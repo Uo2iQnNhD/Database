@@ -7,7 +7,7 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 -- ============ CONFIG ============
-local KEY_SCRIPT_URL = "https://raw.githubusercontent.com/zeutronxsite/hrZyx4kUT-KeyG/refs/heads/main/Generator.luau"
+local KEY_SCRIPT_URL = "https://raw.githubusercontent.com/Uo2iQnNhD/Database/refs/heads/main/hrZyx4kUT-KeyG.luau"
 local VERIFY_SCRIPT_URL = "https://raw.githubusercontent.com/Uo2iQnNhD/Database/refs/heads/main/F4DiY9yZ9-Checking.luau"
 local PASTEBIN_LINK = "https://pastebin.com/Ty4rds"
 local SAVE_FILE = "KeySystem_Save.txt"
