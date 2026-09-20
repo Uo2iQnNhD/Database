@@ -6,6 +6,14 @@ local TeleportService = game:GetService("TeleportService")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "ZETHUB_CHECKING_UI"
+screenGui.ResetOnSpawn = false
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.IgnoreGuiInset = true
+screenGui.DisplayOrder = 999999 -- Paling depan dari UI lain
+
+
 -- ============ CONFIG ============
 local KEY_SCRIPT_URL = "https://raw.githubusercontent.com/zeutronxsite/hrZyx4kUT-KeyG/refs/heads/main/Generator.luau"
 local VERIFY_SCRIPT_URL = "https://raw.githubusercontent.com/zeutronxsite/F4DiY9yZ9Safety/refs/heads/main/yXLHkaN70yMain"
