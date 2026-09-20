@@ -291,7 +291,7 @@ end
 
 -- ============ 10 DETIK WAIT SYSTEM (Hanya di Button) ============
 local canGenerate = false
-local loadingTime = 90 -- detik
+local loadingTime = 120 -- detik
 
 task.spawn(function()
     for i = 1, loadingTime do
