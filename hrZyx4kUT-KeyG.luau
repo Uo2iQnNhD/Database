@@ -9,10 +9,9 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "KeyGeneratorUI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-screenGui.IgnoreGuiInset = true
-screenGui.DisplayOrder = 999999 -- Paling depan dari UI lain
+ScreenGui.IgnoreGuiInset = true
+ScreenGui.DisplayOrder = 999999 -- Paling depan dari UI lain (DIPERBAIKI: ScreenGui dengan huruf 'S' besar)
 ScreenGui.Parent = playerGui
-
 
 -- Main Frame (Ukuran compact seperti sebelumnya)
 local MainFrame = Instance.new("Frame")
@@ -61,7 +60,7 @@ for i = 1, 20 do
     Line.BackgroundTransparency = 0.6
     Line.Parent = ParticleContainer
     
-    spawn(function()
+    task.spawn(function()
         while Line.Parent do
             local duration = math.random(5, 10)
             local tween = TweenService:Create(Line, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
@@ -88,7 +87,7 @@ for i = 1, 15 do
     ParticleCorner.CornerRadius = UDim.new(1, 0)
     ParticleCorner.Parent = Particle
     
-    spawn(function()
+    task.spawn(function()
         while Particle.Parent do
             local tween = TweenService:Create(Particle, TweenInfo.new(math.random(4, 7), Enum.EasingStyle.Linear), {
                 Position = UDim2.new(math.random(), 0, math.random(), 0),
@@ -183,7 +182,7 @@ local GenerateBtn = Instance.new("TextButton")
 GenerateBtn.Size = UDim2.new(1, -40, 0, 45)
 GenerateBtn.Position = UDim2.new(0, 20, 0, 165)
 GenerateBtn.BackgroundColor3 = Color3.fromRGB(38, 38, 38)
-GenerateBtn.Text = "⏳ WAIT 90s..."
+GenerateBtn.Text = "⏳ WAIT 120s..."
 GenerateBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
 GenerateBtn.TextSize = 15
 GenerateBtn.Font = Enum.Font.GothamBold
@@ -292,7 +291,7 @@ local function generateSecureKey()
     return "KEY-" .. part1 .. "-" .. part2 .. "-" .. part3
 end
 
--- ============ 10 DETIK WAIT SYSTEM (Hanya di Button) ============
+-- ============ 120 DETIK WAIT SYSTEM (Hanya di Button) ============
 local canGenerate = false
 local loadingTime = 120 -- detik
 
