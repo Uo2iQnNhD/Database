@@ -9,7 +9,10 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "KeyGeneratorUI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.IgnoreGuiInset = true
+screenGui.DisplayOrder = 999999 -- Paling depan dari UI lain
 ScreenGui.Parent = playerGui
+
 
 -- Main Frame (Ukuran compact seperti sebelumnya)
 local MainFrame = Instance.new("Frame")
