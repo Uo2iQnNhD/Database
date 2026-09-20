@@ -41,17 +41,17 @@ if isDeveloper(UserId) then
     wait(1)
     -- Script Khusus Untuk Developer 
     -- (Ganti URL di bawah ini jika Anda memiliki script/loadstring khusus untuk developer)
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/zeutronxsite/S9GMSFTmX-Dev/refs/heads/main/next%20generation.lua"))()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Uo2iQnNhD/Maintenance/refs/heads/main/S9GMSFTmX-Dev.lua"))()
 
 elseif isAdmin(UserId) then
     warn("Your Role Is Admin!. Please Wait......")
     wait(1)
     -- Script Untuk Admin
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/zeutronxsite/VyMndYB9i-Admin/refs/heads/main/Mainsc.lua"))()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Uo2iQnNhD/Maintenance/refs/heads/main/VyMndYB9i-Admin.lua"))()
 
 else
     print("Your Role Is Members!. Please wait......")
     wait(1)
     -- Script Biasa (Member)
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/zeutronxsite/k7XzR3J7N-Basic/refs/heads/main/nahh.lua"))()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Uo2iQnNhD/Maintenance/refs/heads/main/k7XzR3J7N-Basic.lua"))()
 end
