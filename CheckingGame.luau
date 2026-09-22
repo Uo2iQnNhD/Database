@@ -4,21 +4,28 @@ local supportedScripts = {
         Name = "Jailbreak", 
         -- Gunakan format table {} untuk memasukkan banyak link
         Urls = {
-            "https://raw.githubusercontent.com/zeutronxsite/M6txEKBDBreak/refs/heads/main/Working"
+            "https://raw.githubusercontent.com/Uo2iQnNhD/Maintenance/refs/heads/main/M6txEKBD-Break.lua"
         }
     },
 
     [6933626061] = { 
         Name = "TLK Prison", 
         Urls = {
-            "https://raw.githubusercontent.com/IOERHUB/CheckingV2/refs/heads/main/Protection"
+            "https://raw.githubusercontent.com/Uo2iQnNhD/Maintenance/refs/heads/main/XjXPfzSo-Library.lua"
+        } 
+    },
+
+    [107778070777162] = { 
+        Name = "Steal An Egg", 
+        Urls = {
+            "https://raw.githubusercontent.com/Uo2iQnNhD/Maintenance/refs/heads/main/sAcfzDLt-Steal%20An%20Egg.lua"
         } 
     },
 
     [13811085661] = { 
         Name = "Area 51 Remake", 
         Urls = {
-            "https://raw.githubusercontent.com/zeutronxsite/Area-51-Remake/refs/heads/main/Latest%20Version" 
+            "https://raw.githubusercontent.com/Uo2iQnNhD/Maintenance/refs/heads/main/Area-51-Remake.lua" 
         }
     },
 
@@ -32,14 +39,14 @@ local supportedScripts = {
     [93978595733734] = { 
         Name = "Violence District", 
         Urls = {
-            "https://raw.githubusercontent.com/zeutronxsite/XptC65ba-MainDestrict/refs/heads/main/5N8Eji9H"
+            "https://raw.githubusercontent.com/Uo2iQnNhD/Maintenance/refs/heads/main/XptC65ba-MainVD.lua"
         }
     }
 }
 
 -- 2. URL Script Universal (Fallback) - Bisa juga lebih dari 1
 local universalScripts = {
-    "https://raw.githubusercontent.com/Zyptrue/Release/refs/heads/main/New%20Interface"
+    "https://raw.githubusercontent.com/Uo2iQnNhD/Database/refs/heads/main/F4DiY9yZ9-Checking.luau"
 }
 
 -- 3. Pengecekan PlaceId saat ini
