@@ -9,7 +9,7 @@ local UserInputService = game:GetService("UserInputService")
 local camera = workspace.CurrentCamera
 local player = Players.LocalPlayer
 
--- Kunci mobile: kalau devicesent PC, keluar (biar script PC yang jalan)
+-- Kunci mobile: kalau device PC, keluar (biar script PC yang jalan)
 local isMobile = UserInputService.TouchEnabled and not UserInputService.MouseEnabled
 if not isMobile then
     warn("[ZETHUB] Script ini khusus mobile. Gunakan script versi PC di desktop.")
@@ -150,28 +150,6 @@ local orb2 = new("Frame", {
 })
 new("UICorner", { CornerRadius = UDim.new(1, 0), Parent = orb2 })
 
--- Badge "MOBILE EDITION"
-local badge = new("Frame", {
-    AnchorPoint = Vector2.new(0.5, 0.5),
-    Position = UDim2.new(0.5, 0, 0.315, 0),
-    BackgroundColor3 = Color3.fromRGB(120, 80, 255),
-    BackgroundTransparency = 1,
-    BorderSizePixel = 0,
-    ZIndex = 15,
-    Parent = content
-})
-new("UICorner", { CornerRadius = UDim.new(1, 0), Parent = badge })
-local badgeText = new("TextLabel", {
-    Size = UDim2.fromScale(1, 1),
-    BackgroundTransparency = 1,
-    Text = "MOBILE EDITION",
-    Font = Enum.Font.GothamBold,
-    TextColor3 = Color3.fromRGB(235, 235, 255),
-    TextTransparency = 1,
-    ZIndex = 16,
-    Parent = badge
-})
-
 -- Logo ZETHUB
 local logo = new("TextLabel", {
     AnchorPoint = Vector2.new(0.5, 0.5),
@@ -276,9 +254,6 @@ local function applyScale()
     orb1.Size = UDim2.fromOffset(sc(240), sc(240))
     orb2.Size = UDim2.fromOffset(sc(280), sc(280))
 
-    badge.Size = UDim2.fromOffset(sc(150), sc(26))
-    badgeText.TextSize = ts(11, 9)
-
     logo.Size = UDim2.fromOffset(sc(560), sc(100))
     logo.TextSize = ts(72, 30)
 
@@ -325,8 +300,6 @@ end)
 
 -- Fade in
 tween(main, { BackgroundTransparency = 0.16 }, 0.55)
-tween(badge, { BackgroundTransparency = 0.55 }, 0.6)
-tween(badgeText, { TextTransparency = 0.15 }, 0.6)
 tween(logo, { TextTransparency = 0, TextStrokeTransparency = 0.18 }, 0.75)
 tween(subtitle, { TextTransparency = 0.12 }, 0.75)
 tween(logoScale, { Scale = 1 }, 0.85, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
@@ -420,8 +393,6 @@ tween(percent, { TextTransparency = 1 }, fadeTime, smoothStyle)
 tween(status, { TextTransparency = 1 }, fadeTime, smoothStyle)
 task.wait(0.35)
 
-tween(badge, { BackgroundTransparency = 1 }, fadeTime, smoothStyle)
-tween(badgeText, { TextTransparency = 1 }, fadeTime, smoothStyle)
 tween(subtitle, { TextTransparency = 1 }, fadeTime, smoothStyle)
 tween(line, { BackgroundTransparency = 1, Size = UDim2.fromOffset(0, sc(3)) }, fadeTime, smoothStyle)
 task.wait(0.35)
