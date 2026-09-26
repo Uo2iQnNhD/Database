@@ -414,9 +414,8 @@ gui:Destroy()
 -- EXECUTE CUSTOM SCRIPT (RAYFIELD / UI)
 -- ==========================================
 local success, errorMessage = pcall(function()
-    loadstring(fetch("https://raw.githubusercontent.com/Uo2iQnNhD/Database/refs/heads/main/eaDnYiUk-CheckingV2.luau"))()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Uo2iQnNhD/Database/refs/heads/main/eaDnYiUk-CheckingV2.luau"))()
 end)
-
 if not success then
     warn("[System] Failed to load script:", errorMessage)
 end
