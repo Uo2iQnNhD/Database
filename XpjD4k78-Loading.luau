@@ -336,7 +336,7 @@ while not rayfieldReady do
 end
 
 status.Text = Rayfield and "Interface ready for use!" or "Interface Failed to load!"
-task.wait(2.5)
+task.wait(2)
 
 setProgress(100)
 
