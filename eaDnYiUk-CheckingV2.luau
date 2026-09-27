@@ -46,7 +46,7 @@ local supportedScripts = {
 
 -- 2. URL Script Universal (Fallback) - Bisa juga lebih dari 1
 local universalScripts = {
-    "https://raw.githubusercontent.com/Uo2iQnNhD/Database/refs/heads/main/F4DiY9yZ9-Checking.luau"
+    "https://raw.githubusercontent.com/Uo2iQnNhD/Maintenance/refs/heads/main/L3aun246-Universal.lua"
 }
 
 -- 3. Pengecekan PlaceId saat ini
