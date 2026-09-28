@@ -3,7 +3,7 @@ local isMobile = UserInputService.TouchEnabled and not UserInputService.MouseEna
 local isPC = UserInputService.MouseEnabled and not UserInputService.TouchEnabled
 
 if isMobile then
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Uo2iQnNhD/Database/refs/heads/main/LgMrbYxN-LoadingMobile.luau"))()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Uo2iQnNhD/Database/refs/heads/main/Mobile-RandomV2.luau"))()
 elseif isPC then
     loadstring(game:HttpGet("https://raw.githubusercontent.com/Uo2iQnNhD/Database/refs/heads/main/Loading-RandomPC.luau"))()
 end
