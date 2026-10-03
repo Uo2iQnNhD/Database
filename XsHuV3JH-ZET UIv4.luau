@@ -1,4 +1,4 @@
---[[ ZEUTRON HUB by Externimate0 ]]
+--[[ MONKE HUB V3.4 - Fixed bottom clipping & corner poke ]]
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -259,7 +259,7 @@ function Library:CreateWindow(config)
 		end
 	end)
 
-	-- Sidebar
+	-- Sidebar (FIX V3.4: corner sendiri agar siku tidak menonjol keluar lengkungan window)
 	local sidebar = Instance.new("Frame")
 	sidebar.Size = UDim2.new(0, 150, 1, -46)
 	sidebar.Position = UDim2.new(0, 0, 0, 46)
@@ -267,15 +267,24 @@ function Library:CreateWindow(config)
 	sidebar.BorderSizePixel = 0
 	sidebar.ZIndex = 41
 	sidebar.Parent = main
+	Corner(sidebar, 10)
+	-- Strip penutup: membuat sudut ATAS sidebar tetap siku rapi (menyatu dengan topbar)
+	local sideTop = Instance.new("Frame")
+	sideTop.Size = UDim2.new(1, 0, 0, 12)
+	sideTop.Position = UDim2.new(0, 0, 0, 46)
+	sideTop.BackgroundColor3 = Theme.Sidebar
+	sideTop.BorderSizePixel = 0
+	sideTop.ZIndex = 41
+	sideTop.Parent = main
 	local sideList = Instance.new("UIListLayout")
 	sideList.SortOrder = Enum.SortOrder.LayoutOrder
 	sideList.Padding = UDim.new(0, 5)
 	sideList.Parent = sidebar
 	Pad(sidebar, 10, 8, 10, 8)
 
-	-- Content
+	-- Content (FIX V3.4: inset bawah 12px agar elemen terakhir tidak terpotong border)
 	local content = Instance.new("ScrollingFrame")
-	content.Size = UDim2.new(1, -150, 1, -46)
+	content.Size = UDim2.new(1, -150, 1, -58)
 	content.Position = UDim2.new(0, 150, 0, 46)
 	content.BackgroundTransparency = 1
 	content.BorderSizePixel = 0
@@ -298,11 +307,14 @@ function Library:CreateWindow(config)
 	containerList.Padding = UDim.new(0, 8)
 	containerList.Parent = container
 	local spacer = Instance.new("Frame")
-	spacer.Size = UDim2.new(1, 0, 0, 4)
+	spacer.Size = UDim2.new(1, 0, 0, 6)
 	spacer.BackgroundTransparency = 1
 	spacer.Parent = container
 
-	--// Tabs (FIX: text pakai TextLabel terpisah, indikator tidak menutupi nama)
+	-- FIX V3.3: forward declaration agar info card bisa diakses window:Toggle
+	local info = nil
+
+	--// Tabs
 	function window:CreateTab(name)
 		local btn = Instance.new("TextButton")
 		btn.Size = UDim2.new(1, 0, 0, 34)
@@ -654,7 +666,6 @@ function Library:CreateWindow(config)
 			return { Set = function(self, t) box.Text = t end }
 		end
 
-		--// Dropdown (FIX: judul, nilai & panah terkunci di header, tidak ikut memanjang)
 		function tab:CreateDropdown(cfg)
 			cfg = cfg or {}
 			local options = cfg.Options or {}
@@ -663,7 +674,7 @@ function Library:CreateWindow(config)
 			local f, s = elementFrame(38)
 			f.ClipsDescendants = true
 			local lbl = Instance.new("TextLabel")
-			lbl.Size = UDim2.new(0.5, -12, 0, 38) -- FIX: tinggi tetap 38
+			lbl.Size = UDim2.new(0.5, -12, 0, 38)
 			lbl.Position = UDim2.new(0, 12, 0, 0)
 			lbl.BackgroundTransparency = 1
 			lbl.Text = cfg.Title or "Dropdown"
@@ -673,7 +684,7 @@ function Library:CreateWindow(config)
 			lbl.TextXAlignment = Enum.TextXAlignment.Left
 			lbl.Parent = f
 			local val = Instance.new("TextLabel")
-			val.Size = UDim2.new(0.5, -34, 0, 38) -- FIX: tinggi tetap 38
+			val.Size = UDim2.new(0.5, -34, 0, 38)
 			val.Position = UDim2.new(0.5, 0, 0, 0)
 			val.BackgroundTransparency = 1
 			val.Text = cfg.Default or (options[1] or "...")
@@ -684,7 +695,7 @@ function Library:CreateWindow(config)
 			val.Parent = f
 			local arrow = Instance.new("TextLabel")
 			arrow.Size = UDim2.new(0, 16, 0, 16)
-			arrow.Position = UDim2.new(1, -26, 0, 11) -- FIX: offset tetap, tidak ikut tengah
+			arrow.Position = UDim2.new(1, -26, 0, 11)
 			arrow.BackgroundTransparency = 1
 			arrow.Text = "›"
 			arrow.TextColor3 = Theme.SubText
@@ -886,7 +897,7 @@ function Library:CreateWindow(config)
 		return tab
 	end
 
-	--// Mini Show/Hide Box (FIX: drag tidak lompat lagi)
+	--// Mini Show/Hide Box
 	local MiniToggle = Instance.new("TextButton")
 	MiniToggle.AnchorPoint = Vector2.new(0.5, 0.5)
 	MiniToggle.Position = UDim2.new(0, 37, 0.5, 0)
@@ -938,7 +949,6 @@ function Library:CreateWindow(config)
 		if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
 			mDrag, mMoved = true, 0
 			mStart = inp.Position
-			-- FIX: ambil posisi tengah absolut dalam pixel, bukan Scale/Offset mentah
 			local center = MiniToggle.AbsolutePosition + MiniToggle.AbsoluteSize / 2
 			mOrigX, mOrigY = center.X, center.Y
 		end
@@ -959,10 +969,11 @@ function Library:CreateWindow(config)
 		if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then mDrag = false end
 	end)
 
-	--// Toggle Window
+	--// Toggle Window (info card sync)
 	function window:Toggle(force)
 		local open = (force ~= nil) and force or not Library.Open
 		Library.Open = open
+		if info then info.Visible = open end
 		if open then
 			main.Visible = true
 			Tween(main, .35, {Size = OPEN_SIZE}, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
@@ -973,6 +984,11 @@ function Library:CreateWindow(config)
 		end
 		setMiniIcon(open)
 	end
+
+	function window:SetInfoCard(vis)
+		if info then info.Visible = vis end
+	end
+
 	minimizeBtn.MouseButton1Click:Connect(function() window:Toggle(false) end)
 	closeBtn.MouseButton1Click:Connect(function()
 		Tween(main, .25, {Size = UDim2.new(0, 0, 0, 0)}).Completed:Connect(function() gui:Destroy() end)
@@ -982,8 +998,8 @@ function Library:CreateWindow(config)
 		if inp.KeyCode == Library.ToggleKey then window:Toggle() end
 	end)
 
-	--// Player Info Card (FIX: ID dihapus dari baris FPS/PING)
-	local info = Instance.new("Frame")
+	--// Player Info Card
+	info = Instance.new("Frame")
 	info.Size = UDim2.new(0, 230, 0, 74)
 	info.Position = UDim2.new(0, 12, 1, -86)
 	info.BackgroundColor3 = Theme.Background
@@ -991,6 +1007,7 @@ function Library:CreateWindow(config)
 	info.BorderSizePixel = 0
 	info.ZIndex = 55
 	info.Parent = gui
+	info.Visible = Library.Open
 	Corner(info, 10)
 	Stroke(info, Theme.Border, 1)
 	local avatar = Instance.new("ImageLabel")
@@ -1043,7 +1060,7 @@ function Library:CreateWindow(config)
 			fpsFrames, fpsLast = 0, now
 			local ping = 0
 			pcall(function() ping = math.floor(LocalPlayer:GetNetworkPing() * 1000) end)
-			statsLbl.Text = "Fps: " .. math.min(fps, 999) .. " | Ping: " .. ping .. "ms"
+			statsLbl.Text = "FPS " .. math.min(fps, 999) .. " • PING " .. ping .. "ms"
 		end
 	end)
 
