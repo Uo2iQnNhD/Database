@@ -11,7 +11,7 @@ local supportedScripts = {
     [6933626061] = { 
         Name = "TLK Prison", 
         Urls = {
-            "https://raw.githubusercontent.com/Uo2iQnNhD/Maintenance/refs/heads/main/XjXPfzSo-Library.lua"
+            "https://raw.githubusercontent.com/IOERHUB/CheckingV2/refs/heads/main/Protection"
         } 
     },
 
