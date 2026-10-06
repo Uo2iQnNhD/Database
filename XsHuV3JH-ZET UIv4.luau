@@ -1060,7 +1060,7 @@ function Library:CreateWindow(config)
 			fpsFrames, fpsLast = 0, now
 			local ping = 0
 			pcall(function() ping = math.floor(LocalPlayer:GetNetworkPing() * 1000) end)
-			statsLbl.Text = "FPS " .. math.min(fps, 999) .. " • PING " .. ping .. "ms"
+			statsLbl.Text = "Fps: " .. math.min(fps, 999) .. " | Ping: " .. ping .. "ms"
 		end
 	end)
 
