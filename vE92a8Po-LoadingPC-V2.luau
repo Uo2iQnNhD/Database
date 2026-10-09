@@ -1,8 +1,6 @@
 -- ==========================================
--- ZETHUB Loading Screen
+-- Loading Screen By Externimate0
 -- ★ AURORA GLASS EDITION - PC ONLY ★
--- Background Gelap Transparan (darker overlay)
--- FIX: Offset tween UDim2 → Vector2 (UIGradient.Offset = Vector2)
 -- ==========================================
 
 -- Guard: cegah splash berulang dalam 30 detik
@@ -58,20 +56,26 @@ local function new(class, props)
 end
 
 -- ★ FIX UTAMA ★: pembuatan instance opsional yang aman gagal.
--- Beberapa executor memblokir Instance.new("UIBlur") dll.
--- Kalau gagal, return nil tanpa crash, lalu pakai fallback visual.
+-- Beberapa executor memblokir Instance.new("UIBlur") atau tidak punya property Size.
+-- Kalau gagal set properti, return nil tanpa crash, lalu pakai fallback visual.
 local function tryNew(class, props)
-    local ok, inst = pcall(function()
-        local i = Instance.new(class)
+    local inst = nil
+    local ok = pcall(function()
+        inst = Instance.new(class)
         for k, v in pairs(props or {}) do
-            pcall(function() i[k] = v end)
+            inst[k] = v
         end
-        return i
     end)
+    
     if ok and inst then
         return inst
+    else
+        -- Bersihkan instance jika gagal di tengah jalan untuk mencegah memory leak
+        if inst then
+            pcall(function() inst:Destroy() end)
+        end
+        return nil
     end
-    return nil
 end
 
 local function tween(obj, props, duration, style, direction)
