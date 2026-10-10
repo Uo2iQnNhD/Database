@@ -1,8 +1,9 @@
 -- 1. Masukkan semua URL loading screen ke dalam tabel
 local daftarScript = {
     "https://raw.githubusercontent.com/Uo2iQnNhD/Database/refs/heads/main/vE92a8Po-LoadingPC-V2.luau",
-    "https://raw.githubusercontent.com/Uo2iQnNhD/Database/refs/heads/main/XpjD4k78-Loading.luau",
-    "https://raw.githubusercontent.com/Uo2iQnNhD/Database/refs/heads/main/G9JsXCBJ-NeonUI.luau"
+    "https://raw.githubusercontent.com/Uo2iQnNhD/Database/refs/heads/main/G9JsXCBJ-NeonUI.luau",
+    "https://raw.githubusercontent.com/Uo2iQnNhD/Database/refs/heads/main/XpjD4k78-Loading.luau"
+
 }
 
 -- 2. Cek apakah ada eksekusi sebelumnya menggunakan _G
