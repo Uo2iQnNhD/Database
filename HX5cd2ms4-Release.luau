@@ -294,7 +294,7 @@ function Library:SetAccent(c)
 	refreshRGBColors()
 end
 
---// Notification GUI dengan Loading Bar yang diperbaiki
+--// Notification GUI (Fixed: loading bar selalu di bawah, layout rapi)
 local NotifGui = Instance.new("ScreenGui")
 NotifGui.Name = "ZethNotifies"
 NotifGui.ResetOnSpawn = false
@@ -326,147 +326,162 @@ function Library:Notify(text, duration, title, icon)
 	duration = duration or 5
 	notifyOrder -= 1
 
-	-- Frame utama notifikasi
+	--// Tuning (ubah angka ini kalau mau atur jarak sendiri)
+	local PAD_TOP   = 12   -- jarak tepi atas -> judul/icon
+	local PAD_X     = 14   -- jarak kiri/kanan teks
+	local GAP_HEAD  = 6    -- judul/icon -> separator (atau -> isi kalau tanpa separator)
+	local GAP_SEP   = 6    -- separator -> isi
+	local GAP_BAR   = 10   -- isi -> loading bar
+	local SEP_H     = 1    -- tebal garis pemisah
+	local BAR_H     = 3    -- tebal loading bar
+
+	local hasTitle     = type(title) == "string" and title ~= ""
+	local hasIcon      = icon ~= nil and icon ~= ""
+	local hasHeader    = hasTitle or hasIcon
+	local hasSeparator = hasTitle
+
+	--// Frame utama (auto tinggi, semua anak diatur oleh SATU UIListLayout)
 	local n = Instance.new("Frame")
 	n.Size = UDim2.new(1, 0, 0, 0)
 	n.AutomaticSize = Enum.AutomaticSize.Y
 	n.LayoutOrder = notifyOrder
 	n.BackgroundColor3 = Theme.Element
 	n.BorderSizePixel = 0
-	n.ClipsDescendants = false -- Penting: agar loading bar terlihat
+	n.ClipsDescendants = true
 	n.Parent = notifyContainer
 	Corner(n, 8)
-	registerRGB(Stroke(n, Color3.new(1,1,1), 1.5))
+	registerRGB(Stroke(n, Color3.new(1, 1, 1), 1.5))
 
-	-- Padding untuk spacing dalam
-	local notifPad = Instance.new("UIPadding")
-	notifPad.PaddingTop = UDim.new(0, 14)
-	notifPad.PaddingLeft = UDim.new(0, 14)
-	notifPad.PaddingBottom = UDim.new(0, 10)
-	notifPad.PaddingRight = UDim.new(0, 14)
-	notifPad.Parent = n
-
-	-- Layout vertikal untuk konten
 	local notifLayout = Instance.new("UIListLayout")
 	notifLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	notifLayout.Padding = UDim.new(0, 0)
+	notifLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center -- biar separator bisa inset simetris
 	notifLayout.Parent = n
 
-	-- Row untuk icon + title
-	local headerRow = Instance.new("Frame")
-	headerRow.Size = UDim2.new(1, 0, 0, 0)
-	headerRow.AutomaticSize = Enum.AutomaticSize.Y
-	headerRow.BackgroundTransparency = 1
-	headerRow.LayoutOrder = 1
-	headerRow.Parent = n
+	--// 1) Header: icon + judul (bold)
+	if hasHeader then
+		local headerRow = Instance.new("Frame")
+		headerRow.Size = UDim2.new(1, 0, 0, 0)
+		headerRow.AutomaticSize = Enum.AutomaticSize.Y
+		headerRow.BackgroundTransparency = 1
+		headerRow.LayoutOrder = 1
+		headerRow.Parent = n
 
-	local headerLayout = Instance.new("UIListLayout")
-	headerLayout.FillDirection = Enum.FillDirection.Horizontal
-	headerLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	headerLayout.Padding = UDim.new(0, 10)
-	headerLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-	headerLayout.Parent = headerRow
+		local hp = Instance.new("UIPadding")
+		hp.PaddingTop = UDim.new(0, PAD_TOP)
+		hp.PaddingBottom = UDim.new(0, GAP_HEAD)
+		hp.PaddingLeft = UDim.new(0, PAD_X)
+		hp.PaddingRight = UDim.new(0, PAD_X)
+		hp.Parent = headerRow
 
-	-- Icon
-	local leftX = 0
-	local iconImg = makeIcon(headerRow, icon, UDim2.new(0, 20, 0, 20), nil, Library.Accent)
-	if iconImg then
-		iconImg.LayoutOrder = 1
-		leftX = 30
-	else
-		-- Dot indicator jika tidak ada icon
-		local dot = Instance.new("Frame")
-		dot.Size = UDim2.new(0, 4, 0, 20)
-		dot.BackgroundColor3 = Library.Accent
-		dot.BorderSizePixel = 0
-		dot.LayoutOrder = 1
-		dot.Parent = headerRow
-		Corner(dot, 2)
-		leftX = 14
+		local hl = Instance.new("UIListLayout")
+		hl.FillDirection = Enum.FillDirection.Horizontal
+		hl.SortOrder = Enum.SortOrder.LayoutOrder
+		hl.Padding = UDim.new(0, 9)
+		hl.VerticalAlignment = Enum.VerticalAlignment.Center
+		hl.HorizontalAlignment = Enum.HorizontalAlignment.Left
+		hl.Parent = headerRow
+
+		if hasIcon then
+			local ic = makeIcon(headerRow, icon, UDim2.new(0, 20, 0, 20), nil, Library.Accent)
+			if ic then
+				ic.LayoutOrder = 1
+			else
+				local dot = Instance.new("Frame")
+				dot.Size = UDim2.new(0, 4, 0, 20)
+				dot.BackgroundColor3 = Library.Accent
+				dot.BorderSizePixel = 0
+				dot.LayoutOrder = 1
+				dot.Parent = headerRow
+				Corner(dot, 2)
+			end
+		end
+
+		if hasTitle then
+			local t = Instance.new("TextLabel")
+			t.Size = UDim2.new(0, 0, 0, 18)
+			t.AutomaticSize = Enum.AutomaticSize.X
+			t.BackgroundTransparency = 1
+			t.Text = title
+			t.TextColor3 = Library.Accent
+			t.TextSize = 13
+			t.Font = Enum.Font.GothamBold
+			t.TextXAlignment = Enum.TextXAlignment.Left
+			t.TextYAlignment = Enum.TextYAlignment.Center
+			t.LayoutOrder = 2
+			t.Parent = headerRow
+		end
 	end
 
-	-- Title (tebal)
-	if title then
-		local t = Instance.new("TextLabel")
-		t.Size = UDim2.new(1, -leftX, 0, 16)
-		t.BackgroundTransparency = 1
-		t.Text = title
-		t.TextColor3 = Library.Accent
-		t.TextSize = 13
-		t.Font = Enum.Font.GothamBold
-		t.TextXAlignment = Enum.TextXAlignment.Left
-		t.TextYAlignment = Enum.TextYAlignment.Center
-		t.LayoutOrder = 2
-		t.Parent = headerRow
+	--// 2) Separator (hanya kalau ada judul)
+	if hasSeparator then
+		local sep = Instance.new("Frame")
+		sep.Size = UDim2.new(1, -(PAD_X * 2), 0, SEP_H) -- inset kiri-kanan, di-center oleh layout
+		sep.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+		sep.BorderSizePixel = 0
+		sep.LayoutOrder = 2
+		sep.Parent = n
 	end
 
-	-- Separator/garis pemisah (hanya jika ada title)
-	if title then
-		local separator = Instance.new("Frame")
-		separator.Size = UDim2.new(1, 0, 0, 1)
-		separator.BackgroundColor3 = Theme.Border
-		separator.BorderSizePixel = 0
-		separator.LayoutOrder = 2
-		separator.Parent = n
-		
-		local sepPad = Instance.new("UIPadding")
-		sepPad.PaddingTop = UDim.new(0, 8) -- Spacing lebih besar setelah separator
-		sepPad.PaddingBottom = UDim.new(0, 0)
-		sepPad.Parent = separator
-	end
+	--// 3) Isi teks
+	local contentRow = Instance.new("Frame")
+	contentRow.Size = UDim2.new(1, 0, 0, 0)
+	contentRow.AutomaticSize = Enum.AutomaticSize.Y
+	contentRow.BackgroundTransparency = 1
+	contentRow.LayoutOrder = 3
+	contentRow.Parent = n
 
-	-- Content text
-	local contentLbl = Instance.new("TextLabel")
-	contentLbl.Size = UDim2.new(1, 0, 0, 0)
-	contentLbl.AutomaticSize = Enum.AutomaticSize.Y
-	contentLbl.BackgroundTransparency = 1
-	contentLbl.Text = text
-	contentLbl.TextColor3 = Theme.Text
-	contentLbl.TextSize = 12
-	contentLbl.Font = Enum.Font.Gotham
-	contentLbl.TextXAlignment = Enum.TextXAlignment.Left
-	contentLbl.TextYAlignment = Enum.TextYAlignment.Top
-	contentLbl.TextWrapped = true
-	contentLbl.LayoutOrder = title and 3 or 2
-	contentLbl.Parent = n
+	local cp = Instance.new("UIPadding")
+	cp.PaddingTop = UDim.new(0, hasHeader and (hasSeparator and GAP_SEP or GAP_HEAD) or PAD_TOP)
+	cp.PaddingBottom = UDim.new(0, GAP_BAR)
+	cp.PaddingLeft = UDim.new(0, PAD_X)
+	cp.PaddingRight = UDim.new(0, PAD_X)
+	cp.Parent = contentRow
 
-	-- Loading bar di bagian bawah
-	local loadingBarContainer = Instance.new("Frame")
-	loadingBarContainer.Size = UDim2.new(1, 0, 0, 3)
-	loadingBarContainer.Position = UDim2.new(0, 0, 1, -3)
-	loadingBarContainer.BackgroundTransparency = 1
-	loadingBarContainer.ClipsDescendants = true
-	loadingBarContainer.Parent = n
-	Corner(loadingBarContainer, 8)
+	local cl = Instance.new("UIListLayout")
+	cl.SortOrder = Enum.SortOrder.LayoutOrder
+	cl.Padding = UDim.new(0, 0)
+	cl.Parent = contentRow
 
-	local loadingBar = Instance.new("Frame")
-	loadingBar.Size = UDim2.new(1, 0, 1, 0)
-	loadingBar.BackgroundColor3 = Library.Accent
-	loadingBar.BorderSizePixel = 0
-	loadingBar.Parent = loadingBarContainer
-	Corner(loadingBar, 8)
+	local c = Instance.new("TextLabel")
+	c.Size = UDim2.new(1, 0, 0, 0)
+	c.AutomaticSize = Enum.AutomaticSize.Y
+	c.BackgroundTransparency = 1
+	c.Text = text or ""
+	c.TextColor3 = Theme.Text
+	c.TextSize = 12
+	c.Font = Enum.Font.Gotham
+	c.TextXAlignment = Enum.TextXAlignment.Left
+	c.TextYAlignment = Enum.TextYAlignment.Top
+	c.TextWrapped = true
+	c.LayoutOrder = 1
+	c.Parent = contentRow
 
-	-- Animasi masuk
+	--// 4) Loading bar (PALING BAWAH, menempel tepi bawah, LayoutOrder terakhir)
+	local track = Instance.new("Frame")
+	track.Size = UDim2.new(1, 0, 0, BAR_H)
+	track.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+	track.BackgroundTransparency = 0.2
+	track.BorderSizePixel = 0
+	track.LayoutOrder = 4
+	track.Parent = n
+
+	local fill = Instance.new("Frame")
+	fill.Size = UDim2.new(1, 0, 1, 0)
+	fill.BackgroundColor3 = Library.Accent
+	fill.BorderSizePixel = 0
+	fill.Parent = track
+
+	--// Animasi masuk (slide dari kanan) + progress bar
 	n.Position = UDim2.new(1, 30, 0, 0)
-	n.BackgroundTransparency = 1
-	Tween(n, .45, {
-		Position = UDim2.new(0, 0, 0, 0),
-		BackgroundTransparency = 0
-	}, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+	task.wait() -- biarkan layout & AutomaticSize settle dulu supaya tidak kedip
+	Tween(n, .4, {Position = UDim2.new(0, 0, 0, 0)}, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+	Tween(fill, duration, {Size = UDim2.new(0, 0, 1, 0)}, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
 
-	-- Animasi loading bar
-	Tween(loadingBar, duration, {
-		Size = UDim2.new(0, 0, 1, 0)
-	}, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-
-	-- Hapus notifikasi setelah durasi
+	--// Keluar setelah durasi habis
 	task.delay(duration, function()
 		if not n.Parent then return end
-		
-		Tween(n, .4, {
-			Position = UDim2.new(1, 30, 0, 0),
-			BackgroundTransparency = 1
-		}, Enum.EasingStyle.Quint, Enum.EasingDirection.In).Completed:Connect(function()
+		Tween(n, .35, {Position = UDim2.new(1, 30, 0, 0)}, Enum.EasingStyle.Quint, Enum.EasingDirection.In).Completed:Connect(function()
 			if n.Parent then
 				n:Destroy()
 			end
