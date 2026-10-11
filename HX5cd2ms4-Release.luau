@@ -294,23 +294,73 @@ function Library:SetAccent(c)
 	refreshRGBColors()
 end
 
---// Notification GUI (Fixed: loading bar selalu di bawah, layout rapi)
+--// Notification GUI (Self-healing: kebal terhadap copy-paste parsial)
+local NotifGui = Instance.new("ScreenGui")
+NotifGui.Name = "ZethNotifies"
+NotifGui.ResetOnSpawn = false
+NotifGui.DisplayOrder = 999
+NotifGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+pcall(function() NotifGui.Parent = game:GetService("CoreGui") end)
+if not NotifGui.Parent then
+	pcall(function() NotifGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end)
+end
+
+local notifyContainer = Instance.new("Frame")
+notifyContainer.Size = UDim2.new(0, 300, 1, -30)
+notifyContainer.Position = UDim2.new(1, -312, 0, 15)
+notifyContainer.BackgroundTransparency = 1
+notifyContainer.Parent = NotifGui
+
+local notifyList = Instance.new("UIListLayout")
+notifyList.SortOrder = Enum.SortOrder.LayoutOrder
+notifyList.Padding = UDim.new(0, 8)
+notifyList.Parent = notifyContainer
+
+-- CATATAN: tidak ada `local notifyOrder` lagi. Counter hidup di Library._notifyOrder.
+
 function Library:Notify(text, duration, title, icon)
 	if Library._destroyed then return end
 
 	duration = duration or 5
-	notifyOrder -= 1
+
+	-- ✅ Anti-nil: kalau Library._notifyOrder belum ada, mulai dari 0
+	Library._notifyOrder = (Library._notifyOrder or 0) - 1
+	local notifyOrder = Library._notifyOrder
+
+	-- ✅ Self-healing container: rebuild kalau hilang / ke-destroy
+	if not notifyContainer or not notifyContainer.Parent then
+		if not NotifGui or not NotifGui.Parent then
+			NotifGui = Instance.new("ScreenGui")
+			NotifGui.Name = "ZethNotifies"
+			NotifGui.ResetOnSpawn = false
+			NotifGui.DisplayOrder = 999
+			NotifGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+			pcall(function() NotifGui.Parent = game:GetService("CoreGui") end)
+			if not NotifGui.Parent then
+				pcall(function() NotifGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end)
+			end
+		end
+		notifyContainer = Instance.new("Frame")
+		notifyContainer.Size = UDim2.new(0, 300, 1, -30)
+		notifyContainer.Position = UDim2.new(1, -312, 0, 15)
+		notifyContainer.BackgroundTransparency = 1
+		notifyContainer.Parent = NotifGui
+		notifyList = Instance.new("UIListLayout")
+		notifyList.SortOrder = Enum.SortOrder.LayoutOrder
+		notifyList.Padding = UDim.new(0, 8)
+		notifyList.Parent = notifyContainer
+	end
 
 	--// Tuning jarak & bentuk
-	local PAD_TOP   = 12   -- tepi atas -> judul/icon
-	local PAD_X     = 14   -- jarak kiri/kanan teks
-	local GAP_HEAD  = 6    -- judul/icon -> separator
-	local GAP_SEP   = 6    -- separator -> isi
-	local GAP_BAR   = 8    -- isi -> loading bar
-	local SEP_H     = 1    -- tebal garis pemisah
-	local BAR_H     = 3    -- tebal loading bar
-	local BAR_RAD   = 2    -- radius membulat loading bar
-	local TRACK_INSET = 12 -- margin kiri/kanan loading bar (WAJIB > Corner radius frame = 8)
+	local PAD_TOP     = 12
+	local PAD_X       = 14
+	local GAP_HEAD    = 6
+	local GAP_SEP     = 6
+	local GAP_BAR     = 8
+	local SEP_H       = 1
+	local BAR_H       = 3
+	local BAR_RAD     = 2
+	local TRACK_INSET = 12 -- > Corner(n,8) supaya tidak keluar curve
 
 	local hasTitle     = type(title) == "string" and title ~= ""
 	local hasIcon      = icon ~= nil and icon ~= ""
@@ -334,14 +384,6 @@ function Library:Notify(text, duration, title, icon)
 	notifLayout.Padding = UDim.new(0, 0)
 	notifLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	notifLayout.Parent = n
-
-	-- Padding: bawah 0 supaya bar menempel dasar, tapi bar di-inset horizontal -> aman dari curve
-	local np = Instance.new("UIPadding")
-	np.PaddingTop = UDim.new(0, 0)
-	np.PaddingBottom = UDim.new(0, 0)
-	np.PaddingLeft = UDim.new(0, 0)
-	np.PaddingRight = UDim.new(0, 0)
-	np.Parent = n
 
 	--// 1) Header: icon + judul
 	if hasHeader then
@@ -442,13 +484,13 @@ function Library:Notify(text, duration, title, icon)
 	c.LayoutOrder = 1
 	c.Parent = contentRow
 
-	--// 4) Loading bar (INSET kiri-kanan + corner sendiri -> tidak pernah keluar curve)
+	--// 4) Loading bar (inset + corner sendiri -> tidak keluar curve)
 	local track = Instance.new("Frame")
 	track.Size = UDim2.new(1, -(TRACK_INSET * 2), 0, BAR_H)
 	track.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 	track.BackgroundTransparency = 0.25
 	track.BorderSizePixel = 0
-	track.ClipsDescendants = true   -- fill yang menyusut ikut ter-clip jadi pill rapi
+	track.ClipsDescendants = true
 	track.LayoutOrder = 4
 	track.Parent = n
 	Corner(track, BAR_RAD)
@@ -462,7 +504,7 @@ function Library:Notify(text, duration, title, icon)
 
 	--// Animasi masuk + progress
 	n.Position = UDim2.new(1, 30, 0, 0)
-	task.wait() -- biarkan AutomaticSize settle dulu (cegah kedip/overflow sesaat)
+	task.wait()
 	Tween(n, .4, {Position = UDim2.new(0, 0, 0, 0)}, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 	Tween(fill, duration, {Size = UDim2.new(0, 0, 1, 0)}, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
 
