@@ -294,7 +294,7 @@ function Library:SetAccent(c)
 	refreshRGBColors()
 end
 
---// Notification GUI dengan Loading Bar
+--// Notification GUI dengan Loading Bar yang diperbaiki
 local NotifGui = Instance.new("ScreenGui")
 NotifGui.Name = "ZethNotifies"
 NotifGui.ResetOnSpawn = false
@@ -333,15 +333,16 @@ function Library:Notify(text, duration, title, icon)
 	n.LayoutOrder = notifyOrder
 	n.BackgroundColor3 = Theme.Element
 	n.BorderSizePixel = 0
+	n.ClipsDescendants = false -- Penting: agar loading bar terlihat
 	n.Parent = notifyContainer
 	Corner(n, 8)
 	registerRGB(Stroke(n, Color3.new(1,1,1), 1.5))
 
 	-- Padding untuk spacing dalam
 	local notifPad = Instance.new("UIPadding")
-	notifPad.PaddingTop = UDim.new(0, 12)
+	notifPad.PaddingTop = UDim.new(0, 14)
 	notifPad.PaddingLeft = UDim.new(0, 14)
-	notifPad.PaddingBottom = UDim.new(0, 8)
+	notifPad.PaddingBottom = UDim.new(0, 10)
 	notifPad.PaddingRight = UDim.new(0, 14)
 	notifPad.Parent = n
 
@@ -409,8 +410,8 @@ function Library:Notify(text, duration, title, icon)
 		separator.Parent = n
 		
 		local sepPad = Instance.new("UIPadding")
-		sepPad.PaddingTop = UDim.new(0, 6)
-		sepPad.PaddingBottom = UDim.new(0, 6)
+		sepPad.PaddingTop = UDim.new(0, 8) -- Spacing lebih besar setelah separator
+		sepPad.PaddingBottom = UDim.new(0, 0)
 		sepPad.Parent = separator
 	end
 
