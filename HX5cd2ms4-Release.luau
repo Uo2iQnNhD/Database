@@ -1177,56 +1177,119 @@ function Library:CreateWindow(config)
 		end
 
 		--// Paragraph dengan frame/alas
+		--// Paragraph dengan frame/alas versi lebih rapi
 		function tab:CreateParagraph(cfg)
 			cfg = cfg or {}
+
+			local function toText(v)
+				if type(v) == "table" then
+					return table.concat(v, "\n")
+				end
+				return tostring(v or "")
+			end
+
+			local titleText = toText(cfg.Title)
+			local contentText = toText(cfg.Content)
 
 			local f = Instance.new("Frame")
 			f.Size = UDim2.new(1, 0, 0, 0)
 			f.AutomaticSize = Enum.AutomaticSize.Y
 			f.BackgroundColor3 = Theme.Element
+			f.BackgroundTransparency = 0
 			f.BorderSizePixel = 0
 			f.Parent = tabContent
-			Corner(f, 7)
+			Corner(f, 8)
 
 			local s = Stroke(f, Theme.Border, 1)
 
 			local pad = Instance.new("UIPadding")
-			pad.PaddingTop = UDim.new(0, 10)
+			pad.PaddingTop = UDim.new(0, 12)
 			pad.PaddingLeft = UDim.new(0, 12)
-			pad.PaddingBottom = UDim.new(0, 10)
+			pad.PaddingBottom = UDim.new(0, 12)
 			pad.PaddingRight = UDim.new(0, 12)
 			pad.Parent = f
 
 			local layout = Instance.new("UIListLayout")
 			layout.SortOrder = Enum.SortOrder.LayoutOrder
-			layout.Padding = UDim.new(0, 6)
+			layout.Padding = UDim.new(0, 7)
 			layout.Parent = f
 
+			-- ✅ Pastikan frame paragraph selalu punya tinggi minimum
+			local sizeConstraint = Instance.new("UISizeConstraint")
+			sizeConstraint.MinSize = Vector2.new(0, 58)
+			sizeConstraint.MaxSize = Vector2.new(999999, 999999)
+			sizeConstraint.Parent = f
+
+			-- Row judul, supaya bisa pakai icon di sebelah kiri judul
+			local titleRow = Instance.new("Frame")
+			titleRow.Size = UDim2.new(1, 0, 0, 0)
+			titleRow.AutomaticSize = Enum.AutomaticSize.Y
+			titleRow.BackgroundTransparency = 1
+			titleRow.LayoutOrder = 1
+			titleRow.Parent = f
+
+			local rowLayout = Instance.new("UIListLayout")
+			rowLayout.FillDirection = Enum.FillDirection.Horizontal
+			rowLayout.SortOrder = Enum.SortOrder.LayoutOrder
+			rowLayout.Padding = UDim.new(0, 8)
+			rowLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+			rowLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+			rowLayout.Parent = titleRow
+
+			local iconOffset = 0
+
+			-- Optional icon seperti gaya Rayfield
+			if cfg.Icon and cfg.Icon ~= "" then
+				local id = resolveIcon(cfg.Icon)
+				if id then
+					local icon = Instance.new("ImageLabel")
+					icon.Size = UDim2.new(0, 18, 0, 18)
+					icon.BackgroundTransparency = 1
+					icon.Image = id
+					icon.ImageColor3 = window.accent
+					icon.LayoutOrder = 1
+					icon.Parent = titleRow
+
+					window:onAccent(function(c)
+						if icon.Parent then
+							icon.ImageColor3 = c
+						end
+					end)
+
+					iconOffset = 26
+				end
+			end
+
 			local titleObj = Instance.new("TextLabel")
-			titleObj.Size = UDim2.new(1, 0, 0, 0)
+			titleObj.Size = UDim2.new(1, -iconOffset, 0, 0)
 			titleObj.AutomaticSize = Enum.AutomaticSize.Y
 			titleObj.BackgroundTransparency = 1
-			titleObj.Text = cfg.Title or ""
+			titleObj.Text = titleText
 			titleObj.TextColor3 = Theme.Text
 			titleObj.TextSize = 13
 			titleObj.Font = Enum.Font.GothamBold
 			titleObj.TextXAlignment = Enum.TextXAlignment.Left
+			titleObj.TextYAlignment = Enum.TextYAlignment.Top
 			titleObj.TextWrapped = true
-			titleObj.LayoutOrder = 1
-			titleObj.Visible = cfg.Title ~= nil and cfg.Title ~= ""
-			titleObj.Parent = f
+			titleObj.LayoutOrder = 2
+			titleObj.Visible = titleText ~= ""
+			titleObj.Parent = titleRow
+
+			titleRow.Visible = (iconOffset > 0) or (titleText ~= "")
 
 			local contentObj = Instance.new("TextLabel")
 			contentObj.Size = UDim2.new(1, 0, 0, 0)
 			contentObj.AutomaticSize = Enum.AutomaticSize.Y
 			contentObj.BackgroundTransparency = 1
-			contentObj.Text = cfg.Content or ""
+			contentObj.Text = contentText
 			contentObj.TextColor3 = Theme.SubText
 			contentObj.TextSize = 12
 			contentObj.Font = Enum.Font.Gotham
 			contentObj.TextXAlignment = Enum.TextXAlignment.Left
+			contentObj.TextYAlignment = Enum.TextYAlignment.Top
 			contentObj.TextWrapped = true
 			contentObj.LayoutOrder = 2
+			contentObj.Visible = contentText ~= ""
 			contentObj.Parent = f
 
 			hoverBorder(f, s, function()
@@ -1237,14 +1300,21 @@ function Library:CreateWindow(config)
 			function para:Set(newCfg)
 				if type(newCfg) == "table" then
 					if newCfg.Title ~= nil then
-						titleObj.Text = tostring(newCfg.Title)
-						titleObj.Visible = newCfg.Title ~= ""
+						titleText = toText(newCfg.Title)
+						titleObj.Text = titleText
+						titleObj.Visible = titleText ~= ""
+						titleRow.Visible = (iconOffset > 0) or (titleText ~= "")
 					end
+
 					if newCfg.Content ~= nil then
-						contentObj.Text = tostring(newCfg.Content)
+						contentText = toText(newCfg.Content)
+						contentObj.Text = contentText
+						contentObj.Visible = contentText ~= ""
 					end
 				else
-					contentObj.Text = tostring(newCfg)
+					contentText = toText(newCfg)
+					contentObj.Text = contentText
+					contentObj.Visible = contentText ~= ""
 				end
 			end
 
@@ -1660,20 +1730,24 @@ function Library:CreateWindow(config)
 			}
 		end
 
-		function tab:CreateDropdown(cfg)
+				function tab:CreateDropdown(cfg)
 			cfg = cfg or {}
 			local options = cfg.Options or {}
 			local col = cfg.Color
+			local headerH = H_ELEMENT
+			local gap = 4
 			local listH = math.min(#options * 30, 150)
-			local openH = 42 + listH + 6
-			local f, s = elementFrame(H_ELEMENT)
+			local openH = headerH + gap + listH + 6
+			local f, s = elementFrame(headerH)
 			f.ClipsDescendants = true
 
-			local hasIcon = makeIcon(f, cfg.Icon)
+			-- ✅ FIX: icon dropdown tidak ikut ke bawah saat dibuka
+			-- Posisi vertikal dibuat tetap di header, bukan tengah frame
+			local hasIcon = makeIcon(f, cfg.Icon, UDim2.new(0, 16, 0, 16), UDim2.new(0, 12, 0, 11), Theme.SubText)
 			local lx = hasIcon and 34 or 12
 
 			local lbl = Instance.new("TextLabel")
-			lbl.Size = UDim2.new(0.5, -lx, 0, H_ELEMENT)
+			lbl.Size = UDim2.new(0.5, -lx, 0, headerH)
 			lbl.Position = UDim2.new(0, lx, 0, 0)
 			lbl.BackgroundTransparency = 1
 			lbl.Text = cfg.Name or cfg.Title or "Dropdown"
@@ -1684,7 +1758,7 @@ function Library:CreateWindow(config)
 			lbl.Parent = f
 
 			local val = Instance.new("TextLabel")
-			val.Size = UDim2.new(0.5, -34, 0, H_ELEMENT)
+			val.Size = UDim2.new(0.5, -34, 0, headerH)
 			val.Position = UDim2.new(0.5, 0, 0, 0)
 			val.BackgroundTransparency = 1
 			val.Text = cfg.Default or (options[1] or "...")
@@ -1711,7 +1785,7 @@ function Library:CreateWindow(config)
 
 			local list = Instance.new("ScrollingFrame")
 			list.Size = UDim2.new(1, -12, 0, 0)
-			list.Position = UDim2.new(0, 6, 0, 42)
+			list.Position = UDim2.new(0, 6, 0, headerH + gap)
 			list.BackgroundTransparency = 1
 			list.BorderSizePixel = 0
 			list.ScrollBarThickness = 2
@@ -1733,7 +1807,7 @@ function Library:CreateWindow(config)
 					Tween(list, .3, {Size = UDim2.new(1, -12, 0, listH)})
 					Tween(arrow, .3, {Rotation = -90, TextColor3 = col or window.accent})
 				else
-					Tween(f, .3, {Size = UDim2.new(1, 0, 0, H_ELEMENT)})
+					Tween(f, .3, {Size = UDim2.new(1, 0, 0, headerH)})
 					Tween(list, .3, {Size = UDim2.new(1, -12, 0, 0)})
 					Tween(arrow, .3, {Rotation = 90, TextColor3 = Theme.SubText})
 				end
@@ -1780,7 +1854,7 @@ function Library:CreateWindow(config)
 			end
 
 			local head = Instance.new("TextButton")
-			head.Size = UDim2.new(1, 0, 0, H_ELEMENT)
+			head.Size = UDim2.new(1, 0, 0, headerH)
 			head.BackgroundTransparency = 1
 			head.Text = ""
 			head.AutoButtonColor = false
@@ -1800,7 +1874,7 @@ function Library:CreateWindow(config)
 
 					options = newOpts
 					listH = math.min(#options * 30, 150)
-					openH = 42 + listH + 6
+					openH = headerH + gap + listH + 6
 
 					for _, opt in ipairs(options) do
 						addOption(opt)
@@ -2033,11 +2107,16 @@ function Library:CreateWindow(config)
 	end
 
 	--// Mini Toggle + Label framed: [icon | Show UI / Hide UI]
+	-- ✅ Ukuran dibuat lebih sedang, tidak terlalu kecil
+	local MINI_W, MINI_H = 168, 42
+	local MINI_ICON = 22
+	local MINI_LINE = 3
+
 	local MiniToggle = Instance.new("TextButton")
 	MiniToggle.Name = "ZethHubMini"
 	MiniToggle.AnchorPoint = Vector2.new(0.5, 0.5)
-	MiniToggle.Position = UDim2.new(0, 90, 0.5, 0)
-	MiniToggle.Size = UDim2.new(0, 132, 0, 34)
+	MiniToggle.Position = UDim2.new(0, 112, 0.5, 0)
+	MiniToggle.Size = UDim2.new(0, MINI_W, 0, MINI_H)
 	MiniToggle.BackgroundColor3 = Theme.Background
 	MiniToggle.BackgroundTransparency = 0.05
 	MiniToggle.BorderSizePixel = 0
@@ -2045,20 +2124,20 @@ function Library:CreateWindow(config)
 	MiniToggle.AutoButtonColor = false
 	MiniToggle.ZIndex = 60
 	MiniToggle.Parent = gui
-	Corner(MiniToggle, 10)
-	registerRGB(Stroke(MiniToggle, Color3.new(1,1,1), 1.8))
-	Pad(MiniToggle, 0, 10, 0, 10)
+	Corner(MiniToggle, 12)
+	registerRGB(Stroke(MiniToggle, Color3.new(1,1,1), 2))
+	Pad(MiniToggle, 0, 14, 0, 14)
 
 	local miniLayout = Instance.new("UIListLayout")
 	miniLayout.FillDirection = Enum.FillDirection.Horizontal
 	miniLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	miniLayout.Padding = UDim.new(0, 8)
+	miniLayout.Padding = UDim.new(0, 10)
 	miniLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 	miniLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
 	miniLayout.Parent = MiniToggle
 
 	local miniIconFrame = Instance.new("Frame")
-	miniIconFrame.Size = UDim2.new(0, 18, 0, 18)
+	miniIconFrame.Size = UDim2.new(0, MINI_ICON, 0, MINI_ICON)
 	miniIconFrame.BackgroundTransparency = 1
 	miniIconFrame.LayoutOrder = 1
 	miniIconFrame.ZIndex = 61
@@ -2069,22 +2148,22 @@ function Library:CreateWindow(config)
 		local l = Instance.new("Frame")
 		l.AnchorPoint = Vector2.new(0.5, 0.5)
 		l.Position = UDim2.new(0.5, 0, 0.5, y)
-		l.Size = UDim2.new(0, 18, 0, 2)
+		l.Size = UDim2.new(0, MINI_ICON, 0, MINI_LINE)
 		l.BackgroundColor3 = Theme.Text
 		l.BorderSizePixel = 0
 		l.ZIndex = 62
 		l.Parent = miniIconFrame
-		Corner(l, 1)
+		Corner(l, 2)
 		table.insert(miniLines, l)
 		return l
 	end
 
-	makeMiniLine(-6)
+	makeMiniLine(-8)
 	makeMiniLine(0)
-	makeMiniLine(6)
+	makeMiniLine(8)
 
 	local miniSeparator = Instance.new("Frame")
-	miniSeparator.Size = UDim2.new(0, 1, 0, 18)
+	miniSeparator.Size = UDim2.new(0, 1, 0, MINI_ICON)
 	miniSeparator.BackgroundColor3 = Theme.Border
 	miniSeparator.BorderSizePixel = 0
 	miniSeparator.LayoutOrder = 2
@@ -2092,12 +2171,12 @@ function Library:CreateWindow(config)
 	miniSeparator.Parent = MiniToggle
 
 	local miniLbl = Instance.new("TextLabel")
-	miniLbl.Size = UDim2.new(0, 0, 0, 18)
+	miniLbl.Size = UDim2.new(0, 0, 0, MINI_ICON)
 	miniLbl.AutomaticSize = Enum.AutomaticSize.X
 	miniLbl.BackgroundTransparency = 1
 	miniLbl.Text = "Hide UI"
 	miniLbl.TextColor3 = Theme.Text
-	miniLbl.TextSize = 11
+	miniLbl.TextSize = 12
 	miniLbl.Font = Enum.Font.GothamBold
 	miniLbl.TextXAlignment = Enum.TextXAlignment.Left
 	miniLbl.LayoutOrder = 3
@@ -2113,43 +2192,46 @@ function Library:CreateWindow(config)
 	end)
 
 	local function setMiniIcon(open)
+		local lineSize = UDim2.new(0, MINI_ICON, 0, MINI_LINE)
+		local emptySize = UDim2.new(0, 0, 0, MINI_LINE)
+
 		if open then
-			-- X icon when UI is visible
+			-- X icon saat UI terbuka
 			Tween(miniLines[1], .25, {
 				Position = UDim2.new(0.5, 0, 0.5, 0),
 				Rotation = 45,
 				BackgroundTransparency = 0,
-				Size = UDim2.new(0, 18, 0, 2),
+				Size = lineSize,
 			})
 			Tween(miniLines[2], .25, {
 				Position = UDim2.new(0.5, 0, 0.5, 0),
 				Rotation = -45,
 				BackgroundTransparency = 0,
-				Size = UDim2.new(0, 18, 0, 2),
+				Size = lineSize,
 			})
 			Tween(miniLines[3], .15, {
 				BackgroundTransparency = 1,
-				Size = UDim2.new(0, 0, 0, 2),
+				Size = emptySize,
 			})
 		else
-			-- Menu/hamburger icon when UI is hidden
+			-- Hamburger/menu icon saat UI hidden
 			Tween(miniLines[1], .25, {
-				Position = UDim2.new(0.5, 0, 0.5, -6),
+				Position = UDim2.new(0.5, 0, 0.5, -8),
 				Rotation = 0,
 				BackgroundTransparency = 0,
-				Size = UDim2.new(0, 18, 0, 2),
+				Size = lineSize,
 			})
 			Tween(miniLines[2], .25, {
 				Position = UDim2.new(0.5, 0, 0.5, 0),
 				Rotation = 0,
 				BackgroundTransparency = 0,
-				Size = UDim2.new(0, 18, 0, 2),
+				Size = lineSize,
 			})
 			Tween(miniLines[3], .25, {
-				Position = UDim2.new(0.5, 0, 0.5, 6),
+				Position = UDim2.new(0.5, 0, 0.5, 8),
 				Rotation = 0,
 				BackgroundTransparency = 0,
-				Size = UDim2.new(0, 18, 0, 2),
+				Size = lineSize,
 			})
 		end
 	end
