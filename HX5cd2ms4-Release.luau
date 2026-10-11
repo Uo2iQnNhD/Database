@@ -295,52 +295,29 @@ function Library:SetAccent(c)
 end
 
 --// Notification GUI (Fixed: loading bar selalu di bawah, layout rapi)
-local NotifGui = Instance.new("ScreenGui")
-NotifGui.Name = "ZethNotifies"
-NotifGui.ResetOnSpawn = false
-NotifGui.DisplayOrder = 999
-NotifGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-pcall(function()
-	NotifGui.Parent = game:GetService("CoreGui")
-end)
-if not NotifGui.Parent then
-	NotifGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-end
-
-local notifyContainer = Instance.new("Frame")
-notifyContainer.Size = UDim2.new(0, 300, 1, -30)
-notifyContainer.Position = UDim2.new(1, -312, 0, 15)
-notifyContainer.BackgroundTransparency = 1
-notifyContainer.Parent = NotifGui
-
-local notifyList = Instance.new("UIListLayout")
-notifyList.SortOrder = Enum.SortOrder.LayoutOrder
-notifyList.Padding = UDim.new(0, 8)
-notifyList.Parent = notifyContainer
-
-local notifyOrder = 0
-
 function Library:Notify(text, duration, title, icon)
 	if Library._destroyed then return end
 
 	duration = duration or 5
 	notifyOrder -= 1
 
-	--// Tuning (ubah angka ini kalau mau atur jarak sendiri)
-	local PAD_TOP   = 12   -- jarak tepi atas -> judul/icon
+	--// Tuning jarak & bentuk
+	local PAD_TOP   = 12   -- tepi atas -> judul/icon
 	local PAD_X     = 14   -- jarak kiri/kanan teks
-	local GAP_HEAD  = 6    -- judul/icon -> separator (atau -> isi kalau tanpa separator)
+	local GAP_HEAD  = 6    -- judul/icon -> separator
 	local GAP_SEP   = 6    -- separator -> isi
-	local GAP_BAR   = 10   -- isi -> loading bar
+	local GAP_BAR   = 8    -- isi -> loading bar
 	local SEP_H     = 1    -- tebal garis pemisah
 	local BAR_H     = 3    -- tebal loading bar
+	local BAR_RAD   = 2    -- radius membulat loading bar
+	local TRACK_INSET = 12 -- margin kiri/kanan loading bar (WAJIB > Corner radius frame = 8)
 
 	local hasTitle     = type(title) == "string" and title ~= ""
 	local hasIcon      = icon ~= nil and icon ~= ""
 	local hasHeader    = hasTitle or hasIcon
 	local hasSeparator = hasTitle
 
-	--// Frame utama (auto tinggi, semua anak diatur oleh SATU UIListLayout)
+	--// Frame utama
 	local n = Instance.new("Frame")
 	n.Size = UDim2.new(1, 0, 0, 0)
 	n.AutomaticSize = Enum.AutomaticSize.Y
@@ -355,10 +332,18 @@ function Library:Notify(text, duration, title, icon)
 	local notifLayout = Instance.new("UIListLayout")
 	notifLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	notifLayout.Padding = UDim.new(0, 0)
-	notifLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center -- biar separator bisa inset simetris
+	notifLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	notifLayout.Parent = n
 
-	--// 1) Header: icon + judul (bold)
+	-- Padding: bawah 0 supaya bar menempel dasar, tapi bar di-inset horizontal -> aman dari curve
+	local np = Instance.new("UIPadding")
+	np.PaddingTop = UDim.new(0, 0)
+	np.PaddingBottom = UDim.new(0, 0)
+	np.PaddingLeft = UDim.new(0, 0)
+	np.PaddingRight = UDim.new(0, 0)
+	np.Parent = n
+
+	--// 1) Header: icon + judul
 	if hasHeader then
 		local headerRow = Instance.new("Frame")
 		headerRow.Size = UDim2.new(1, 0, 0, 0)
@@ -413,10 +398,10 @@ function Library:Notify(text, duration, title, icon)
 		end
 	end
 
-	--// 2) Separator (hanya kalau ada judul)
+	--// 2) Separator
 	if hasSeparator then
 		local sep = Instance.new("Frame")
-		sep.Size = UDim2.new(1, -(PAD_X * 2), 0, SEP_H) -- inset kiri-kanan, di-center oleh layout
+		sep.Size = UDim2.new(1, -(PAD_X * 2), 0, SEP_H)
 		sep.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
 		sep.BorderSizePixel = 0
 		sep.LayoutOrder = 2
@@ -457,28 +442,31 @@ function Library:Notify(text, duration, title, icon)
 	c.LayoutOrder = 1
 	c.Parent = contentRow
 
-	--// 4) Loading bar (PALING BAWAH, menempel tepi bawah, LayoutOrder terakhir)
+	--// 4) Loading bar (INSET kiri-kanan + corner sendiri -> tidak pernah keluar curve)
 	local track = Instance.new("Frame")
-	track.Size = UDim2.new(1, 0, 0, BAR_H)
+	track.Size = UDim2.new(1, -(TRACK_INSET * 2), 0, BAR_H)
 	track.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-	track.BackgroundTransparency = 0.2
+	track.BackgroundTransparency = 0.25
 	track.BorderSizePixel = 0
+	track.ClipsDescendants = true   -- fill yang menyusut ikut ter-clip jadi pill rapi
 	track.LayoutOrder = 4
 	track.Parent = n
+	Corner(track, BAR_RAD)
 
 	local fill = Instance.new("Frame")
 	fill.Size = UDim2.new(1, 0, 1, 0)
 	fill.BackgroundColor3 = Library.Accent
 	fill.BorderSizePixel = 0
 	fill.Parent = track
+	Corner(fill, BAR_RAD)
 
-	--// Animasi masuk (slide dari kanan) + progress bar
+	--// Animasi masuk + progress
 	n.Position = UDim2.new(1, 30, 0, 0)
-	task.wait() -- biarkan layout & AutomaticSize settle dulu supaya tidak kedip
+	task.wait() -- biarkan AutomaticSize settle dulu (cegah kedip/overflow sesaat)
 	Tween(n, .4, {Position = UDim2.new(0, 0, 0, 0)}, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 	Tween(fill, duration, {Size = UDim2.new(0, 0, 1, 0)}, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
 
-	--// Keluar setelah durasi habis
+	--// Keluar
 	task.delay(duration, function()
 		if not n.Parent then return end
 		Tween(n, .35, {Position = UDim2.new(1, 30, 0, 0)}, Enum.EasingStyle.Quint, Enum.EasingDirection.In).Completed:Connect(function()
