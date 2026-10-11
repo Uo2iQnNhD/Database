@@ -86,8 +86,12 @@ local H_SECTION = 20
 local H_TAB = 34
 local TOPBAR_H = 58
 
---// Lucide Icons (sumber: lucideblox community port)
-Library.Lucide = {
+--// Lucide Icons + Rayfield-style icon engine
+Library.Lucide = {}
+Library.LucideRect = {}
+
+-- Fallback icon milik library lama
+local fallbackIcons = {
 	["home"]="rbxassetid://7733960981", ["settings"]="rbxassetid://7734053495", ["settings-2"]="rbxassetid://8997386997",
 	["shield"]="rbxassetid://7734056608", ["shield-check"]="rbxassetid://7734056411", ["key"]="rbxassetid://7733965118",
 	["gamepad-2"]="rbxassetid://7733799795", ["folder"]="rbxassetid://7733799185", ["file-text"]="rbxassetid://7733789088",
@@ -130,22 +134,191 @@ Library.Lucide = {
 	["sliders-horizontal"]="rbxassetid://7734058803",
 }
 
+for name, asset in pairs(fallbackIcons) do
+	Library.Lucide[name] = asset
+end
+
+-- Cache global supaya kalau script dijalankan ulang, icon tidak perlu download terus
+local IconCache = (type(Env) == "table" and Env.ZethHubIconCache) or {
+	Loaded = false,
+	Lucide = {},
+	Rect = {},
+}
+
+if type(Env) == "table" then
+	Env.ZethHubIconCache = IconCache
+end
+
+-- Terapkan cache jika sudah pernah dimuat
+for name, asset in pairs(IconCache.Lucide) do
+	Library.Lucide[name] = asset
+end
+
+for name, rect in pairs(IconCache.Rect) do
+	Library.LucideRect[name] = rect
+end
+
+local function fetchRayfieldIconSource()
+	local url = "https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/refs/heads/main/icons.lua"
+
+	local ok, body = pcall(function()
+		return game:HttpGet(url)
+	end)
+
+	if ok and type(body) == "string" and #body > 0 then
+		return body
+	end
+
+	local requestFunc = (syn and syn.request) or (fluxus and fluxus.request) or (http and http.request) or http_request or request
+
+	if requestFunc then
+		local okReq, res = pcall(function()
+			return requestFunc({
+				Url = url,
+				Method = "GET",
+			})
+		end)
+
+		if okReq and type(res) == "table" and type(res.Body) == "string" and #res.Body > 0 then
+			return res.Body
+		end
+	end
+
+	return nil
+end
+
+local function loadRayfieldIcons()
+	if IconCache.Loaded then
+		return
+	end
+
+	IconCache.Loaded = true
+
+	local source = fetchRayfieldIconSource()
+
+	if not source then
+		warn("[ZethHub] Gagal memuat Rayfield icons.lua, memakai fallback icon.")
+		return
+	end
+
+	local ok, Icons = pcall(function()
+		return loadstring(source)()
+	end)
+
+	if not ok or type(Icons) ~= "table" then
+		warn("[ZethHub] Rayfield icons.lua gagal dieksekusi, memakai fallback icon.")
+		return
+	end
+
+	local iconTable = Icons["48px"] or Icons
+
+	for name, data in pairs(iconTable) do
+		if type(name) == "string" and type(data) == "table" then
+			local assetId = data[1]
+			local rectSize = data[2]
+			local rectOffset = data[3]
+
+			if
+				type(assetId) == "number"
+				and type(rectSize) == "table"
+				and type(rectOffset) == "table"
+				and rectSize[1] and rectSize[2]
+				and rectOffset[1] and rectOffset[2]
+			then
+				local asset = "rbxassetid://" .. assetId
+				local rect = {
+					ImageRectOffset = Vector2.new(rectOffset[1], rectOffset[2]),
+					ImageRectSize = Vector2.new(rectSize[1], rectSize[2]),
+				}
+
+				IconCache.Lucide[name] = asset
+				IconCache.Rect[name] = rect
+
+				Library.Lucide[name] = asset
+				Library.LucideRect[name] = rect
+			end
+		end
+	end
+end
+
+loadRayfieldIcons()
+
 local function resolveIcon(icon)
-	if type(icon) ~= "string" or icon == "" then return nil end
-	if icon:sub(1, 12) == "rbxassetid://" or icon:sub(1, 10) == "rbxasset://" then return icon end
-	return Library.Lucide[icon]
+	if icon == nil or icon == false or icon == 0 or icon == "" then
+		return nil, nil, nil
+	end
+
+	if type(icon) == "number" then
+		return "rbxassetid://" .. icon, nil, nil
+	end
+
+	if type(icon) == "string" then
+		if
+			icon:sub(1, 12) == "rbxassetid://" or
+			icon:sub(1, 10) == "rbxasset://" or
+			icon:sub(1, 11) == "rbxthumb://" or
+			icon:sub(1, 7) == "http://" or
+			icon:sub(1, 8) == "https://"
+		then
+			return icon, nil, nil
+		end
+
+		local key = string.match(string.lower(icon), "^%s*(.-)%s*$")
+		local asset = Library.Lucide[key]
+		local rect = Library.LucideRect[key]
+
+		if not asset or asset == "" then
+			asset = Library.Lucide["info"]
+			rect = Library.LucideRect["info"]
+		end
+
+		return asset, rect and rect.ImageRectOffset, rect and rect.ImageRectSize
+	end
+
+	return nil, nil, nil
+end
+
+local function setIcon(instance, icon)
+	if not instance then
+		return
+	end
+
+	if not (instance:IsA("ImageLabel") or instance:IsA("ImageButton")) then
+		return
+	end
+
+	local asset, offset, size = resolveIcon(icon)
+	instance.Image = asset or ""
+
+	if offset and size then
+		instance.ImageRectOffset = offset
+		instance.ImageRectSize = size
+	else
+		instance.ImageRectOffset = Vector2.new(0, 0)
+		instance.ImageRectSize = Vector2.new(0, 0)
+	end
 end
 
 local function makeIcon(parent, icon, size, pos, color)
-	local id = resolveIcon(icon)
-	if not id then return nil end
+	local asset, offset, rectSize = resolveIcon(icon)
+
+	if not asset or asset == "" then
+		return nil
+	end
+
 	local im = Instance.new("ImageLabel")
 	im.Name = "Icon"
 	im.Size = size or UDim2.new(0, 16, 0, 16)
 	im.Position = pos or UDim2.new(0, 12, 0.5, -8)
 	im.BackgroundTransparency = 1
-	im.Image = id
+	im.Image = asset
 	im.ImageColor3 = color or Theme.Text
+
+	if offset and rectSize then
+		im.ImageRectOffset = offset
+		im.ImageRectSize = rectSize
+	end
+
 	im.Parent = parent
 	return im
 end
@@ -1271,7 +1444,6 @@ function Library:CreateWindow(config)
 			}
 		end
 
-		--// Paragraph dengan frame/alas
 		--// Paragraph dengan frame/alas versi lebih rapi
 		function tab:CreateParagraph(cfg)
 			cfg = cfg or {}
@@ -1334,26 +1506,34 @@ function Library:CreateWindow(config)
 			local iconOffset = 0
 
 			-- Optional icon seperti gaya Rayfield
-			if cfg.Icon and cfg.Icon ~= "" then
-				local id = resolveIcon(cfg.Icon)
-				if id then
-					local icon = Instance.new("ImageLabel")
-					icon.Size = UDim2.new(0, 18, 0, 18)
-					icon.BackgroundTransparency = 1
-					icon.Image = id
-					icon.ImageColor3 = window.accent
-					icon.LayoutOrder = 1
-					icon.Parent = titleRow
+-- Optional icon seperti gaya Rayfield
+if cfg.Icon and cfg.Icon ~= "" then
+	local asset, offset, rectSize = resolveIcon(cfg.Icon)
 
-					window:onAccent(function(c)
-						if icon.Parent then
-							icon.ImageColor3 = c
-						end
-					end)
+	if asset and asset ~= "" then
+		local icon = Instance.new("ImageLabel")
+		icon.Size = UDim2.new(0, 18, 0, 18)
+		icon.BackgroundTransparency = 1
+		icon.Image = asset
 
-					iconOffset = 26
-				end
+		if offset and rectSize then
+			icon.ImageRectOffset = offset
+			icon.ImageRectSize = rectSize
+		end
+
+		icon.ImageColor3 = window.accent
+		icon.LayoutOrder = 1
+		icon.Parent = titleRow
+
+		window:onAccent(function(c)
+			if icon.Parent then
+				icon.ImageColor3 = c
 			end
+		end)
+
+		iconOffset = 26
+	end
+end
 
 			local titleObj = Instance.new("TextLabel")
 			titleObj.Size = UDim2.new(1, -iconOffset, 0, 0)
