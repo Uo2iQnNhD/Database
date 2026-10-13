@@ -841,21 +841,16 @@ function Library:CreateWindow(config)
 	local subtitle = config.Subtitle or "V5 • YinYang Edition"
 	local OPEN_SIZE = UDim2.new(0, 560, 0, 420)
 
-	local gui = Instance.new("ScreenGui")
+local gui = Instance.new("ScreenGui")
 	gui.Name = "ZethHubV5"
 	gui.ResetOnSpawn = false
 	gui.DisplayOrder = 998
 	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-	gui.IgnoreGuiInset = true
-
 	pcall(function()
 		gui.Parent = game:GetService("CoreGui")
 	end)
-
 	if not gui.Parent then
-		pcall(function()
-			gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-		end)
+		gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 	end
 
 	local main = Instance.new("Frame")
@@ -2660,34 +2655,11 @@ end
 	end
 
 local function clampMini()
-		local camera = workspace.CurrentCamera
-		local vp = camera and camera.ViewportSize or Vector2.new(1920, 1080)
-
-		local size = MiniToggle.AbsoluteSize
-		if size.X <= 0 or size.Y <= 0 then
-			size = Vector2.new(MINI_W, MINI_H)
-		end
-
-		local halfX = size.X / 2
-		local halfY = size.Y / 2
-		local margin = tonumber(Library.MiniSafeMargin) or 8
-
-		local minX = margin + halfX
-		local maxX = vp.X - margin - halfX
-		local minY = margin + halfY
-		local maxY = vp.Y - margin - halfY
-
-		if maxX < minX then
-			maxX = minX
-		end
-
-		if maxY < minY then
-			maxY = minY
-		end
-
-		local x = math.clamp(MiniToggle.Position.X.Offset, minX, maxX)
-		local y = math.clamp(MiniToggle.Position.Y.Offset, minY, maxY)
-
+		local vp = workspace.CurrentCamera.ViewportSize
+		local halfX = MiniToggle.AbsoluteSize.X / 2
+		local halfY = MiniToggle.AbsoluteSize.Y / 2
+		local x = math.clamp(MiniToggle.Position.X.Offset, halfX + 4, vp.X - halfX - 4)
+		local y = math.clamp(MiniToggle.Position.Y.Offset, halfY + 4, vp.Y - halfY - 4)
 		MiniToggle.Position = UDim2.new(0, x, 0, y)
 	end
 
@@ -2698,8 +2670,7 @@ local function clampMini()
 		if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
 			mDrag = true
 			mMoved = 0
-			mStart = UserInputService:GetMouseLocation()
-
+			mStart = inp.Position
 			local center = MiniToggle.AbsolutePosition + MiniToggle.AbsoluteSize / 2
 			mOrigX, mOrigY = center.X, center.Y
 		end
@@ -2707,11 +2678,8 @@ local function clampMini()
 
 	Connect(UserInputService.InputChanged, function(inp)
 		if mDrag and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
-			local mouse = UserInputService:GetMouseLocation()
-			local d = mouse - mStart
-
+			local d = inp.Position - mStart
 			mMoved = math.max(mMoved, math.abs(d.X) + math.abs(d.Y))
-
 			MiniToggle.Position = UDim2.new(0, mOrigX + d.X, 0, mOrigY + d.Y)
 			clampMini()
 		end
@@ -2720,17 +2688,8 @@ local function clampMini()
 	Connect(UserInputService.InputEnded, function(inp)
 		if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
 			mDrag = false
-			clampMini()
 		end
 	end, window)
-
-	task.spawn(function()
-		task.wait(0.1)
-
-		if not window._destroyed then
-			clampMini()
-		end
-	end)
 
 	function window:Toggle(force)
 		if window._destroyed then return end
