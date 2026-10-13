@@ -467,227 +467,365 @@ function Library:SetAccent(c)
 	refreshRGBColors()
 end
 
---// Notification GUI (Self-healing: kebal terhadap copy-paste parsial)
+--// Notification settings (Rayfield-inspired)
+Library.NotificationWidth = Library.NotificationWidth or 320
+Library.NotificationRightOffset = Library.NotificationRightOffset or 16
+Library.NotificationTopOffset = Library.NotificationTopOffset or 12
+Library.MiniSafeMargin = Library.MiniSafeMargin or 8
+
+--// Notification GUI (Self-healing + Rayfield-style)
 local NotifGui = Instance.new("ScreenGui")
 NotifGui.Name = "ZethNotifies"
 NotifGui.ResetOnSpawn = false
-NotifGui.DisplayOrder = 999
+NotifGui.DisplayOrder = 9999
 NotifGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-pcall(function() NotifGui.Parent = game:GetService("CoreGui") end)
+NotifGui.IgnoreGuiInset = true
+
+pcall(function()
+	NotifGui.Parent = game:GetService("CoreGui")
+end)
+
 if not NotifGui.Parent then
-	pcall(function() NotifGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end)
+	pcall(function()
+		NotifGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+	end)
 end
 
-local notifyContainer = Instance.new("Frame")
-notifyContainer.Size = UDim2.new(0, 300, 1, -30)
-notifyContainer.Position = UDim2.new(1, -312, 0, 15)
-notifyContainer.BackgroundTransparency = 1
-notifyContainer.Parent = NotifGui
+local notifyContainer
+local notifyList
 
-local notifyList = Instance.new("UIListLayout")
-notifyList.SortOrder = Enum.SortOrder.LayoutOrder
-notifyList.Padding = UDim.new(0, 8)
-notifyList.Parent = notifyContainer
+local function rebuildNotifyContainer()
+	if not NotifGui or not NotifGui.Parent then
+		NotifGui = Instance.new("ScreenGui")
+		NotifGui.Name = "ZethNotifies"
+		NotifGui.ResetOnSpawn = false
+		NotifGui.DisplayOrder = 999
+		NotifGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		NotifGui.IgnoreGuiInset = true
 
--- CATATAN: tidak ada `local notifyOrder` lagi. Counter hidup di Library._notifyOrder.
+		pcall(function()
+			NotifGui.Parent = game:GetService("CoreGui")
+		end)
 
-function Library:Notify(text, duration, title, icon)
-	if Library._destroyed then return end
-
-	duration = duration or 5
-
-	-- ✅ Anti-nil: kalau Library._notifyOrder belum ada, mulai dari 0
-	Library._notifyOrder = (Library._notifyOrder or 0) - 1
-	local notifyOrder = Library._notifyOrder
-
-	-- ✅ Self-healing container: rebuild kalau hilang / ke-destroy
-	if not notifyContainer or not notifyContainer.Parent then
-		if not NotifGui or not NotifGui.Parent then
-			NotifGui = Instance.new("ScreenGui")
-			NotifGui.Name = "ZethNotifies"
-			NotifGui.ResetOnSpawn = false
-			NotifGui.DisplayOrder = 999
-			NotifGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-			pcall(function() NotifGui.Parent = game:GetService("CoreGui") end)
-			if not NotifGui.Parent then
-				pcall(function() NotifGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end)
-			end
+		if not NotifGui.Parent then
+			pcall(function()
+				NotifGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+			end)
 		end
+	end
+
+	if not notifyContainer or not notifyContainer.Parent then
 		notifyContainer = Instance.new("Frame")
-		notifyContainer.Size = UDim2.new(0, 300, 1, -30)
-		notifyContainer.Position = UDim2.new(1, -312, 0, 15)
+		notifyContainer.Name = "NotifyContainer"
+		notifyContainer.Size = UDim2.new(0, Library.NotificationWidth, 1, -24)
+		notifyContainer.Position = UDim2.new(
+			1,
+			-(Library.NotificationWidth + Library.NotificationRightOffset),
+			0,
+			Library.NotificationTopOffset
+		)
 		notifyContainer.BackgroundTransparency = 1
+		notifyContainer.BorderSizePixel = 0
 		notifyContainer.Parent = NotifGui
+
 		notifyList = Instance.new("UIListLayout")
 		notifyList.SortOrder = Enum.SortOrder.LayoutOrder
 		notifyList.Padding = UDim.new(0, 8)
+		notifyList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		notifyList.VerticalAlignment = Enum.VerticalAlignment.Top
 		notifyList.Parent = notifyContainer
 	end
+end
 
-	--// Tuning jarak & bentuk
-	local PAD_TOP     = 12
-	local PAD_X       = 14
-	local GAP_HEAD    = 6
-	local GAP_SEP     = 6
-	local GAP_BAR     = 8
-	local SEP_H       = 1
-	local BAR_H       = 3
-	local BAR_RAD     = 2
-	local TRACK_INSET = 12 -- > Corner(n,8) supaya tidak keluar curve
+rebuildNotifyContainer()
 
-	local hasTitle     = type(title) == "string" and title ~= ""
-	local hasIcon      = icon ~= nil and icon ~= ""
-	local hasHeader    = hasTitle or hasIcon
-	local hasSeparator = hasTitle
+local function notifyToText(value)
+	if type(value) == "table" then
+		return table.concat(value, "\n")
+	end
 
-	--// Frame utama
-	local n = Instance.new("Frame")
-	n.Size = UDim2.new(1, 0, 0, 0)
-	n.AutomaticSize = Enum.AutomaticSize.Y
-	n.LayoutOrder = notifyOrder
-	n.BackgroundColor3 = Theme.Element
-	n.BorderSizePixel = 0
-	n.ClipsDescendants = true
-	n.Parent = notifyContainer
-	Corner(n, 8)
-	registerRGB(Stroke(n, Color3.new(1, 1, 1), 1.5))
+	return tostring(value or "")
+end
 
-	local notifLayout = Instance.new("UIListLayout")
-	notifLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	notifLayout.Padding = UDim.new(0, 0)
-	notifLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	notifLayout.Parent = n
+function Library:Notify(...)
+	if Library._destroyed then
+		return
+	end
 
-	--// 1) Header: icon + judul
-	if hasHeader then
-		local headerRow = Instance.new("Frame")
-		headerRow.Size = UDim2.new(1, 0, 0, 0)
-		headerRow.AutomaticSize = Enum.AutomaticSize.Y
-		headerRow.BackgroundTransparency = 1
-		headerRow.LayoutOrder = 1
-		headerRow.Parent = n
+	local first = ...
+	local cfg
 
-		local hp = Instance.new("UIPadding")
-		hp.PaddingTop = UDim.new(0, PAD_TOP)
-		hp.PaddingBottom = UDim.new(0, GAP_HEAD)
-		hp.PaddingLeft = UDim.new(0, PAD_X)
-		hp.PaddingRight = UDim.new(0, PAD_X)
-		hp.Parent = headerRow
+	-- Kompatibel:
+	-- Library:Notify({Title=..., Content=..., Duration=..., Image=...})
+	-- Library:Notify(text, duration, title, icon)
+	if type(first) == "table" then
+		cfg = first
+	else
+		cfg = {
+			Content = first,
+			Duration = select(2, ...),
+			Title = select(3, ...),
+			Image = select(4, ...),
+		}
+	end
 
-		local hl = Instance.new("UIListLayout")
-		hl.FillDirection = Enum.FillDirection.Horizontal
-		hl.SortOrder = Enum.SortOrder.LayoutOrder
-		hl.Padding = UDim.new(0, 9)
-		hl.VerticalAlignment = Enum.VerticalAlignment.Center
-		hl.HorizontalAlignment = Enum.HorizontalAlignment.Left
-		hl.Parent = headerRow
+	local content = notifyToText(cfg.Content or cfg.Text or cfg.Message or "")
+	local title = notifyToText(cfg.Title or cfg.title or "")
+	local image = cfg.Image or cfg.Icon or cfg.icon
+
+	-- Default icon supaya mirip Rayfield: selalu ada icon kecuali Image = 0 / false / nil secara eksplisit ingin disembunyikan.
+	if image == nil and (title ~= "" or content ~= "") then
+		image = "info"
+	end
+
+	local duration = tonumber(cfg.Duration or cfg.duration) or 5
+	if duration < 0.1 then
+		duration = 0.1
+	end
+
+	local accent = cfg.Color or cfg.Accent or Library.Accent
+	if typeof(accent) ~= "Color3" then
+		accent = Library.Accent
+	end
+
+	local hasTitle = title ~= ""
+	local hasContent = content ~= ""
+	local hasIcon = image ~= nil and image ~= "" and image ~= 0
+
+	if not hasTitle and not hasContent and not hasIcon then
+		return
+	end
+
+	Library._notifyOrder = (Library._notifyOrder or 0) - 1
+	local order = Library._notifyOrder
+
+	task.spawn(function()
+		if Library._destroyed then
+			return
+		end
+
+		rebuildNotifyContainer()
+
+		-- Holder dipakai supaya animasi slide kanan-kiri tidak berantakan kena UIListLayout.
+		local holder = Instance.new("Frame")
+		holder.Name = "NotifyHolder"
+		holder.Size = UDim2.new(1, 0, 0, 0)
+		holder.AutomaticSize = Enum.AutomaticSize.Y
+		holder.BackgroundTransparency = 1
+		holder.BorderSizePixel = 0
+		holder.ClipsDescendants = true
+		holder.LayoutOrder = order
+		holder.Parent = notifyContainer
+
+		local n = Instance.new("Frame")
+		n.Name = "Notification"
+		n.Size = UDim2.new(1, 0, 0, 0)
+		n.AutomaticSize = Enum.AutomaticSize.Y
+		n.BackgroundColor3 = Theme.Element
+		n.BackgroundTransparency = 1
+		n.BorderSizePixel = 0
+		n.ClipsDescendants = true
+		n.Position = UDim2.new(1, 36, 0, 0)
+		n.Parent = holder
+		Corner(n, 10)
+
+		local stroke = Stroke(n, Color3.new(1, 1, 1), 1.5)
+		stroke.Transparency = 1
+		registerRGB(stroke)
+
+		local nPad = Instance.new("UIPadding")
+		nPad.PaddingTop = UDim.new(0, 12)
+		nPad.PaddingLeft = UDim.new(0, 12)
+		nPad.PaddingBottom = UDim.new(0, 10)
+		nPad.PaddingRight = UDim.new(0, 12)
+		nPad.Parent = n
+
+		local nList = Instance.new("UIListLayout")
+		nList.SortOrder = Enum.SortOrder.LayoutOrder
+		nList.Padding = UDim.new(0, 8)
+		nList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		nList.VerticalAlignment = Enum.VerticalAlignment.Top
+		nList.Parent = n
+
+		local row = Instance.new("Frame")
+		row.Name = "Row"
+		row.Size = UDim2.new(1, 0, 0, 0)
+		row.AutomaticSize = Enum.AutomaticSize.Y
+		row.BackgroundTransparency = 1
+		row.BorderSizePixel = 0
+		row.LayoutOrder = 1
+		row.Parent = n
+
+		local rowLayout = Instance.new("UIListLayout")
+		rowLayout.FillDirection = Enum.FillDirection.Horizontal
+		rowLayout.SortOrder = Enum.SortOrder.LayoutOrder
+		rowLayout.Padding = UDim.new(0, 10)
+		rowLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+		rowLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+		rowLayout.Parent = row
+
+		local icon
 
 		if hasIcon then
-			local ic = makeIcon(headerRow, icon, UDim2.new(0, 20, 0, 20), nil, Library.Accent)
-			if ic then
-				ic.LayoutOrder = 1
-			else
-				local dot = Instance.new("Frame")
-				dot.Size = UDim2.new(0, 4, 0, 20)
-				dot.BackgroundColor3 = Library.Accent
-				dot.BorderSizePixel = 0
-				dot.LayoutOrder = 1
-				dot.Parent = headerRow
-				Corner(dot, 2)
-			end
+			icon = Instance.new("ImageLabel")
+			icon.Name = "Icon"
+			icon.Size = UDim2.new(0, 32, 0, 32)
+			icon.BackgroundTransparency = 1
+			icon.ImageTransparency = 1
+			icon.ImageColor3 = accent
+			icon.LayoutOrder = 1
+			icon.Parent = row
+
+			setIcon(icon, image)
 		end
+
+		local textBox = Instance.new("Frame")
+		textBox.Name = "TextBox"
+		textBox.Size = UDim2.new(1, hasIcon and -42 or 0, 0, 0)
+		textBox.AutomaticSize = Enum.AutomaticSize.Y
+		textBox.BackgroundTransparency = 1
+		textBox.BorderSizePixel = 0
+		textBox.LayoutOrder = 2
+		textBox.Parent = row
+
+		local textList = Instance.new("UIListLayout")
+		textList.SortOrder = Enum.SortOrder.LayoutOrder
+		textList.Padding = UDim.new(0, 3)
+		textList.HorizontalAlignment = Enum.HorizontalAlignment.Left
+		textList.VerticalAlignment = Enum.VerticalAlignment.Top
+		textList.Parent = textBox
+
+		local titleLbl
+		local contentLbl
 
 		if hasTitle then
-			local t = Instance.new("TextLabel")
-			t.Size = UDim2.new(0, 0, 0, 18)
-			t.AutomaticSize = Enum.AutomaticSize.X
-			t.BackgroundTransparency = 1
-			t.Text = title
-			t.TextColor3 = Library.Accent
-			t.TextSize = 13
-			t.Font = Enum.Font.GothamBold
-			t.TextXAlignment = Enum.TextXAlignment.Left
-			t.TextYAlignment = Enum.TextYAlignment.Center
-			t.LayoutOrder = 2
-			t.Parent = headerRow
+			titleLbl = Instance.new("TextLabel")
+			titleLbl.Name = "Title"
+			titleLbl.Size = UDim2.new(1, 0, 0, 0)
+			titleLbl.AutomaticSize = Enum.AutomaticSize.Y
+			titleLbl.BackgroundTransparency = 1
+			titleLbl.Text = title
+			titleLbl.TextColor3 = accent
+			titleLbl.TextSize = 14
+			titleLbl.Font = Enum.Font.GothamBold
+			titleLbl.TextXAlignment = Enum.TextXAlignment.Left
+			titleLbl.TextYAlignment = Enum.TextYAlignment.Top
+			titleLbl.TextWrapped = true
+			titleLbl.TextTransparency = 1
+			titleLbl.LayoutOrder = 1
+			titleLbl.Parent = textBox
 		end
-	end
 
-	--// 2) Separator
-	if hasSeparator then
-		local sep = Instance.new("Frame")
-		sep.Size = UDim2.new(1, -(PAD_X * 2), 0, SEP_H)
-		sep.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
-		sep.BorderSizePixel = 0
-		sep.LayoutOrder = 2
-		sep.Parent = n
-	end
+		if hasContent then
+			contentLbl = Instance.new("TextLabel")
+			contentLbl.Name = "Content"
+			contentLbl.Size = UDim2.new(1, 0, 0, 0)
+			contentLbl.AutomaticSize = Enum.AutomaticSize.Y
+			contentLbl.BackgroundTransparency = 1
+			contentLbl.Text = content
+			contentLbl.TextColor3 = Color3.fromRGB(232, 232, 232)
+			contentLbl.TextSize = 12
+			contentLbl.Font = Enum.Font.Gotham
+			contentLbl.TextXAlignment = Enum.TextXAlignment.Left
+			contentLbl.TextYAlignment = Enum.TextYAlignment.Top
+			contentLbl.TextWrapped = true
+			contentLbl.TextTransparency = 1
+			contentLbl.LayoutOrder = 2
+			contentLbl.Parent = textBox
+		end
 
-	--// 3) Isi teks
-	local contentRow = Instance.new("Frame")
-	contentRow.Size = UDim2.new(1, 0, 0, 0)
-	contentRow.AutomaticSize = Enum.AutomaticSize.Y
-	contentRow.BackgroundTransparency = 1
-	contentRow.LayoutOrder = 3
-	contentRow.Parent = n
+		local track = Instance.new("Frame")
+		track.Name = "ProgressTrack"
+		track.Size = UDim2.new(1, 0, 0, 4)
+		track.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+		track.BackgroundTransparency = 0.25
+		track.BorderSizePixel = 0
+		track.ClipsDescendants = true
+		track.LayoutOrder = 2
+		track.Parent = n
+		Corner(track, 99)
 
-	local cp = Instance.new("UIPadding")
-	cp.PaddingTop = UDim.new(0, hasHeader and (hasSeparator and GAP_SEP or GAP_HEAD) or PAD_TOP)
-	cp.PaddingBottom = UDim.new(0, GAP_BAR)
-	cp.PaddingLeft = UDim.new(0, PAD_X)
-	cp.PaddingRight = UDim.new(0, PAD_X)
-	cp.Parent = contentRow
+		local fill = Instance.new("Frame")
+		fill.Name = "ProgressFill"
+		fill.Size = UDim2.new(1, 0, 1, 0)
+		fill.BackgroundColor3 = accent
+		fill.BorderSizePixel = 0
+		fill.Parent = track
+		Corner(fill, 99)
 
-	local cl = Instance.new("UIListLayout")
-	cl.SortOrder = Enum.SortOrder.LayoutOrder
-	cl.Padding = UDim.new(0, 0)
-	cl.Parent = contentRow
+		-- Animasi masuk
+		task.wait()
 
-	local c = Instance.new("TextLabel")
-	c.Size = UDim2.new(1, 0, 0, 0)
-	c.AutomaticSize = Enum.AutomaticSize.Y
-	c.BackgroundTransparency = 1
-	c.Text = text or ""
-	c.TextColor3 = Theme.Text
-	c.TextSize = 12
-	c.Font = Enum.Font.Gotham
-	c.TextXAlignment = Enum.TextXAlignment.Left
-	c.TextYAlignment = Enum.TextYAlignment.Top
-	c.TextWrapped = true
-	c.LayoutOrder = 1
-	c.Parent = contentRow
+		Tween(
+			n,
+			0.35,
+			{
+				Position = UDim2.new(0, 0, 0, 0),
+				BackgroundTransparency = 0,
+			},
+			Enum.EasingStyle.Back,
+			Enum.EasingDirection.Out
+		)
 
-	--// 4) Loading bar (inset + corner sendiri -> tidak keluar curve)
-	local track = Instance.new("Frame")
-	track.Size = UDim2.new(1, -(TRACK_INSET * 2), 0, BAR_H)
-	track.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-	track.BackgroundTransparency = 0.25
-	track.BorderSizePixel = 0
-	track.ClipsDescendants = true
-	track.LayoutOrder = 4
-	track.Parent = n
-	Corner(track, BAR_RAD)
+		Tween(stroke, 0.35, {Transparency = 0})
 
-	local fill = Instance.new("Frame")
-	fill.Size = UDim2.new(1, 0, 1, 0)
-	fill.BackgroundColor3 = Library.Accent
-	fill.BorderSizePixel = 0
-	fill.Parent = track
-	Corner(fill, BAR_RAD)
+		if icon then
+			Tween(icon, 0.28, {ImageTransparency = 0})
+		end
 
-	--// Animasi masuk + progress
-	n.Position = UDim2.new(1, 30, 0, 0)
-	task.wait()
-	Tween(n, .4, {Position = UDim2.new(0, 0, 0, 0)}, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-	Tween(fill, duration, {Size = UDim2.new(0, 0, 1, 0)}, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+		if titleLbl then
+			Tween(titleLbl, 0.28, {TextTransparency = 0})
+		end
 
-	--// Keluar
-	task.delay(duration, function()
-		if not n.Parent then return end
-		Tween(n, .35, {Position = UDim2.new(1, 30, 0, 0)}, Enum.EasingStyle.Quint, Enum.EasingDirection.In).Completed:Connect(function()
-			if n.Parent then
-				n:Destroy()
+		if contentLbl then
+			Tween(contentLbl, 0.28, {TextTransparency = 0})
+		end
+
+		-- Progress bar sesuai durasi
+		Tween(
+			fill,
+			duration,
+			{Size = UDim2.new(0, 0, 1, 0)},
+			Enum.EasingStyle.Linear,
+			Enum.EasingDirection.Out
+		)
+
+		-- Animasi keluar
+		task.delay(duration, function()
+			if not holder or not holder.Parent then
+				return
 			end
+
+			Tween(
+				n,
+				0.3,
+				{
+					Position = UDim2.new(1, 36, 0, 0),
+					BackgroundTransparency = 1,
+				},
+				Enum.EasingStyle.Quint,
+				Enum.EasingDirection.In
+			)
+
+			Tween(stroke, 0.3, {Transparency = 1})
+
+			if icon then
+				Tween(icon, 0.25, {ImageTransparency = 1})
+			end
+
+			if titleLbl then
+				Tween(titleLbl, 0.25, {TextTransparency = 1})
+			end
+
+			if contentLbl then
+				Tween(contentLbl, 0.25, {TextTransparency = 1})
+			end
+
+			task.delay(0.32, function()
+				if holder and holder.Parent then
+					holder:Destroy()
+				end
+			end)
 		end)
 	end)
 end
@@ -708,11 +846,16 @@ function Library:CreateWindow(config)
 	gui.ResetOnSpawn = false
 	gui.DisplayOrder = 998
 	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	gui.IgnoreGuiInset = true
+
 	pcall(function()
 		gui.Parent = game:GetService("CoreGui")
 	end)
+
 	if not gui.Parent then
-		gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+		pcall(function()
+			gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+		end)
 	end
 
 	local main = Instance.new("Frame")
@@ -2516,12 +2659,35 @@ end
 		Tween(miniLbl, .2, {TextColor3 = open and Theme.Text or Theme.SubText})
 	end
 
-	local function clampMini()
-		local vp = workspace.CurrentCamera.ViewportSize
-		local halfX = MiniToggle.AbsoluteSize.X / 2
-		local halfY = MiniToggle.AbsoluteSize.Y / 2
-		local x = math.clamp(MiniToggle.Position.X.Offset, halfX + 4, vp.X - halfX - 4)
-		local y = math.clamp(MiniToggle.Position.Y.Offset, halfY + 4, vp.Y - halfY - 4)
+local function clampMini()
+		local camera = workspace.CurrentCamera
+		local vp = camera and camera.ViewportSize or Vector2.new(1920, 1080)
+
+		local size = MiniToggle.AbsoluteSize
+		if size.X <= 0 or size.Y <= 0 then
+			size = Vector2.new(MINI_W, MINI_H)
+		end
+
+		local halfX = size.X / 2
+		local halfY = size.Y / 2
+		local margin = tonumber(Library.MiniSafeMargin) or 8
+
+		local minX = margin + halfX
+		local maxX = vp.X - margin - halfX
+		local minY = margin + halfY
+		local maxY = vp.Y - margin - halfY
+
+		if maxX < minX then
+			maxX = minX
+		end
+
+		if maxY < minY then
+			maxY = minY
+		end
+
+		local x = math.clamp(MiniToggle.Position.X.Offset, minX, maxX)
+		local y = math.clamp(MiniToggle.Position.Y.Offset, minY, maxY)
+
 		MiniToggle.Position = UDim2.new(0, x, 0, y)
 	end
 
@@ -2532,7 +2698,8 @@ end
 		if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
 			mDrag = true
 			mMoved = 0
-			mStart = inp.Position
+			mStart = UserInputService:GetMouseLocation()
+
 			local center = MiniToggle.AbsolutePosition + MiniToggle.AbsoluteSize / 2
 			mOrigX, mOrigY = center.X, center.Y
 		end
@@ -2540,8 +2707,11 @@ end
 
 	Connect(UserInputService.InputChanged, function(inp)
 		if mDrag and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
-			local d = inp.Position - mStart
+			local mouse = UserInputService:GetMouseLocation()
+			local d = mouse - mStart
+
 			mMoved = math.max(mMoved, math.abs(d.X) + math.abs(d.Y))
+
 			MiniToggle.Position = UDim2.new(0, mOrigX + d.X, 0, mOrigY + d.Y)
 			clampMini()
 		end
@@ -2550,8 +2720,17 @@ end
 	Connect(UserInputService.InputEnded, function(inp)
 		if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
 			mDrag = false
+			clampMini()
 		end
 	end, window)
+
+	task.spawn(function()
+		task.wait(0.1)
+
+		if not window._destroyed then
+			clampMini()
+		end
+	end)
 
 	function window:Toggle(force)
 		if window._destroyed then return end
