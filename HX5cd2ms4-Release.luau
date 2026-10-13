@@ -2520,229 +2520,235 @@ end
 	end
 
 	--// Mini Toggle + Label framed: [icon | Show UI / Hide UI]
-	-- ✅ Ukuran dibuat lebih sedang, tidak terlalu kecil
-	local MINI_W, MINI_H = 168, 42
-	local MINI_ICON = 22
-	local MINI_LINE = 3
+local MINI_W, MINI_H = 168, 42
+local MINI_ICON = 22
+local MINI_LINE = 3
 
-	local MiniToggle = Instance.new("TextButton")
-	MiniToggle.Name = "ZethHubMini"
-	MiniToggle.AnchorPoint = Vector2.new(0.5, 0.5)
-	MiniToggle.Position = UDim2.new(0, 112, 0.5, 0)
-	MiniToggle.Size = UDim2.new(0, MINI_W, 0, MINI_H)
-	MiniToggle.BackgroundColor3 = Theme.Background
-	MiniToggle.BackgroundTransparency = 0.05
-	MiniToggle.BorderSizePixel = 0
-	MiniToggle.Text = ""
-	MiniToggle.AutoButtonColor = false
-	MiniToggle.ZIndex = 60
-	MiniToggle.Parent = gui
-	Corner(MiniToggle, 12)
-	registerRGB(Stroke(MiniToggle, Color3.new(1,1,1), 2))
-	Pad(MiniToggle, 0, 14, 0, 14)
+local MiniToggle = Instance.new("TextButton")
+MiniToggle.Name = "ZethHubMini"
+MiniToggle.AnchorPoint = Vector2.new(0.5, 0.5)
+MiniToggle.Position = UDim2.new(0, 112, 0.5, 0)
+MiniToggle.Size = UDim2.new(0, MINI_W, 0, MINI_H)
+MiniToggle.BackgroundColor3 = Theme.Background
+MiniToggle.BackgroundTransparency = 0.05
+MiniToggle.BorderSizePixel = 0
+MiniToggle.Text = ""
+MiniToggle.AutoButtonColor = false
+MiniToggle.ZIndex = 60
+MiniToggle.Parent = gui
+Corner(MiniToggle, 12)
+registerRGB(Stroke(MiniToggle, Color3.new(1,1,1), 2))
+Pad(MiniToggle, 0, 14, 0, 14)
 
-	local miniLayout = Instance.new("UIListLayout")
-	miniLayout.FillDirection = Enum.FillDirection.Horizontal
-	miniLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	miniLayout.Padding = UDim.new(0, 10)
-	miniLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-	miniLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-	miniLayout.Parent = MiniToggle
+local miniLayout = Instance.new("UIListLayout")
+miniLayout.FillDirection = Enum.FillDirection.Horizontal
+miniLayout.SortOrder = Enum.SortOrder.LayoutOrder
+miniLayout.Padding = UDim.new(0, 10)
+miniLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+miniLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+miniLayout.Parent = MiniToggle
 
-	local miniIconFrame = Instance.new("Frame")
-	miniIconFrame.Size = UDim2.new(0, MINI_ICON, 0, MINI_ICON)
-	miniIconFrame.BackgroundTransparency = 1
-	miniIconFrame.LayoutOrder = 1
-	miniIconFrame.ZIndex = 61
-	miniIconFrame.Parent = MiniToggle
+local miniIconFrame = Instance.new("Frame")
+miniIconFrame.Size = UDim2.new(0, MINI_ICON, 0, MINI_ICON)
+miniIconFrame.BackgroundTransparency = 1
+miniIconFrame.LayoutOrder = 1
+miniIconFrame.ZIndex = 61
+miniIconFrame.Parent = MiniToggle
 
-	local miniLines = {}
-	local function makeMiniLine(y)
-		local l = Instance.new("Frame")
-		l.AnchorPoint = Vector2.new(0.5, 0.5)
-		l.Position = UDim2.new(0.5, 0, 0.5, y)
-		l.Size = UDim2.new(0, MINI_ICON, 0, MINI_LINE)
-		l.BackgroundColor3 = Theme.Text
-		l.BorderSizePixel = 0
-		l.ZIndex = 62
-		l.Parent = miniIconFrame
-		Corner(l, 2)
-		table.insert(miniLines, l)
-		return l
+local miniLines = {}
+local function makeMiniLine(y)
+	local l = Instance.new("Frame")
+	l.AnchorPoint = Vector2.new(0.5, 0.5)
+	l.Position = UDim2.new(0.5, 0, 0.5, y)
+	l.Size = UDim2.new(0, MINI_ICON, 0, MINI_LINE)
+	l.BackgroundColor3 = Theme.Text
+	l.BorderSizePixel = 0
+	l.ZIndex = 62
+	l.Parent = miniIconFrame
+	Corner(l, 2)
+	table.insert(miniLines, l)
+	return l
+end
+
+makeMiniLine(-8)
+makeMiniLine(0)
+makeMiniLine(8)
+
+local miniSeparator = Instance.new("Frame")
+miniSeparator.Size = UDim2.new(0, 1, 0, MINI_ICON)
+miniSeparator.BackgroundColor3 = Theme.Border
+miniSeparator.BorderSizePixel = 0
+miniSeparator.LayoutOrder = 2
+miniSeparator.ZIndex = 61
+miniSeparator.Parent = MiniToggle
+
+local miniLbl = Instance.new("TextLabel")
+miniLbl.Size = UDim2.new(0, 0, 0, MINI_ICON)
+miniLbl.AutomaticSize = Enum.AutomaticSize.X
+miniLbl.BackgroundTransparency = 1
+miniLbl.Text = "Hide UI"
+miniLbl.TextColor3 = Theme.Text
+miniLbl.TextSize = 12
+miniLbl.Font = Enum.Font.GothamBold
+miniLbl.TextXAlignment = Enum.TextXAlignment.Left
+miniLbl.LayoutOrder = 3
+miniLbl.ZIndex = 61
+miniLbl.Parent = MiniToggle
+
+MiniToggle.MouseEnter:Connect(function()
+	Tween(MiniToggle, .2, {BackgroundColor3 = Theme.ElementHover})
+end)
+
+MiniToggle.MouseLeave:Connect(function()
+	Tween(MiniToggle, .2, {BackgroundColor3 = Theme.Background})
+end)
+
+local function setMiniIcon(open)
+	local lineSize = UDim2.new(0, MINI_ICON, 0, MINI_LINE)
+	local emptySize = UDim2.new(0, 0, 0, MINI_LINE)
+
+	if open then
+		-- X icon saat UI terbuka
+		Tween(miniLines[1], .25, {
+			Position = UDim2.new(0.5, 0, 0.5, 0),
+			Rotation = 45,
+			BackgroundTransparency = 0,
+			Size = lineSize,
+		})
+		Tween(miniLines[2], .25, {
+			Position = UDim2.new(0.5, 0, 0.5, 0),
+			Rotation = -45,
+			BackgroundTransparency = 0,
+			Size = lineSize,
+		})
+		Tween(miniLines[3], .15, {
+			BackgroundTransparency = 1,
+			Size = emptySize,
+		})
+	else
+		-- Hamburger/menu icon saat UI hidden
+		Tween(miniLines[1], .25, {
+			Position = UDim2.new(0.5, 0, 0.5, -8),
+			Rotation = 0,
+			BackgroundTransparency = 0,
+			Size = lineSize,
+		})
+		Tween(miniLines[2], .25, {
+			Position = UDim2.new(0.5, 0, 0.5, 0),
+			Rotation = 0,
+			BackgroundTransparency = 0,
+			Size = lineSize,
+		})
+		Tween(miniLines[3], .25, {
+			Position = UDim2.new(0.5, 0, 0.5, 8),
+			Rotation = 0,
+			BackgroundTransparency = 0,
+			Size = lineSize,
+		})
 	end
+end
 
-	makeMiniLine(-8)
-	makeMiniLine(0)
-	makeMiniLine(8)
+local function setMiniLabel(open)
+	miniLbl.Text = open and "Hide UI" or "Show UI"
+	Tween(miniLbl, .2, {TextColor3 = open and Theme.Text or Theme.SubText})
+end
 
-	local miniSeparator = Instance.new("Frame")
-	miniSeparator.Size = UDim2.new(0, 1, 0, MINI_ICON)
-	miniSeparator.BackgroundColor3 = Theme.Border
-	miniSeparator.BorderSizePixel = 0
-	miniSeparator.LayoutOrder = 2
-	miniSeparator.ZIndex = 61
-	miniSeparator.Parent = MiniToggle
-
-	local miniLbl = Instance.new("TextLabel")
-	miniLbl.Size = UDim2.new(0, 0, 0, MINI_ICON)
-	miniLbl.AutomaticSize = Enum.AutomaticSize.X
-	miniLbl.BackgroundTransparency = 1
-	miniLbl.Text = "Hide UI"
-	miniLbl.TextColor3 = Theme.Text
-	miniLbl.TextSize = 12
-	miniLbl.Font = Enum.Font.GothamBold
-	miniLbl.TextXAlignment = Enum.TextXAlignment.Left
-	miniLbl.LayoutOrder = 3
-	miniLbl.ZIndex = 61
-	miniLbl.Parent = MiniToggle
-
-	MiniToggle.MouseEnter:Connect(function()
-		Tween(MiniToggle, .2, {BackgroundColor3 = Theme.ElementHover})
-	end)
-
-	MiniToggle.MouseLeave:Connect(function()
-		Tween(MiniToggle, .2, {BackgroundColor3 = Theme.Background})
-	end)
-
-	local function setMiniIcon(open)
-		local lineSize = UDim2.new(0, MINI_ICON, 0, MINI_LINE)
-		local emptySize = UDim2.new(0, 0, 0, MINI_LINE)
-
-		if open then
-			-- X icon saat UI terbuka
-			Tween(miniLines[1], .25, {
-				Position = UDim2.new(0.5, 0, 0.5, 0),
-				Rotation = 45,
-				BackgroundTransparency = 0,
-				Size = lineSize,
-			})
-			Tween(miniLines[2], .25, {
-				Position = UDim2.new(0.5, 0, 0.5, 0),
-				Rotation = -45,
-				BackgroundTransparency = 0,
-				Size = lineSize,
-			})
-			Tween(miniLines[3], .15, {
-				BackgroundTransparency = 1,
-				Size = emptySize,
-			})
-		else
-			-- Hamburger/menu icon saat UI hidden
-			Tween(miniLines[1], .25, {
-				Position = UDim2.new(0.5, 0, 0.5, -8),
-				Rotation = 0,
-				BackgroundTransparency = 0,
-				Size = lineSize,
-			})
-			Tween(miniLines[2], .25, {
-				Position = UDim2.new(0.5, 0, 0.5, 0),
-				Rotation = 0,
-				BackgroundTransparency = 0,
-				Size = lineSize,
-			})
-			Tween(miniLines[3], .25, {
-				Position = UDim2.new(0.5, 0, 0.5, 8),
-				Rotation = 0,
-				BackgroundTransparency = 0,
-				Size = lineSize,
-			})
-		end
-	end
-
-	local function setMiniLabel(open)
-		miniLbl.Text = open and "Hide UI" or "Show UI"
-		Tween(miniLbl, .2, {TextColor3 = open and Theme.Text or Theme.SubText})
-	end
-
+-- HAPUS ATAU KOMENTARI FUNGSI CLAMP BERIKUT INI AGAR TIDAK ADA BATASAN
+--[[ 
 local function clampMini()
-		local vp = workspace.CurrentCamera.ViewportSize
-		local halfX = MiniToggle.AbsoluteSize.X / 2
-		local halfY = MiniToggle.AbsoluteSize.Y / 2
-		local x = math.clamp(MiniToggle.Position.X.Offset, halfX + 4, vp.X - halfX - 4)
-		local y = math.clamp(MiniToggle.Position.Y.Offset, halfY + 4, vp.Y - halfY - 4)
-		MiniToggle.Position = UDim2.new(0, x, 0, y)
+    local vp = workspace.CurrentCamera.ViewportSize
+    local halfX = MiniToggle.AbsoluteSize.X / 2
+    local halfY = MiniToggle.AbsoluteSize.Y / 2
+    local x = math.clamp(MiniToggle.Position.X.Offset, halfX + 4, vp.X - halfX - 4)
+    local y = math.clamp(MiniToggle.Position.Y.Offset, halfY + 4, vp.Y - halfY - 4)
+    MiniToggle.Position = UDim2.new(0, x, 0, y)
+end
+]]
+
+local mDrag, mStart, mMoved = false, nil, 0
+local mOrigX, mOrigY = 0, 0
+
+Connect(MiniToggle.InputBegan, function(inp)
+	if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+		mDrag = true
+		mMoved = 0
+		mStart = inp.Position
+		local center = MiniToggle.AbsolutePosition + MiniToggle.AbsoluteSize / 2
+		mOrigX, mOrigY = center.X, center.Y
+	end
+end, window)
+
+Connect(UserInputService.InputChanged, function(inp)
+	if mDrag and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
+		local d = inp.Position - mStart
+		mMoved = math.max(mMoved, math.abs(d.X) + math.abs(d.Y))
+		
+		-- PERBAIKAN: Posisi diatur langsung tanpa dipotong oleh clampMini()
+		MiniToggle.Position = UDim2.new(0, mOrigX + d.X, 0, mOrigY + d.Y)
+		
+		-- Panggilan clampMini() DIHAPUS dari sini
+		-- clampMini() 
+	end
+end, window)
+
+Connect(UserInputService.InputEnded, function(inp)
+	if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+		mDrag = false
+	end
+end, window)
+
+function window:Toggle(force)
+	if window._destroyed then return end
+
+	local open = (force ~= nil) and force or not Library.Open
+	Library.Open = open
+	windowOpen = open
+
+	if info then
+		info.Visible = open
 	end
 
-	local mDrag, mStart, mMoved = false, nil, 0
-	local mOrigX, mOrigY = 0, 0
-
-	Connect(MiniToggle.InputBegan, function(inp)
-		if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
-			mDrag = true
-			mMoved = 0
-			mStart = inp.Position
-			local center = MiniToggle.AbsolutePosition + MiniToggle.AbsoluteSize / 2
-			mOrigX, mOrigY = center.X, center.Y
-		end
-	end, window)
-
-	Connect(UserInputService.InputChanged, function(inp)
-		if mDrag and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
-			local d = inp.Position - mStart
-			mMoved = math.max(mMoved, math.abs(d.X) + math.abs(d.Y))
-			MiniToggle.Position = UDim2.new(0, mOrigX + d.X, 0, mOrigY + d.Y)
-			clampMini()
-		end
-	end, window)
-
-	Connect(UserInputService.InputEnded, function(inp)
-		if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
-			mDrag = false
-		end
-	end, window)
-
-	function window:Toggle(force)
-		if window._destroyed then return end
-
-		local open = (force ~= nil) and force or not Library.Open
-		Library.Open = open
-		windowOpen = open
-
-		if info then
-			info.Visible = open
-		end
-
-		if open then
-			main.Visible = true
-			Tween(main, .35, {Size = OPEN_SIZE}, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-		else
-			Tween(main, .25, {Size = UDim2.new(0, 0, 0, 0)}, Enum.EasingStyle.Quint, Enum.EasingDirection.In).Completed:Connect(function()
-				if not Library.Open and not window._destroyed and main.Parent then
-					main.Visible = false
-				end
-			end)
-		end
-
-		refreshKbVis()
-		setMiniIcon(open)
-		setMiniLabel(open)
+	if open then
+		main.Visible = true
+		Tween(main, .35, {Size = OPEN_SIZE}, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+	else
+		Tween(main, .25, {Size = UDim2.new(0, 0, 0, 0)}, Enum.EasingStyle.Quint, Enum.EasingDirection.In).Completed:Connect(function()
+			if not Library.Open and not window._destroyed and main.Parent then
+				main.Visible = false
+			end
+		end)
 	end
 
-	MiniToggle.MouseButton1Click:Connect(function()
-		if mMoved > 8 then return end
+	refreshKbVis()
+	setMiniIcon(open)
+	setMiniLabel(open)
+end
+
+MiniToggle.MouseButton1Click:Connect(function()
+	if mMoved > 8 then return end
+	window:Toggle()
+end)
+
+function window:SetInfoCard(vis)
+	if info then
+		info.Visible = vis and windowOpen
+	end
+end
+
+minimizeBtn.MouseButton1Click:Connect(function()
+	window:Toggle(false)
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+	window:Destroy()
+end)
+
+Connect(UserInputService.InputBegan, function(inp, gp)
+	if gp then return end
+	if inp.KeyCode == Library.ToggleKey then
 		window:Toggle()
-	end)
-
-	function window:SetInfoCard(vis)
-		if info then
-			info.Visible = vis and windowOpen
-		end
 	end
-
-	minimizeBtn.MouseButton1Click:Connect(function()
-		window:Toggle(false)
-	end)
-
-	closeBtn.MouseButton1Click:Connect(function()
-		window:Destroy()
-	end)
-
-	Connect(UserInputService.InputBegan, function(inp, gp)
-		if gp then return end
-		if inp.KeyCode == Library.ToggleKey then
-			window:Toggle()
-		end
-	end, window)
+end, window)
 
 	--// Info Card FPS/Ping
 	info = Instance.new("Frame")
