@@ -2753,9 +2753,150 @@ minimizeBtn.MouseButton1Click:Connect(function()
 	window:Toggle(false)
 end)
 
-closeBtn.MouseButton1Click:Connect(function()
-	window:Destroy()
-end)
+--// ==========================================
+	--// SISTEM KONFIRMASI TUTUP (WITH COOLDOWN)
+	--// ==========================================
+	
+	local confirmModal = nil
+	
+	-- Fungsi pembuat Popup Konfirmasi
+	local function showCloseConfirmation()
+		if confirmModal then 
+			pcall(function() confirmModal:Destroy() end) 
+			confirmModal = nil
+		end
+		
+		-- Buat Frame Utama Modal
+		confirmModal = Instance.new("Frame")
+		confirmModal.Name = "CloseConfirmModal"
+		confirmModal.Size = UDim2.new(0, 320, 0, 160)
+		-- Pusatkan modal di tengah layar ScreenGui
+		confirmModal.AnchorPoint = Vector2.new(0.5, 0.5)
+		confirmModal.Position = UDim2.new(0.5, 0, 0.5, 0)
+		confirmModal.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+		confirmModal.BorderSizePixel = 0
+		confirmModal.ZIndex = 9999 -- Pastikan paling depan
+		confirmModal.Parent = gui
+		
+		Corner(confirmModal, 8)
+		local stroke = Stroke(confirmModal, Color3.fromRGB(255, 255, 255), 1)
+		stroke.Transparency = 0.6
+
+		-- Label Pertanyaan
+		local questionLbl = Instance.new("TextLabel")
+		questionLbl.Size = UDim2.new(1, -20, 0, 40)
+		questionLbl.Position = UDim2.new(0, 10, 0, 15)
+		questionLbl.BackgroundTransparency = 1
+		questionLbl.Text = "Do you want to close this window?"
+		questionLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+		questionLbl.TextSize = 14
+		questionLbl.Font = Enum.Font.GothamBold
+		questionLbl.TextWrapped = true
+		questionLbl.ZIndex = 10000
+		questionLbl.Parent = confirmModal
+
+		-- Container Tombol
+		local btnContainer = Instance.new("Frame")
+		btnContainer.Size = UDim2.new(1, -20, 0, 40)
+		btnContainer.Position = UDim2.new(0, 10, 1, -55)
+		btnContainer.BackgroundTransparency = 1
+		btnContainer.ZIndex = 10000
+		btnContainer.Parent = confirmModal
+
+		local layout = Instance.new("UIListLayout")
+		layout.FillDirection = Enum.FillDirection.Horizontal
+		layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		layout.VerticalAlignment = Enum.VerticalAlignment.Center
+		layout.Padding = UDim.new(0, 15)
+		layout.Parent = btnContainer
+
+		-- TOMBOL NO
+		local noBtn = Instance.new("TextButton")
+		noBtn.Size = UDim2.new(0, 100, 0, 35)
+		noBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+		noBtn.Text = "NO"
+		noBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		noBtn.TextSize = 14
+		noBtn.Font = Enum.Font.GothamMedium
+		noBtn.AutoButtonColor = true
+		noBtn.ZIndex = 10001
+		noBtn.Parent = btnContainer
+		Corner(noBtn, 6)
+
+		noBtn.MouseButton1Click:Connect(function()
+			-- Aksi No: Hanya tutup modal, jangan hancurkan window
+			if confirmModal and confirmModal.Parent then
+				confirmModal:Destroy()
+				confirmModal = nil
+			end
+		end)
+
+		-- TOMBOL YES (Dengan Cooldown)
+		local yesBtn = Instance.new("TextButton")
+		yesBtn.Size = UDim2.new(0, 100, 0, 35)
+		yesBtn.BackgroundColor3 = Color3.fromRGB(225, 70, 70) -- Merah awal
+		yesBtn.Text = "YES"
+		yesBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		yesBtn.TextSize = 14
+		yesBtn.Font = Enum.Font.GothamBold
+		yesBtn.AutoButtonColor = false -- Matikan auto-color agar kita kontrol sendiri
+		yesBtn.ZIndex = 10001
+		yesBtn.Parent = btnContainer
+		Corner(yesBtn, 6)
+
+		local canClickYes = false
+		local isCoolingDown = false
+
+		-- Logika Cooldown
+		task.spawn(function()
+			isCoolingDown = true
+			canClickYes = false
+			
+			-- Ubah tampilan jadi non-aktif (abu-abu)
+			yesBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+			yesBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+			
+			for i = 5, 1, -1 do
+				if not yesBtn.Parent then break end -- Jika modal ditutup paksa saat countdown
+				yesBtn.Text = "WAIT (" .. i .. ")"
+				task.wait(1)
+			end
+			
+			if yesBtn.Parent then
+				-- Kembalikan ke keadaan aktif
+				yesBtn.Text = "YES"
+				yesBtn.BackgroundColor3 = Color3.fromRGB(225, 70, 70)
+				yesBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+				canClickYes = true
+				isCoolingDown = false
+			end
+		end)
+
+		-- Klik Tombol Yes
+		yesBtn.MouseButton1Click:Connect(function()
+			if canClickYes then
+				-- Hancurkan Modal dulu
+				if confirmModal and confirmModal.Parent then
+					confirmModal:Destroy()
+					confirmModal = nil
+				end
+				
+				-- Eksekusi aksi utama: Tutup/Hancurkan Window
+				window:Destroy()
+			else
+				-- Efek visual jika klik terlalu cepat (opsional, biar terasa responsif)
+				Tween(yesBtn, 0.1, {Rotation = -5})
+				task.delay(0.1, function() if yesBtn.Parent then Tween(yesBtn, 0.1, {Rotation = 5}) end end)
+				task.delay(0.2, function() if yesBtn.Parent then Tween(yesBtn, 0.1, {Rotation = 0}) end end)
+			end
+		end)
+	end
+
+	-- GANTI LOGIKA CLOSE BUTTON LAMA DENGAN INI:
+	closeBtn.MouseButton1Click:Connect(function()
+		showCloseConfirmation()
+	end)
+	--// ==========================================
 
 Connect(UserInputService.InputBegan, function(inp, gp)
 	if gp then return end
