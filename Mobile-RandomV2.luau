@@ -1,6 +1,7 @@
 -- 1. Masukkan semua URL loading screen ke dalam tabel
 local daftarScript = {
     "https://raw.githubusercontent.com/Uo2iQnNhD/Database/refs/heads/main/m4JymrG3-LoadingPH-V2.luau",
+    "https://raw.githubusercontent.com/Uo2iQnNhD/Database/refs/heads/main/c6GptqTd-LoadingMv3.luau",
     "https://raw.githubusercontent.com/Uo2iQnNhD/Database/refs/heads/main/LgMrbYxN-LoadingMobile.luau"
 }
 
