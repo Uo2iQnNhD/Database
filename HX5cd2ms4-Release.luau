@@ -1168,7 +1168,7 @@ local gui = Instance.new("ScreenGui")
 		end
 	end
 
-	-- Resize handle
+-- Resize handle (Fixed for Mobile/Touch Support)
 	local resizeHandle = Instance.new("TextButton")
 	resizeHandle.Size = UDim2.new(0, 14, 0, 14)
 	resizeHandle.Position = UDim2.new(1, -15, 1, -15)
@@ -1190,28 +1190,42 @@ local gui = Instance.new("ScreenGui")
 	end
 
 	local resizing, resizeStart, resizeOrig = false, nil, nil
+	
+	-- Helper untuk mendapatkan posisi dari InputObject (Mouse atau Touch)
+	local function getInputPosition(inp)
+		if inp.UserInputType == Enum.UserInputType.Touch then
+			return inp.Position
+		elseif inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.MouseButton1 then
+			return inp.Position
+		end
+		return nil
+	end
+
 	Connect(resizeHandle.InputBegan, function(inp)
-		if inp.UserInputType == Enum.UserInputType.MouseButton1 then
+		if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
 			resizing = true
-			resizeStart = inp.Position
+			resizeStart = getInputPosition(inp)
 			resizeOrig = main.Size
 		end
 	end, window)
 
 	Connect(UserInputService.InputChanged, function(inp)
-		if resizing and inp.UserInputType == Enum.UserInputType.MouseMovement then
-			local d = inp.Position - resizeStart
-			main.Size = UDim2.new(
-				0,
-				math.clamp(resizeOrig.X.Offset + d.X, 460, 1100),
-				0,
-				math.clamp(resizeOrig.Y.Offset + d.Y, 340, 760)
-			)
+		if resizing then
+			local pos = getInputPosition(inp)
+			if pos and resizeStart then
+				local d = pos - resizeStart
+				main.Size = UDim2.new(
+					0,
+					math.clamp(resizeOrig.X.Offset + d.X, 460, 1100),
+					0,
+					math.clamp(resizeOrig.Y.Offset + d.Y, 340, 760)
+				)
+			end
 		end
 	end, window)
 
 	Connect(UserInputService.InputEnded, function(inp)
-		if inp.UserInputType == Enum.UserInputType.MouseButton1 then
+		if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
 			resizing = false
 		end
 	end, window)
@@ -1643,7 +1657,7 @@ local gui = Instance.new("ScreenGui")
 
 			local iconOffset = 0
 
-			-- Optional icon seperti gaya Rayfield
+
 -- Optional icon seperti gaya Rayfield
 if cfg.Icon and cfg.Icon ~= "" then
 	local asset, offset, rectSize = resolveIcon(cfg.Icon)
@@ -2519,7 +2533,7 @@ end
 		return tab
 	end
 
-	--// Mini Toggle + Label framed: [icon | Show UI / Hide UI]
+--// Mini Toggle + Label framed: [icon | Show UI / Hide UI]
 local MINI_W, MINI_H = 168, 42
 local MINI_ICON = 22
 local MINI_LINE = 3
