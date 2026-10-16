@@ -2157,163 +2157,226 @@ end
 			}
 		end
 
-function tab:CreateDropdown(cfg)
-	cfg = cfg or {}
-	local options = cfg.Options or {}
-	local col = cfg.Color
-	local headerH = H_ELEMENT
-	local gap = 4
-	local listH = math.min(#options * 30, 150)
-	local openH = headerH + gap + listH + 6
-	local f, s = elementFrame(headerH)
-	f.ClipsDescendants = true
+		function tab:CreateDropdown(cfg)
+			cfg = cfg or {}
+			local options = cfg.Options or {}
+			local col = cfg.Color
+			local TextService = game:GetService("TextService")
+			local headerH = H_ELEMENT
+			local gap = 4
+			local listH = math.min(#options * 30, 150)
+			local openH = headerH + gap + listH + 6
+			local f, s = elementFrame(headerH)
+			f.ClipsDescendants = true
 
-	-- icon dropdown tetap di header (tidak ikut turun saat dibuka)
-	local hasIcon = makeIcon(f, cfg.Icon, UDim2.new(0, 16, 0, 16), UDim2.new(0, 12, 0, 11), Theme.SubText)
-	local lx = hasIcon and 34 or 12
+			-- icon tetap di header
+			local hasIcon = makeIcon(f, cfg.Icon, UDim2.new(0, 16, 0, 16), UDim2.new(0, 12, 0, 11), Theme.SubText)
+			local lx = hasIcon and 34 or 12
 
-	-- ✅ FIX: NAMA dropdown (kiri) -> truncate + beri jarak 10px dari tengah
-	local lbl = Instance.new("TextLabel")
-	lbl.Size = UDim2.new(0.5, -lx - 10, 0, headerH)
-	lbl.Position = UDim2.new(0, lx, 0, 0)
-	lbl.BackgroundTransparency = 1
-	lbl.Text = cfg.Name or cfg.Title or "Dropdown"
-	lbl.TextColor3 = Theme.SubText
-	lbl.TextSize = 13
-	lbl.Font = Enum.Font.Gotham
-	lbl.TextXAlignment = Enum.TextXAlignment.Left
-	lbl.TextTruncate = Enum.TextTruncate.AtEnd          -- <-- kunci anti‑lubер
-	lbl.Parent = f
+			-- ============================================================
+			-- ✅ TRUNCATION MANUAL (pasti potong, tidak peduli alignment)
+			--    Menghitung lebar pixel via TextService, lalu memotong
+			--    string + menambah "..." supaya tidak pernah luber /
+			--    menimpa teks tetangga. Meniru perilaku tab "Theme &..".
+			-- ============================================================
+			local function fitText(textObj, fullText)
+				if not textObj or not textObj.Parent then return end
+				fullText = tostring(fullText or "")
+				local w = textObj.AbsoluteSize.X
+				if w <= 1 then
+					textObj.Text = ""
+					return
+				end
+				w = w - 2 -- sisakan 2px napas di tepi
+				local big = Vector2.new(999999, 999999)
+				local b0 = TextService:GetTextSize(fullText, textObj.TextSize, textObj.Font, big)
+				if b0.X <= w then
+					textObj.Text = fullText
+					return
+				end
+				local lo, hi, best = 1, #fullText, ""
+				while lo <= hi do
+					local mid = math.floor((lo + hi) / 2)
+					local cand = string.sub(fullText, 1, mid) .. "..."
+					local bb = TextService:GetTextSize(cand, textObj.TextSize, textObj.Font, big)
+					if bb.X <= w then
+						best = cand
+						lo = mid + 1
+					else
+						hi = mid - 1
+					end
+				end
+				if best == "" then best = "..." end
+				textObj.Text = best
+			end
 
-	-- ✅ FIX: VALUE/script terpilih (kanan) -> truncate + mulai 6px setelah tengah
-	-- nama panjang otomatis jadi "GIFTER GAMEPASS…" (bukan full)
-	local val = Instance.new("TextLabel")
-	val.Size = UDim2.new(0.5, -40, 0, headerH)
-	val.Position = UDim2.new(0.5, 6, 0, 0)
-	val.BackgroundTransparency = 1
-	val.Text = cfg.Default or (options[1] or "...")
-	val.TextColor3 = Theme.Text
-	val.TextSize = 13
-	val.Font = Enum.Font.GothamMedium
-	val.TextXAlignment = Enum.TextXAlignment.Right
-	val.TextTruncate = Enum.TextTruncate.AtEnd          -- <-- kunci anti‑lubер
-	val.Parent = f
+			-- NAMA dropdown (kiri)
+			local nameFull = cfg.Name or cfg.Title or "Dropdown"
+			local lbl = Instance.new("TextLabel")
+			lbl.Size = UDim2.new(0.5, -lx - 10, 0, headerH)
+			lbl.Position = UDim2.new(0, lx, 0, 0)
+			lbl.BackgroundTransparency = 1
+			lbl.Text = ""
+			lbl.TextColor3 = Theme.SubText
+			lbl.TextSize = 13
+			lbl.Font = Enum.Font.Gotham
+			lbl.TextXAlignment = Enum.TextXAlignment.Left
+			lbl.TextTruncate = Enum.TextTruncate.AtEnd -- bonus, kalau native jalan
+			lbl.Parent = f
 
-	if cfg.Flag then
-		Library.Flags[cfg.Flag] = val.Text
-	end
+			-- NILAI / script terpilih (kanan)  -> ini biang keroknya
+			local valueFull = cfg.Default or (options[1] or "...")
+			local val = Instance.new("TextLabel")
+			val.Size = UDim2.new(0.5, -40, 0, headerH)
+			val.Position = UDim2.new(0.5, 6, 0, 0)
+			val.BackgroundTransparency = 1
+			val.Text = ""
+			val.TextColor3 = Theme.Text
+			val.TextSize = 13
+			val.Font = Enum.Font.GothamMedium
+			val.TextXAlignment = Enum.TextXAlignment.Right
+			val.TextTruncate = Enum.TextTruncate.AtEnd -- bonus
+			val.Parent = f
 
-	local arrow = Instance.new("TextLabel")
-	arrow.Size = UDim2.new(0, 16, 0, 16)
-	arrow.Position = UDim2.new(1, -26, 0, 11)
-	arrow.BackgroundTransparency = 1
-	arrow.Text = "›"
-	arrow.TextColor3 = Theme.SubText
-	arrow.TextSize = 16
-	arrow.Font = Enum.Font.GothamBold
-	arrow.Rotation = 90
-	arrow.Parent = f
+			local function refreshLbl() fitText(lbl, nameFull) end
+			local function refreshVal() fitText(val, valueFull) end
 
-	local list = Instance.new("ScrollingFrame")
-	list.Size = UDim2.new(1, -12, 0, 0)
-	list.Position = UDim2.new(0, 6, 0, headerH + gap)
-	list.BackgroundTransparency = 1
-	list.BorderSizePixel = 0
-	list.ScrollBarThickness = 2
-	list.ScrollBarImageColor3 = Theme.Border
-	list.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	list.CanvasSize = UDim2.new(0, 0, 0, 0)
-	list.Parent = f
+			-- potong setelah layout pertama siap (AbsoluteSize sudah definite)
+			task.spawn(function()
+				task.wait()
+				refreshLbl()
+				refreshVal()
+			end)
 
-	local listLayout = Instance.new("UIListLayout")
-	listLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	listLayout.Padding = UDim.new(0, 2)
-	listLayout.Parent = list
+			-- potong ulang tiap kali lebar berubah (resize window / minimax)
+			Connect(lbl:GetPropertyChangedSignal("AbsoluteSize"), refreshLbl, window)
+			Connect(val:GetPropertyChangedSignal("AbsoluteSize"), refreshVal, window)
 
-	local isOpen = false
-	local function toggleOpen()
-		isOpen = not isOpen
-		if isOpen then
-			Tween(f, .3, {Size = UDim2.new(1, 0, 0, openH)})
-			Tween(list, .3, {Size = UDim2.new(1, -12, 0, listH)})
-			Tween(arrow, .3, {Rotation = -90, TextColor3 = col or window.accent})
-		else
-			Tween(f, .3, {Size = UDim2.new(1, 0, 0, headerH)})
-			Tween(list, .3, {Size = UDim2.new(1, -12, 0, 0)})
-			Tween(arrow, .3, {Rotation = 90, TextColor3 = Theme.SubText})
-		end
-	end
-
-	local function addOption(opt)
-		local o = Instance.new("TextButton")
-		o.Size = UDim2.new(1, 0, 0, 28)
-		o.BackgroundColor3 = Color3.new(1,1,1)
-		o.BackgroundTransparency = 1
-		o.BorderSizePixel = 0
-		o.Text = opt
-		o.TextColor3 = Theme.SubText
-		o.TextSize = 12
-		o.Font = Enum.Font.Gotham
-		o.TextXAlignment = Enum.TextXAlignment.Left
-		o.TextTruncate = Enum.TextTruncate.AtEnd        -- ✅ FIX: opsi panjang juga rapi
-		o.AutoButtonColor = false
-		o.Parent = list
-		Corner(o, 5)
-		Pad(o, 0, 8, 0, 8)
-
-		o.MouseEnter:Connect(function()
-			Tween(o, .15, {BackgroundTransparency = .85, BackgroundColor3 = col or window.accent, TextColor3 = Theme.Text})
-		end)
-
-		o.MouseLeave:Connect(function()
-			Tween(o, .15, {BackgroundTransparency = 1, TextColor3 = Theme.SubText})
-		end)
-
-		o.MouseButton1Click:Connect(function()
-			val.Text = opt
 			if cfg.Flag then
-				Library.Flags[cfg.Flag] = opt
+				Library.Flags[cfg.Flag] = valueFull
 			end
-			toggleOpen()
-			if cfg.Callback then
-				task.spawn(cfg.Callback, opt)
-			end
-		end)
-	end
 
-	for _, opt in ipairs(options) do
-		addOption(opt)
-	end
+			local arrow = Instance.new("TextLabel")
+			arrow.Size = UDim2.new(0, 16, 0, 16)
+			arrow.Position = UDim2.new(1, -26, 0, 11)
+			arrow.BackgroundTransparency = 1
+			arrow.Text = "›"
+			arrow.TextColor3 = Theme.SubText
+			arrow.TextSize = 16
+			arrow.Font = Enum.Font.GothamBold
+			arrow.Rotation = 90
+			arrow.Parent = f
 
-	local head = Instance.new("TextButton")
-	head.Size = UDim2.new(1, 0, 0, headerH)
-	head.BackgroundTransparency = 1
-	head.Text = ""
-	head.AutoButtonColor = false
-	head.Parent = f
-	head.MouseButton1Click:Connect(toggleOpen)
+			local list = Instance.new("ScrollingFrame")
+			list.Size = UDim2.new(1, -12, 0, 0)
+			list.Position = UDim2.new(0, 6, 0, headerH + gap)
+			list.BackgroundTransparency = 1
+			list.BorderSizePixel = 0
+			list.ScrollBarThickness = 2
+			list.ScrollBarImageColor3 = Theme.Border
+			list.AutomaticCanvasSize = Enum.AutomaticSize.Y
+			list.CanvasSize = UDim2.new(0, 0, 0, 0)
+			list.Parent = f
 
-	hoverBorder(f, s, function() return col or window.accent end)
-	addTooltip(f, cfg.Tooltip)
+			local listLayout = Instance.new("UIListLayout")
+			listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+			listLayout.Padding = UDim.new(0, 2)
+			listLayout.Parent = list
 
-	return {
-		Refresh = function(self, newOpts)
-			for _, c in ipairs(list:GetChildren()) do
-				if c:IsA("TextButton") then
-					c:Destroy()
+			local isOpen = false
+			local function toggleOpen()
+				isOpen = not isOpen
+				if isOpen then
+					Tween(f, .3, {Size = UDim2.new(1, 0, 0, openH)})
+					Tween(list, .3, {Size = UDim2.new(1, -12, 0, listH)})
+					Tween(arrow, .3, {Rotation = -90, TextColor3 = col or window.accent})
+				else
+					Tween(f, .3, {Size = UDim2.new(1, 0, 0, headerH)})
+					Tween(list, .3, {Size = UDim2.new(1, -12, 0, 0)})
+					Tween(arrow, .3, {Rotation = 90, TextColor3 = Theme.SubText})
 				end
 			end
 
-			options = newOpts
-			listH = math.min(#options * 30, 150)
-			openH = headerH + gap + listH + 6
+			local function setValue(t)
+				valueFull = tostring(t or "")
+				refreshVal()
+				if cfg.Flag then
+					Library.Flags[cfg.Flag] = valueFull
+				end
+			end
+
+			local function addOption(opt)
+				local o = Instance.new("TextButton")
+				o.Size = UDim2.new(1, 0, 0, 28)
+				o.BackgroundColor3 = Color3.new(1,1,1)
+				o.BackgroundTransparency = 1
+				o.BorderSizePixel = 0
+				o.Text = opt
+				o.TextColor3 = Theme.SubText
+				o.TextSize = 12
+				o.Font = Enum.Font.Gotham
+				o.TextXAlignment = Enum.TextXAlignment.Left
+				o.TextTruncate = Enum.TextTruncate.AtEnd
+				o.AutoButtonColor = false
+				o.Parent = list
+				Corner(o, 5)
+				Pad(o, 0, 8, 0, 8)
+
+				o.MouseEnter:Connect(function()
+					Tween(o, .15, {BackgroundTransparency = .85, BackgroundColor3 = col or window.accent, TextColor3 = Theme.Text})
+				end)
+
+				o.MouseLeave:Connect(function()
+					Tween(o, .15, {BackgroundTransparency = 1, TextColor3 = Theme.SubText})
+				end)
+
+				o.MouseButton1Click:Connect(function()
+					setValue(opt)            -- display terpotong, flag/callback tetap full
+					toggleOpen()
+					if cfg.Callback then
+						task.spawn(cfg.Callback, opt)
+					end
+				end)
+			end
 
 			for _, opt in ipairs(options) do
 				addOption(opt)
 			end
+
+			local head = Instance.new("TextButton")
+			head.Size = UDim2.new(1, 0, 0, headerH)
+			head.BackgroundTransparency = 1
+			head.Text = ""
+			head.AutoButtonColor = false
+			head.Parent = f
+			head.MouseButton1Click:Connect(toggleOpen)
+
+			hoverBorder(f, s, function() return col or window.accent end)
+			addTooltip(f, cfg.Tooltip)
+
+			return {
+				Refresh = function(self, newOpts)
+					for _, c in ipairs(list:GetChildren()) do
+						if c:IsA("TextButton") then
+							c:Destroy()
+						end
+					end
+					options = newOpts
+					listH = math.min(#options * 30, 150)
+					openH = headerH + gap + listH + 6
+					for _, opt in ipairs(options) do
+						addOption(opt)
+					end
+					refreshVal()
+				end,
+				Set = function(self, t)
+					setValue(t)
+				end,
+				Get = function()
+					return valueFull
+				end,
+			}
 		end
-	}
-end
 
 		--// KEYBIND gaya Rayfield
 		function tab:CreateKeybind(cfg)
