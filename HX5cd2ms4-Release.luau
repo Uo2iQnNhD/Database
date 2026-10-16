@@ -2157,158 +2157,163 @@ end
 			}
 		end
 
-				function tab:CreateDropdown(cfg)
-			cfg = cfg or {}
-			local options = cfg.Options or {}
-			local col = cfg.Color
-			local headerH = H_ELEMENT
-			local gap = 4
-			local listH = math.min(#options * 30, 150)
-			local openH = headerH + gap + listH + 6
-			local f, s = elementFrame(headerH)
-			f.ClipsDescendants = true
+function tab:CreateDropdown(cfg)
+	cfg = cfg or {}
+	local options = cfg.Options or {}
+	local col = cfg.Color
+	local headerH = H_ELEMENT
+	local gap = 4
+	local listH = math.min(#options * 30, 150)
+	local openH = headerH + gap + listH + 6
+	local f, s = elementFrame(headerH)
+	f.ClipsDescendants = true
 
-			-- ✅ FIX: icon dropdown tidak ikut ke bawah saat dibuka
-			-- Posisi vertikal dibuat tetap di header, bukan tengah frame
-			local hasIcon = makeIcon(f, cfg.Icon, UDim2.new(0, 16, 0, 16), UDim2.new(0, 12, 0, 11), Theme.SubText)
-			local lx = hasIcon and 34 or 12
+	-- icon dropdown tetap di header (tidak ikut turun saat dibuka)
+	local hasIcon = makeIcon(f, cfg.Icon, UDim2.new(0, 16, 0, 16), UDim2.new(0, 12, 0, 11), Theme.SubText)
+	local lx = hasIcon and 34 or 12
 
-			local lbl = Instance.new("TextLabel")
-			lbl.Size = UDim2.new(0.5, -lx, 0, headerH)
-			lbl.Position = UDim2.new(0, lx, 0, 0)
-			lbl.BackgroundTransparency = 1
-			lbl.Text = cfg.Name or cfg.Title or "Dropdown"
-			lbl.TextColor3 = Theme.SubText
-			lbl.TextSize = 13
-			lbl.Font = Enum.Font.Gotham
-			lbl.TextXAlignment = Enum.TextXAlignment.Left
-			lbl.Parent = f
+	-- ✅ FIX: NAMA dropdown (kiri) -> truncate + beri jarak 10px dari tengah
+	local lbl = Instance.new("TextLabel")
+	lbl.Size = UDim2.new(0.5, -lx - 10, 0, headerH)
+	lbl.Position = UDim2.new(0, lx, 0, 0)
+	lbl.BackgroundTransparency = 1
+	lbl.Text = cfg.Name or cfg.Title or "Dropdown"
+	lbl.TextColor3 = Theme.SubText
+	lbl.TextSize = 13
+	lbl.Font = Enum.Font.Gotham
+	lbl.TextXAlignment = Enum.TextXAlignment.Left
+	lbl.TextTruncate = Enum.TextTruncate.AtEnd          -- <-- kunci anti‑lubер
+	lbl.Parent = f
 
-			local val = Instance.new("TextLabel")
-			val.Size = UDim2.new(0.5, -34, 0, headerH)
-			val.Position = UDim2.new(0.5, 0, 0, 0)
-			val.BackgroundTransparency = 1
-			val.Text = cfg.Default or (options[1] or "...")
-			val.TextColor3 = Theme.Text
-			val.TextSize = 13
-			val.Font = Enum.Font.GothamMedium
-			val.TextXAlignment = Enum.TextXAlignment.Right
-			val.Parent = f
+	-- ✅ FIX: VALUE/script terpilih (kanan) -> truncate + mulai 6px setelah tengah
+	-- nama panjang otomatis jadi "GIFTER GAMEPASS…" (bukan full)
+	local val = Instance.new("TextLabel")
+	val.Size = UDim2.new(0.5, -40, 0, headerH)
+	val.Position = UDim2.new(0.5, 6, 0, 0)
+	val.BackgroundTransparency = 1
+	val.Text = cfg.Default or (options[1] or "...")
+	val.TextColor3 = Theme.Text
+	val.TextSize = 13
+	val.Font = Enum.Font.GothamMedium
+	val.TextXAlignment = Enum.TextXAlignment.Right
+	val.TextTruncate = Enum.TextTruncate.AtEnd          -- <-- kunci anti‑lubер
+	val.Parent = f
 
+	if cfg.Flag then
+		Library.Flags[cfg.Flag] = val.Text
+	end
+
+	local arrow = Instance.new("TextLabel")
+	arrow.Size = UDim2.new(0, 16, 0, 16)
+	arrow.Position = UDim2.new(1, -26, 0, 11)
+	arrow.BackgroundTransparency = 1
+	arrow.Text = "›"
+	arrow.TextColor3 = Theme.SubText
+	arrow.TextSize = 16
+	arrow.Font = Enum.Font.GothamBold
+	arrow.Rotation = 90
+	arrow.Parent = f
+
+	local list = Instance.new("ScrollingFrame")
+	list.Size = UDim2.new(1, -12, 0, 0)
+	list.Position = UDim2.new(0, 6, 0, headerH + gap)
+	list.BackgroundTransparency = 1
+	list.BorderSizePixel = 0
+	list.ScrollBarThickness = 2
+	list.ScrollBarImageColor3 = Theme.Border
+	list.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	list.CanvasSize = UDim2.new(0, 0, 0, 0)
+	list.Parent = f
+
+	local listLayout = Instance.new("UIListLayout")
+	listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	listLayout.Padding = UDim.new(0, 2)
+	listLayout.Parent = list
+
+	local isOpen = false
+	local function toggleOpen()
+		isOpen = not isOpen
+		if isOpen then
+			Tween(f, .3, {Size = UDim2.new(1, 0, 0, openH)})
+			Tween(list, .3, {Size = UDim2.new(1, -12, 0, listH)})
+			Tween(arrow, .3, {Rotation = -90, TextColor3 = col or window.accent})
+		else
+			Tween(f, .3, {Size = UDim2.new(1, 0, 0, headerH)})
+			Tween(list, .3, {Size = UDim2.new(1, -12, 0, 0)})
+			Tween(arrow, .3, {Rotation = 90, TextColor3 = Theme.SubText})
+		end
+	end
+
+	local function addOption(opt)
+		local o = Instance.new("TextButton")
+		o.Size = UDim2.new(1, 0, 0, 28)
+		o.BackgroundColor3 = Color3.new(1,1,1)
+		o.BackgroundTransparency = 1
+		o.BorderSizePixel = 0
+		o.Text = opt
+		o.TextColor3 = Theme.SubText
+		o.TextSize = 12
+		o.Font = Enum.Font.Gotham
+		o.TextXAlignment = Enum.TextXAlignment.Left
+		o.TextTruncate = Enum.TextTruncate.AtEnd        -- ✅ FIX: opsi panjang juga rapi
+		o.AutoButtonColor = false
+		o.Parent = list
+		Corner(o, 5)
+		Pad(o, 0, 8, 0, 8)
+
+		o.MouseEnter:Connect(function()
+			Tween(o, .15, {BackgroundTransparency = .85, BackgroundColor3 = col or window.accent, TextColor3 = Theme.Text})
+		end)
+
+		o.MouseLeave:Connect(function()
+			Tween(o, .15, {BackgroundTransparency = 1, TextColor3 = Theme.SubText})
+		end)
+
+		o.MouseButton1Click:Connect(function()
+			val.Text = opt
 			if cfg.Flag then
-				Library.Flags[cfg.Flag] = val.Text
+				Library.Flags[cfg.Flag] = opt
 			end
+			toggleOpen()
+			if cfg.Callback then
+				task.spawn(cfg.Callback, opt)
+			end
+		end)
+	end
 
-			local arrow = Instance.new("TextLabel")
-			arrow.Size = UDim2.new(0, 16, 0, 16)
-			arrow.Position = UDim2.new(1, -26, 0, 11)
-			arrow.BackgroundTransparency = 1
-			arrow.Text = "›"
-			arrow.TextColor3 = Theme.SubText
-			arrow.TextSize = 16
-			arrow.Font = Enum.Font.GothamBold
-			arrow.Rotation = 90
-			arrow.Parent = f
+	for _, opt in ipairs(options) do
+		addOption(opt)
+	end
 
-			local list = Instance.new("ScrollingFrame")
-			list.Size = UDim2.new(1, -12, 0, 0)
-			list.Position = UDim2.new(0, 6, 0, headerH + gap)
-			list.BackgroundTransparency = 1
-			list.BorderSizePixel = 0
-			list.ScrollBarThickness = 2
-			list.ScrollBarImageColor3 = Theme.Border
-			list.AutomaticCanvasSize = Enum.AutomaticSize.Y
-			list.CanvasSize = UDim2.new(0, 0, 0, 0)
-			list.Parent = f
+	local head = Instance.new("TextButton")
+	head.Size = UDim2.new(1, 0, 0, headerH)
+	head.BackgroundTransparency = 1
+	head.Text = ""
+	head.AutoButtonColor = false
+	head.Parent = f
+	head.MouseButton1Click:Connect(toggleOpen)
 
-			local listLayout = Instance.new("UIListLayout")
-			listLayout.SortOrder = Enum.SortOrder.LayoutOrder
-			listLayout.Padding = UDim.new(0, 2)
-			listLayout.Parent = list
+	hoverBorder(f, s, function() return col or window.accent end)
+	addTooltip(f, cfg.Tooltip)
 
-			local isOpen = false
-			local function toggleOpen()
-				isOpen = not isOpen
-				if isOpen then
-					Tween(f, .3, {Size = UDim2.new(1, 0, 0, openH)})
-					Tween(list, .3, {Size = UDim2.new(1, -12, 0, listH)})
-					Tween(arrow, .3, {Rotation = -90, TextColor3 = col or window.accent})
-				else
-					Tween(f, .3, {Size = UDim2.new(1, 0, 0, headerH)})
-					Tween(list, .3, {Size = UDim2.new(1, -12, 0, 0)})
-					Tween(arrow, .3, {Rotation = 90, TextColor3 = Theme.SubText})
+	return {
+		Refresh = function(self, newOpts)
+			for _, c in ipairs(list:GetChildren()) do
+				if c:IsA("TextButton") then
+					c:Destroy()
 				end
 			end
 
-			local function addOption(opt)
-				local o = Instance.new("TextButton")
-				o.Size = UDim2.new(1, 0, 0, 28)
-				o.BackgroundColor3 = Color3.new(1,1,1)
-				o.BackgroundTransparency = 1
-				o.BorderSizePixel = 0
-				o.Text = opt
-				o.TextColor3 = Theme.SubText
-				o.TextSize = 12
-				o.Font = Enum.Font.Gotham
-				o.TextXAlignment = Enum.TextXAlignment.Left
-				o.AutoButtonColor = false
-				o.Parent = list
-				Corner(o, 5)
-				Pad(o, 0, 8, 0, 4)
-
-				o.MouseEnter:Connect(function()
-					Tween(o, .15, {BackgroundTransparency = .85, BackgroundColor3 = col or window.accent, TextColor3 = Theme.Text})
-				end)
-
-				o.MouseLeave:Connect(function()
-					Tween(o, .15, {BackgroundTransparency = 1, TextColor3 = Theme.SubText})
-				end)
-
-				o.MouseButton1Click:Connect(function()
-					val.Text = opt
-					if cfg.Flag then
-						Library.Flags[cfg.Flag] = opt
-					end
-					toggleOpen()
-					if cfg.Callback then
-						task.spawn(cfg.Callback, opt)
-					end
-				end)
-			end
+			options = newOpts
+			listH = math.min(#options * 30, 150)
+			openH = headerH + gap + listH + 6
 
 			for _, opt in ipairs(options) do
 				addOption(opt)
 			end
-
-			local head = Instance.new("TextButton")
-			head.Size = UDim2.new(1, 0, 0, headerH)
-			head.BackgroundTransparency = 1
-			head.Text = ""
-			head.AutoButtonColor = false
-			head.Parent = f
-			head.MouseButton1Click:Connect(toggleOpen)
-
-			hoverBorder(f, s, function() return col or window.accent end)
-			addTooltip(f, cfg.Tooltip)
-
-			return {
-				Refresh = function(self, newOpts)
-					for _, c in ipairs(list:GetChildren()) do
-						if c:IsA("TextButton") then
-							c:Destroy()
-						end
-					end
-
-					options = newOpts
-					listH = math.min(#options * 30, 150)
-					openH = headerH + gap + listH + 6
-
-					for _, opt in ipairs(options) do
-						addOption(opt)
-					end
-				end
-			}
 		end
+	}
+end
 
 		--// KEYBIND gaya Rayfield
 		function tab:CreateKeybind(cfg)
