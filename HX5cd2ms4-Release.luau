@@ -79,6 +79,30 @@ local Theme = {
 	SubText = Color3.fromRGB(160, 160, 160),
 }
 
+-- [UPDATE 1] Close / Confirm Theme
+Theme.Close = Color3.fromRGB(225, 70, 70)
+Theme.CloseHover = Color3.fromRGB(255, 95, 95)
+Theme.ClosePressed = Color3.fromRGB(185, 45, 45)
+Theme.CloseText = Color3.fromRGB(255, 255, 255)
+
+Theme.ConfirmBackground = Color3.fromRGB(18, 18, 18)
+Theme.ConfirmText = Color3.fromRGB(255, 255, 255)
+Theme.ConfirmSubText = Color3.fromRGB(180, 180, 180)
+
+Theme.Neutral = Color3.fromRGB(60, 60, 60)
+Theme.NeutralHover = Color3.fromRGB(85, 85, 85)
+Theme.Disabled = Color3.fromRGB(100, 100, 100)
+Theme.DisabledText = Color3.fromRGB(150, 150, 150)
+
+-- Default global untuk close color, bisa dioverride per window lewat config
+Library.CloseColor = Theme.Close
+Library.CloseHoverColor = Theme.CloseHover
+Library.ClosePressedColor = Theme.ClosePressed
+
+-- Lock system agar UI tidak bisa digeser saat close confirm muncul / tombol close ditekan
+Library._confirmOpen = false
+Library._buttonPressLock = false
+
 --// Presisi tinggi elemen
 local H_ELEMENT = 38
 local H_SLIDER = 46
@@ -352,6 +376,58 @@ local function Pad(p, t, l, b, r)
 	d.PaddingRight = UDim.new(0, r or 0)
 	d.Parent = p
 	return d
+end
+
+-- [UPDATE 2] Helper untuk input press & blur-like close button
+local function isPressInput(inp)
+	return inp ~= nil and (
+		inp.UserInputType == Enum.UserInputType.MouseButton1 or
+		inp.UserInputType == Enum.UserInputType.Touch
+	)
+end
+
+local function playCloseBlur(btn, overlay, scale, lines, pressColor, textColor)
+	if not btn or not btn.Parent then
+		return
+	end
+
+	if overlay and overlay.Parent then
+		overlay.Visible = true
+		overlay.Size = UDim2.new(0, 0, 0, 0)
+		overlay.BackgroundColor3 = pressColor or Theme.ClosePressed
+		overlay.BackgroundTransparency = 0.12
+
+		Tween(
+			overlay,
+			0.34,
+			{
+				Size = UDim2.new(0, 76, 0, 76),
+				BackgroundTransparency = 1
+			},
+			Enum.EasingStyle.Quart,
+			Enum.EasingDirection.Out
+		)
+
+		task.delay(0.35, function()
+			if overlay and overlay.Parent then
+				overlay.Visible = false
+			end
+		end)
+	end
+
+	if scale and scale.Parent then
+		Tween(scale, 0.08, {Scale = 0.82}, Enum.EasingStyle.Back, Enum.EasingDirection.In)
+	end
+
+	Tween(btn, 0.08, {BackgroundColor3 = pressColor or Theme.ClosePressed})
+
+	if lines then
+		for _, l in ipairs(lines) do
+			if l and l.Parent then
+				Tween(l, 0.08, {BackgroundColor3 = textColor or Theme.CloseText})
+			end
+		end
+	end
 end
 
 local function Connect(signal, callback, owner)
@@ -983,69 +1059,220 @@ local gui = Instance.new("ScreenGui")
 	tagLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
 	tagLayout.Parent = tagRow
 
-	local function iconButton(xoff, kind)
-		local b = Instance.new("TextButton")
-		b.Size = UDim2.new(0, 26, 0, 26)
-		b.Position = UDim2.new(1, xoff, 0.5, -13)
-		b.BackgroundColor3 = Theme.Element
-		b.BorderSizePixel = 0
-		b.Text = ""
-		b.AutoButtonColor = false
-		b.ZIndex = 48
-		b.Parent = topbar
-		Corner(b, 6)
+-- [UPDATE 3] Forward declare window agar tombol close bisa membaca theme window
+local window
 
-		if kind == "close" then
-			for _, rot in ipairs({45, -45}) do
-				local l = Instance.new("Frame")
-				l.Size = UDim2.new(0, 12, 0, 2)
-				l.Position = UDim2.new(0.5, -6, 0.5, -1)
-				l.Rotation = rot
-				l.BackgroundColor3 = Theme.SubText
-				l.BorderSizePixel = 0
-				l.ZIndex = 49
-				l.Parent = b
-			end
-			b.MouseEnter:Connect(function()
-				Tween(b, .2, {BackgroundColor3 = Color3.fromRGB(225, 70, 70)})
-			end)
-			b.MouseLeave:Connect(function()
-				Tween(b, .2, {BackgroundColor3 = Theme.Element})
-			end)
-		else
+local function getCloseColor()
+	return (window and window.closeColor) or Library.CloseColor or Theme.Close
+end
+
+local function getCloseHoverColor()
+	return (window and window.closeHoverColor) or Library.CloseHoverColor or Theme.CloseHover
+end
+
+local function getClosePressedColor()
+	return (window and window.closePressedColor) or Library.ClosePressedColor or Theme.ClosePressed
+end
+
+local function getCloseTextColor()
+	return (window and window.closeTextColor) or Theme.CloseText
+end
+
+	-- [UPDATE 4] Icon button dengan blur-like close, theme close, dan drag lock
+local function iconButton(xoff, kind)
+	local b = Instance.new("TextButton")
+	b.Size = UDim2.new(0, 26, 0, 26)
+	b.Position = UDim2.new(1, xoff, 0.5, -13)
+	b.BackgroundColor3 = Theme.Element
+	b.BorderSizePixel = 0
+	b.Text = ""
+	b.AutoButtonColor = false
+	b.ZIndex = 48
+	b.Parent = topbar
+	Corner(b, 6)
+
+	local scale = Instance.new("UIScale")
+	scale.Parent = b
+
+	local lines = {}
+	local overlay
+
+	if kind == "close" then
+		overlay = Instance.new("Frame")
+		overlay.Name = "CloseBlur"
+		overlay.AnchorPoint = Vector2.new(0.5, 0.5)
+		overlay.Position = UDim2.new(0.5, 0, 0.5, 0)
+		overlay.Size = UDim2.new(0, 0, 0, 0)
+		overlay.BackgroundColor3 = getCloseColor()
+		overlay.BackgroundTransparency = 1
+		overlay.BorderSizePixel = 0
+		overlay.ZIndex = 48
+		overlay.Visible = false
+		overlay.Parent = b
+		Corner(overlay, 99)
+
+		for _, rot in ipairs({45, -45}) do
 			local l = Instance.new("Frame")
 			l.Size = UDim2.new(0, 12, 0, 2)
 			l.Position = UDim2.new(0.5, -6, 0.5, -1)
+			l.Rotation = rot
 			l.BackgroundColor3 = Theme.SubText
 			l.BorderSizePixel = 0
 			l.ZIndex = 49
 			l.Parent = b
-			b.MouseEnter:Connect(function()
-				Tween(b, .2, {BackgroundColor3 = Theme.ElementHover})
-			end)
-			b.MouseLeave:Connect(function()
-				Tween(b, .2, {BackgroundColor3 = Theme.Element})
-			end)
+			table.insert(lines, l)
 		end
 
-		return b
+		b.MouseEnter:Connect(function()
+			if Library._confirmOpen then
+				return
+			end
+
+			Tween(b, .2, {BackgroundColor3 = getCloseHoverColor()})
+			for _, l in ipairs(lines) do
+				Tween(l, .2, {BackgroundColor3 = getCloseTextColor()})
+			end
+		end)
+
+		b.MouseLeave:Connect(function()
+			Tween(b, .2, {BackgroundColor3 = Theme.Element})
+			for _, l in ipairs(lines) do
+				Tween(l, .2, {BackgroundColor3 = Theme.SubText})
+			end
+		end)
+	else
+		local l = Instance.new("Frame")
+		l.Size = UDim2.new(0, 12, 0, 2)
+		l.Position = UDim2.new(0.5, -6, 0.5, -1)
+		l.BackgroundColor3 = Theme.SubText
+		l.BorderSizePixel = 0
+		l.ZIndex = 49
+		l.Parent = b
+		table.insert(lines, l)
+
+		b.MouseEnter:Connect(function()
+			if Library._confirmOpen then
+				return
+			end
+
+			Tween(b, .2, {BackgroundColor3 = Theme.ElementHover})
+			for _, line in ipairs(lines) do
+				Tween(line, .2, {BackgroundColor3 = Theme.Text})
+			end
+		end)
+
+		b.MouseLeave:Connect(function()
+			Tween(b, .2, {BackgroundColor3 = Theme.Element})
+			for _, line in ipairs(lines) do
+				Tween(line, .2, {BackgroundColor3 = Theme.SubText})
+			end
+		end)
 	end
 
-	local minimizeBtn = iconButton(-62, "min")
-	local closeBtn = iconButton(-32, "close")
+	b.InputBegan:Connect(function(inp)
+		if isPressInput(inp) then
+			Library._buttonPressLock = true
 
-	local window = {
-		accent = config.Accent or Library.Accent,
-		listeners = {},
-		offset = Vector2.new(0, 0),
-		_connections = {},
-		_destroyed = false,
-		_gui = gui,
+			if kind == "close" then
+				playCloseBlur(
+					b,
+					overlay,
+					scale,
+					lines,
+					getClosePressedColor(),
+					getCloseTextColor()
+				)
+			else
+				Tween(scale, .08, {Scale = .86}, Enum.EasingStyle.Back, Enum.EasingDirection.In)
+				Tween(b, .08, {BackgroundColor3 = Theme.ElementHover})
+				for _, line in ipairs(lines) do
+					Tween(line, .08, {BackgroundColor3 = Theme.Text})
+				end
+			end
+		end
+	end)
+
+	b.InputEnded:Connect(function(inp)
+		if isPressInput(inp) then
+			if not Library._confirmOpen then
+				Library._buttonPressLock = false
+			end
+
+			local hovered = false
+			pcall(function()
+				hovered = b:IsHovered()
+			end)
+
+			if kind == "close" then
+				Tween(b, .16, {
+					BackgroundColor3 = hovered and getCloseHoverColor() or Theme.Element
+				})
+
+				for _, l in ipairs(lines) do
+					Tween(l, .16, {
+						BackgroundColor3 = hovered and getCloseTextColor() or Theme.SubText
+					})
+				end
+			else
+				Tween(b, .16, {
+					BackgroundColor3 = hovered and Theme.ElementHover or Theme.Element
+				})
+
+				for _, l in ipairs(lines) do
+					Tween(l, .16, {
+						BackgroundColor3 = hovered and Theme.Text or Theme.SubText
+					})
+				end
+			end
+
+			if scale and scale.Parent then
+				Tween(scale, .14, {Scale = 1}, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+			end
+		end
+	end)
+
+	return b, {
+		btn = b,
+		lines = lines,
+		overlay = overlay,
+		scale = scale
 	}
+end
+
+-- [UPDATE 5] Simpan data tombol agar bisa di-refresh / reset saat confirm muncul
+local minimizeBtn, minimizeBtnData = iconButton(-62, "min")
+local closeBtn, closeBtnData = iconButton(-32, "close")
+
+	-- [UPDATE 6] Window dengan close color/theme per window
+window = {
+	accent = config.Accent or Library.Accent,
+
+	closeColor = config.CloseColor or Library.CloseColor or Theme.Close,
+	closeHoverColor = config.CloseHoverColor or Library.CloseHoverColor or Theme.CloseHover,
+	closePressedColor = config.ClosePressedColor or Library.ClosePressedColor or Theme.ClosePressed,
+	closeTextColor = config.CloseTextColor or Theme.CloseText,
+
+	listeners = {},
+	offset = Vector2.new(0, 0),
+	_connections = {},
+	_destroyed = false,
+	_gui = gui,
+
+	_closeConfirmCleanup = nil,
+	_closeButtonData = nil,
+	_minimizeButtonData = nil,
+}
+
+window._closeButtonData = closeBtnData
+window._minimizeButtonData = minimizeBtnData
 
 	function window:Destroy()
 		if self._destroyed then return end
 		self._destroyed = true
+
+	    if self._closeConfirmCleanup then
+		pcall(self._closeConfirmCleanup)
+	    end
 
 		for _, conn in ipairs(self._connections) do
 			pcall(function()
@@ -1079,12 +1306,24 @@ local gui = Instance.new("ScreenGui")
 		fn(self.accent)
 	end
 
-	function window:SetAccent(c)
-		self.accent = c
-		for _, fn in ipairs(self.listeners) do
-			fn(c)
-		end
+-- [UPDATE 7] API untuk mengubah warna close button / confirm modal
+function window:SetCloseColor(color, hover, pressed, text)
+	if typeof(color) == "Color3" then
+		self.closeColor = color
 	end
+
+	if typeof(hover) == "Color3" then
+		self.closeHoverColor = hover
+	end
+
+	if typeof(pressed) == "Color3" then
+		self.closePressedColor = pressed
+	end
+
+	if typeof(text) == "Color3" then
+		self.closeTextColor = text
+	end
+end
 
 	--// Add Tag API
 	function window:AddTag(cfg)
@@ -1168,94 +1407,121 @@ local gui = Instance.new("ScreenGui")
 		end
 	end
 
+-- [UPDATE 8] Resize + Drag dengan lock agar tidak bisa digeser saat close confirm / tombol close ditekan
 -- Resize handle (Fixed for Mobile/Touch Support)
-	local resizeHandle = Instance.new("TextButton")
-	resizeHandle.Size = UDim2.new(0, 14, 0, 14)
-	resizeHandle.Position = UDim2.new(1, -15, 1, -15)
-	resizeHandle.BackgroundTransparency = 1
-	resizeHandle.Text = ""
-	resizeHandle.AutoButtonColor = false
-	resizeHandle.ZIndex = 50
-	resizeHandle.Parent = main
+local resizeHandle = Instance.new("TextButton")
+resizeHandle.Size = UDim2.new(0, 14, 0, 14)
+resizeHandle.Position = UDim2.new(1, -15, 1, -15)
+resizeHandle.BackgroundTransparency = 1
+resizeHandle.Text = ""
+resizeHandle.AutoButtonColor = false
+resizeHandle.ZIndex = 50
+resizeHandle.Parent = main
 
-	for i = 0, 2 do
-		local d = Instance.new("Frame")
-		d.Size = UDim2.new(0, 2 + i * 4, 0, 2)
-		d.AnchorPoint = Vector2.new(1, 1)
-		d.Position = UDim2.new(1, -2, 1, -2 - i * 4)
-		d.BackgroundColor3 = Theme.SubText
-		d.BorderSizePixel = 0
-		d.ZIndex = 51
-		d.Parent = resizeHandle
+for i = 0, 2 do
+	local d = Instance.new("Frame")
+	d.Size = UDim2.new(0, 2 + i * 4, 0, 2)
+	d.AnchorPoint = Vector2.new(1, 1)
+	d.Position = UDim2.new(1, -2, 1, -2 - i * 4)
+	d.BackgroundColor3 = Theme.SubText
+	d.BorderSizePixel = 0
+	d.ZIndex = 51
+	d.Parent = resizeHandle
+end
+
+local resizing, resizeStart, resizeOrig = false, nil, nil
+
+local function getInputPosition(inp)
+	if inp.UserInputType == Enum.UserInputType.Touch then
+		return inp.Position
+	elseif inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.MouseButton1 then
+		return inp.Position
+	end
+	return nil
+end
+
+Connect(resizeHandle.InputBegan, function(inp)
+	if Library._confirmOpen or Library._buttonPressLock then
+		return
 	end
 
-	local resizing, resizeStart, resizeOrig = false, nil, nil
-	
-	-- Helper untuk mendapatkan posisi dari InputObject (Mouse atau Touch)
-	local function getInputPosition(inp)
-		if inp.UserInputType == Enum.UserInputType.Touch then
-			return inp.Position
-		elseif inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.MouseButton1 then
-			return inp.Position
-		end
-		return nil
+	if isPressInput(inp) then
+		resizing = true
+		resizeStart = getInputPosition(inp)
+		resizeOrig = main.Size
+	end
+end, window)
+
+Connect(UserInputService.InputChanged, function(inp)
+	if Library._confirmOpen or Library._buttonPressLock then
+		resizing = false
+		return
 	end
 
-	Connect(resizeHandle.InputBegan, function(inp)
-		if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
-			resizing = true
-			resizeStart = getInputPosition(inp)
-			resizeOrig = main.Size
+	if resizing then
+		local pos = getInputPosition(inp)
+		if pos and resizeStart then
+			local d = pos - resizeStart
+			main.Size = UDim2.new(
+				0,
+				math.clamp(resizeOrig.X.Offset + d.X, 460, 1100),
+				0,
+				math.clamp(resizeOrig.Y.Offset + d.Y, 340, 760)
+			)
 		end
-	end, window)
+	end
+end, window)
 
-	Connect(UserInputService.InputChanged, function(inp)
-		if resizing then
-			local pos = getInputPosition(inp)
-			if pos and resizeStart then
-				local d = pos - resizeStart
-				main.Size = UDim2.new(
-					0,
-					math.clamp(resizeOrig.X.Offset + d.X, 460, 1100),
-					0,
-					math.clamp(resizeOrig.Y.Offset + d.Y, 340, 760)
-				)
-			end
-		end
-	end, window)
+Connect(UserInputService.InputEnded, function(inp)
+	if isPressInput(inp) then
+		resizing = false
 
-	Connect(UserInputService.InputEnded, function(inp)
-		if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
-			resizing = false
+		if not Library._confirmOpen then
+			Library._buttonPressLock = false
 		end
-	end, window)
+	end
+end, window)
 
-	-- Drag
-	local dragging, dragStart, dragOrig
-	Connect(topbar.InputBegan, function(inp)
-		if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
-			dragging = true
-			dragStart = inp.Position
-			dragOrig = window.offset
-		end
-	end, window)
+-- Drag
+local dragging, dragStart, dragOrig
 
-	Connect(UserInputService.InputEnded, function(inp)
-		if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
-			dragging = false
-		end
-	end, window)
+Connect(topbar.InputBegan, function(inp)
+	if Library._confirmOpen or Library._buttonPressLock then
+		return
+	end
 
-	Connect(UserInputService.InputChanged, function(inp)
-		if dragging and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
-			local d = inp.Position - dragStart
-			local vp = workspace.CurrentCamera.ViewportSize
-			local x = math.clamp(dragOrig.X + d.X, -(vp.X/2 - 80), vp.X/2 - 80)
-			local y = math.clamp(dragOrig.Y + d.Y, -(vp.Y/2 - 60), vp.Y/2 - 60)
-			window.offset = Vector2.new(x, y)
-			main.Position = UDim2.new(0.5, x, 0.5, y)
+	if isPressInput(inp) then
+		dragging = true
+		dragStart = inp.Position
+		dragOrig = window.offset
+	end
+end, window)
+
+Connect(UserInputService.InputEnded, function(inp)
+	if isPressInput(inp) then
+		dragging = false
+
+		if not Library._confirmOpen then
+			Library._buttonPressLock = false
 		end
-	end, window)
+	end
+end, window)
+
+Connect(UserInputService.InputChanged, function(inp)
+	if Library._confirmOpen or Library._buttonPressLock then
+		dragging = false
+		return
+	end
+
+	if dragging and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
+		local d = inp.Position - dragStart
+		local vp = workspace.CurrentCamera.ViewportSize
+		local x = math.clamp(dragOrig.X + d.X, -(vp.X / 2 - 80), vp.X / 2 - 80)
+		local y = math.clamp(dragOrig.Y + d.Y, -(vp.Y / 2 - 60), vp.Y / 2 - 60)
+		window.offset = Vector2.new(x, y)
+		main.Position = UDim2.new(0.5, x, 0.5, y)
+	end
+end, window)
 
 	-- Sidebar
 	local sidebar = Instance.new("Frame")
@@ -2782,6 +3048,11 @@ end, window)
 function window:Toggle(force)
 	if window._destroyed then return end
 
+	-- [UPDATE 9b] Tutup confirm modal saat UI di-toggle
+	if window._closeConfirmCleanup then
+		pcall(window._closeConfirmCleanup)
+	end
+
 	local open = (force ~= nil) and force or not Library.Open
 	Library.Open = open
 	windowOpen = open
@@ -2822,152 +3093,250 @@ minimizeBtn.MouseButton1Click:Connect(function()
 end)
 
 --// ==========================================
-	--// SISTEM KONFIRMASI TUTUP (WITH COOLDOWN)
-	--// ==========================================
-	
-	local confirmModal = nil
-	
-	-- Fungsi pembuat Popup Konfirmasi
-	local function showCloseConfirmation()
-		if confirmModal then 
-			pcall(function() confirmModal:Destroy() end) 
-			confirmModal = nil
-		end
-		
-		-- Buat Frame Utama Modal
-		confirmModal = Instance.new("Frame")
-		confirmModal.Name = "CloseConfirmModal"
-		confirmModal.Size = UDim2.new(0, 320, 0, 160)
-		-- Pusatkan modal di tengah layar ScreenGui
-		confirmModal.AnchorPoint = Vector2.new(0.5, 0.5)
-		confirmModal.Position = UDim2.new(0.5, 0, 0.5, 0)
-		confirmModal.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-		confirmModal.BorderSizePixel = 0
-		confirmModal.ZIndex = 9999 -- Pastikan paling depan
-		confirmModal.Parent = gui
-		
-		Corner(confirmModal, 8)
-		local stroke = Stroke(confirmModal, Color3.fromRGB(255, 255, 255), 1)
-		stroke.Transparency = 0.6
+--// [UPDATE 10] SISTEM KONFIRMASI TUTUP
+--// - Frame close mengikuti UI karena parent ke main
+--// - Warna close mengikuti theme/window close color
+--// - UI tidak bisa digeser saat confirm muncul
+--// ==========================================
 
-		-- Label Pertanyaan
-		local questionLbl = Instance.new("TextLabel")
-		questionLbl.Size = UDim2.new(1, -20, 0, 40)
-		questionLbl.Position = UDim2.new(0, 10, 0, 15)
-		questionLbl.BackgroundTransparency = 1
-		questionLbl.Text = "Do you want to close this window?"
-		questionLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-		questionLbl.TextSize = 14
-		questionLbl.Font = Enum.Font.GothamBold
-		questionLbl.TextWrapped = true
-		questionLbl.ZIndex = 10000
-		questionLbl.Parent = confirmModal
+local confirmModal, confirmBlocker = nil, nil
 
-		-- Container Tombol
-		local btnContainer = Instance.new("Frame")
-		btnContainer.Size = UDim2.new(1, -20, 0, 40)
-		btnContainer.Position = UDim2.new(0, 10, 1, -55)
-		btnContainer.BackgroundTransparency = 1
-		btnContainer.ZIndex = 10000
-		btnContainer.Parent = confirmModal
-
-		local layout = Instance.new("UIListLayout")
-		layout.FillDirection = Enum.FillDirection.Horizontal
-		layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-		layout.VerticalAlignment = Enum.VerticalAlignment.Center
-		layout.Padding = UDim.new(0, 15)
-		layout.Parent = btnContainer
-
-		-- TOMBOL NO
-		local noBtn = Instance.new("TextButton")
-		noBtn.Size = UDim2.new(0, 100, 0, 35)
-		noBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-		noBtn.Text = "NO"
-		noBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-		noBtn.TextSize = 14
-		noBtn.Font = Enum.Font.GothamMedium
-		noBtn.AutoButtonColor = true
-		noBtn.ZIndex = 10001
-		noBtn.Parent = btnContainer
-		Corner(noBtn, 6)
-
-		noBtn.MouseButton1Click:Connect(function()
-			-- Aksi No: Hanya tutup modal, jangan hancurkan window
-			if confirmModal and confirmModal.Parent then
-				confirmModal:Destroy()
-				confirmModal = nil
-			end
-		end)
-
-		-- TOMBOL YES (Dengan Cooldown)
-		local yesBtn = Instance.new("TextButton")
-		yesBtn.Size = UDim2.new(0, 100, 0, 35)
-		yesBtn.BackgroundColor3 = Color3.fromRGB(225, 70, 70) -- Merah awal
-		yesBtn.Text = "YES"
-		yesBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-		yesBtn.TextSize = 14
-		yesBtn.Font = Enum.Font.GothamBold
-		yesBtn.AutoButtonColor = false -- Matikan auto-color agar kita kontrol sendiri
-		yesBtn.ZIndex = 10001
-		yesBtn.Parent = btnContainer
-		Corner(yesBtn, 6)
-
-		local canClickYes = false
-		local isCoolingDown = false
-
-		-- Logika Cooldown
-		task.spawn(function()
-			isCoolingDown = true
-			canClickYes = false
-			
-			-- Ubah tampilan jadi non-aktif (abu-abu)
-			yesBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-			yesBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
-			
-			for i = 5, 1, -1 do
-				if not yesBtn.Parent then break end -- Jika modal ditutup paksa saat countdown
-				yesBtn.Text = "WAIT (" .. i .. ")"
-				task.wait(1)
-			end
-			
-			if yesBtn.Parent then
-				-- Kembalikan ke keadaan aktif
-				yesBtn.Text = "YES"
-				yesBtn.BackgroundColor3 = Color3.fromRGB(225, 70, 70)
-				yesBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-				canClickYes = true
-				isCoolingDown = false
-			end
-		end)
-
-		-- Klik Tombol Yes
-		yesBtn.MouseButton1Click:Connect(function()
-			if canClickYes then
-				-- Hancurkan Modal dulu
-				if confirmModal and confirmModal.Parent then
-					confirmModal:Destroy()
-					confirmModal = nil
-				end
-				
-				-- Eksekusi aksi utama: Tutup/Hancurkan Window
-				window:Destroy()
-			else
-				-- Efek visual jika klik terlalu cepat (opsional, biar terasa responsif)
-				Tween(yesBtn, 0.1, {Rotation = -5})
-				task.delay(0.1, function() if yesBtn.Parent then Tween(yesBtn, 0.1, {Rotation = 5}) end end)
-				task.delay(0.2, function() if yesBtn.Parent then Tween(yesBtn, 0.1, {Rotation = 0}) end end)
-			end
+local function destroyCloseConfirm()
+	if confirmBlocker and confirmBlocker.Parent then
+		pcall(function()
+			confirmBlocker:Destroy()
 		end)
 	end
 
-	-- GANTI LOGIKA CLOSE BUTTON LAMA DENGAN INI:
-	closeBtn.MouseButton1Click:Connect(function()
-		showCloseConfirmation()
-	end)
-	--// ==========================================
+	if confirmModal and confirmModal.Parent then
+		pcall(function()
+			confirmModal:Destroy()
+		end)
+	end
 
+	confirmModal = nil
+	confirmBlocker = nil
+
+	Library._confirmOpen = false
+	Library._buttonPressLock = false
+
+	if window and not window._destroyed then
+		window._closeConfirmCleanup = nil
+	end
+end
+
+window._closeConfirmCleanup = destroyCloseConfirm
+
+local function showCloseConfirmation()
+	destroyCloseConfirm()
+
+	Library._confirmOpen = true
+	Library._buttonPressLock = true
+
+	dragging = false
+	resizing = false
+
+	-- Reset visual close button agar tidak tertinggal hover state
+	local cd = window._closeButtonData
+	if cd and cd.btn and cd.btn.Parent then
+		pcall(function()
+			Tween(cd.btn, .15, {BackgroundColor3 = Theme.Element})
+		end)
+
+		if cd.lines then
+			for _, l in ipairs(cd.lines) do
+				pcall(function()
+					Tween(l, .15, {BackgroundColor3 = Theme.SubText})
+				end)
+			end
+		end
+	end
+
+	local closeColor = window.closeColor or Theme.Close
+	local closeHover = window.closeHoverColor or Theme.CloseHover
+	local closePressed = window.closePressedColor or Theme.ClosePressed
+	local closeText = window.closeTextColor or Theme.CloseText
+
+	-- Blocker agar seluruh area main tidak bisa Interaksi/drag saat confirm terbuka
+	confirmBlocker = Instance.new("Frame")
+	confirmBlocker.Name = "CloseConfirmBlocker"
+	confirmBlocker.Size = UDim2.new(1, 0, 1, 0)
+	confirmBlocker.Position = UDim2.new(0, 0, 0, 0)
+	confirmBlocker.BackgroundTransparency = 1
+	confirmBlocker.BorderSizePixel = 0
+	confirmBlocker.ZIndex = 9998
+	confirmBlocker.Active = true
+	confirmBlocker.Parent = main
+
+	-- Modal parent ke main supaya mengikuti pergeseran/resizing UI
+	confirmModal = Instance.new("Frame")
+	confirmModal.Name = "CloseConfirmModal"
+	confirmModal.AnchorPoint = Vector2.new(0.5, 0.5)
+	confirmModal.Position = UDim2.new(0.5, 0, 0.5, 0)
+	confirmModal.Size = UDim2.new(0, 320, 0, 160)
+	confirmModal.BackgroundColor3 = Theme.ConfirmBackground
+	confirmModal.BackgroundTransparency = 0.18
+	confirmModal.BorderSizePixel = 0
+	confirmModal.ClipsDescendants = false
+	confirmModal.ZIndex = 9999
+	confirmModal.Parent = main
+	Corner(confirmModal, 10)
+
+	local modalStroke = Stroke(confirmModal, closeColor, 1.4)
+	modalStroke.Transparency = 0.45
+
+	local modalScale = Instance.new("UIScale")
+	modalScale.Scale = 0.88
+	modalScale.Parent = confirmModal
+
+	Tween(modalScale, .22, {Scale = 1}, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+	Tween(confirmModal, .18, {BackgroundTransparency = 0})
+	Tween(modalStroke, .22, {Transparency = 0.18})
+
+	local questionLbl = Instance.new("TextLabel")
+	questionLbl.Size = UDim2.new(1, -24, 0, 42)
+	questionLbl.Position = UDim2.new(0, 12, 0, 18)
+	questionLbl.BackgroundTransparency = 1
+	questionLbl.Text = "Do you want to close this window?"
+	questionLbl.TextColor3 = Theme.ConfirmText
+	questionLbl.TextTransparency = 1
+	questionLbl.TextSize = 14
+	questionLbl.Font = Enum.Font.GothamBold
+	questionLbl.TextWrapped = true
+	questionLbl.ZIndex = 10000
+	questionLbl.Parent = confirmModal
+
+	Tween(questionLbl, .2, {TextTransparency = 0})
+
+	local btnContainer = Instance.new("Frame")
+	btnContainer.Size = UDim2.new(1, -24, 0, 40)
+	btnContainer.Position = UDim2.new(0, 12, 1, -54)
+	btnContainer.BackgroundTransparency = 1
+	btnContainer.ZIndex = 10000
+	btnContainer.Parent = confirmModal
+
+	local layout = Instance.new("UIListLayout")
+	layout.FillDirection = Enum.FillDirection.Horizontal
+	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	layout.VerticalAlignment = Enum.VerticalAlignment.Center
+	layout.Padding = UDim.new(0, 14)
+	layout.Parent = btnContainer
+
+	-- NO BUTTON
+	local noBtn = Instance.new("TextButton")
+	noBtn.Size = UDim2.new(0, 100, 0, 35)
+	noBtn.BackgroundColor3 = Theme.Neutral
+	noBtn.Text = "NO"
+	noBtn.TextColor3 = Theme.ConfirmText
+	noBtn.TextSize = 14
+	noBtn.Font = Enum.Font.GothamMedium
+	noBtn.AutoButtonColor = false
+	noBtn.ZIndex = 10001
+	noBtn.Parent = btnContainer
+	Corner(noBtn, 6)
+
+	noBtn.MouseEnter:Connect(function()
+		Tween(noBtn, .15, {BackgroundColor3 = Theme.NeutralHover})
+	end)
+
+	noBtn.MouseLeave:Connect(function()
+		Tween(noBtn, .15, {BackgroundColor3 = Theme.Neutral})
+	end)
+
+	noBtn.MouseButton1Click:Connect(function()
+		destroyCloseConfirm()
+	end)
+
+	-- YES BUTTON WITH COOLDOWN
+	local yesBtn = Instance.new("TextButton")
+	yesBtn.Size = UDim2.new(0, 100, 0, 35)
+	yesBtn.BackgroundColor3 = closeColor
+	yesBtn.Text = "YES"
+	yesBtn.TextColor3 = closeText
+	yesBtn.TextSize = 14
+	yesBtn.Font = Enum.Font.GothamBold
+	yesBtn.AutoButtonColor = false
+	yesBtn.ZIndex = 10001
+	yesBtn.Parent = btnContainer
+	Corner(yesBtn, 6)
+
+	local canClickYes = false
+
+	yesBtn.MouseEnter:Connect(function()
+		if canClickYes then
+			Tween(yesBtn, .15, {BackgroundColor3 = closeHover})
+		end
+	end)
+
+	yesBtn.MouseLeave:Connect(function()
+		if canClickYes then
+			Tween(yesBtn, .15, {BackgroundColor3 = closeColor})
+		end
+	end)
+
+	task.spawn(function()
+		yesBtn.BackgroundColor3 = Theme.Disabled
+		yesBtn.TextColor3 = Theme.DisabledText
+
+		for i = 5, 1, -1 do
+			if not yesBtn.Parent then
+				break
+			end
+
+			yesBtn.Text = "WAIT (" .. i .. ")"
+			task.wait(1)
+		end
+
+		if yesBtn.Parent then
+			yesBtn.Text = "YES"
+			yesBtn.BackgroundColor3 = window.closeColor or closeColor
+			yesBtn.TextColor3 = window.closeTextColor or closeText
+			canClickYes = true
+		end
+	end)
+
+	yesBtn.MouseButton1Click:Connect(function()
+		if canClickYes then
+			destroyCloseConfirm()
+			window:Destroy()
+		else
+			Tween(yesBtn, .07, {Rotation = -5})
+			task.delay(.07, function()
+				if yesBtn.Parent then
+					Tween(yesBtn, .07, {Rotation = 5})
+				end
+			end)
+			task.delay(.14, function()
+				if yesBtn.Parent then
+					Tween(yesBtn, .07, {Rotation = 0})
+				end
+			end)
+		end
+	end)
+
+	-- Auto destroy jika window ditutup/di-minimize lewat jalur lain
+	Connect(main:GetPropertyChangedSignal("Visible"), function()
+		if not main.Visible then
+			destroyCloseConfirm()
+		end
+	end, window)
+
+	Connect(main:GetPropertyChangedSignal("Size"), function()
+		if main.Size.X.Offset < 80 or main.Size.Y.Offset < 80 then
+			destroyCloseConfirm()
+		end
+	end, window)
+end
+
+closeBtn.MouseButton1Click:Connect(function()
+	showCloseConfirmation()
+end)
+
+-- [UPDATE 11] Toggle key tidak berfungsi saat close confirm terbuka
 Connect(UserInputService.InputBegan, function(inp, gp)
 	if gp then return end
+	if Library._confirmOpen then return end
+
 	if inp.KeyCode == Library.ToggleKey then
 		window:Toggle()
 	end
