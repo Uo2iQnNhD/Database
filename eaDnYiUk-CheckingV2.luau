@@ -60,7 +60,7 @@ local function loadScriptSafely(url, scriptName)
     end)
     
     if success then
-        print(string.format("  [✅ SUCCESS] %s loaded successfully.", scriptName))
+        print(string.format("  [✅ SUCCESS] %s loaded successfully", scriptName))
     else
         warn(string.format("  [❌ ERROR] Failed to load %s! Detail: %s", scriptName, tostring(err)))
     end
@@ -76,7 +76,7 @@ print("==================================================")
 if scriptData then
     -- Jika game DIDUKUNG (Supported)
     print(string.format("[SUPPORTED] Game Detected: %s", scriptData.Name))
-    print("⏳ Loading multiple modules...")
+    print("⏳ Loading Maintenance...")
     
     local totalLoaded = 0
     for index, url in ipairs(scriptData.Urls) do
@@ -91,7 +91,7 @@ if scriptData then
 else
     -- Jika game TIDAK DIDUKUNG (Universal Fallback)
     warn("[⚠️ UNIVERSAL] This game is not specifically supported (PlaceId: " .. currentPlaceId .. ").")
-    print("⏳ Loading Universal Fallback scripts...")
+    print("⏳ Loading Universal scripts...")
     
     local totalLoaded = 0
     for index, url in ipairs(universalScripts) do
@@ -104,6 +104,6 @@ else
     if totalLoaded > 0 then
         print(string.format("🎉 Finished! %d universal module(s) loaded.", totalLoaded))
     else
-        warn("💀 All universal scripts failed to load.")
+        warn("💀 All scripts failed to load!, Report Exterminate0 For Bug")
     end
 end
