@@ -4928,7 +4928,7 @@ end
 			Icon = "refresh-cw",
 			Callback = function()
 				fileDropdown:Refresh(getSaveOptions())
-				Library:Notify("Daftar save diperbarui.", 3, "Save/Load", "refresh-cw")
+				Library:Notify("Save list updated.", 3, "Save/Load", "refresh-cw")
 			end,
 		})
 
@@ -4946,9 +4946,9 @@ end
 					Library._saveFile = fname
 					fileDropdown:Refresh(getSaveOptions())
 					fileDropdown:Set(fname)
-					Library:Notify("Berhasil menyimpan: " .. fname, 4, "Saved", "check-circle")
+					Library:Notify("Successfully saved: " .. fname, 4, "Saved", "check-circle")
 				else
-					Library:Notify(err or "Gagal menyimpan file.", 4, "Error", "x-circle")
+					Library:Notify(err or "Failed to save file", 4, "Error", "x-circle")
 				end
 			end,
 		})
@@ -4964,16 +4964,16 @@ end
 				end
 
 				if not fname or fname == "" or fname == "(no saves)" then
-					Library:Notify("Pilih file save terlebih dahulu.", 4, "Load", "info")
+					Library:Notify("Select save file first", 4, "Load", "info")
 					return
 				end
 
 				local ok, err = Library:LoadFromFile(fname)
 				if ok then
 					fileNameInput:Set(fname)
-					Library:Notify("Berhasil load: " .. fname, 4, "Loaded", "check-circle")
+					Library:Notify("Successfully loaded: " .. fname, 4, "Loaded", "check-circle")
 				else
-					Library:Notify(err or "Gagal load file.", 4, "Error", "x-circle")
+					Library:Notify(err or "Failed to load file", 4, "Error", "x-circle")
 				end
 			end,
 		})
@@ -4985,16 +4985,16 @@ end
 				local fname = fileDropdown:Get()
 
 				if not fname or fname == "" or fname == "(no saves)" then
-					Library:Notify("Tidak ada file yang dipilih.", 4, "Delete", "info")
+					Library:Notify("No file selected", 4, "Delete", "info")
 					return
 				end
 
 				local ok, err = Library:DeleteSave(fname)
 				if ok then
 					fileDropdown:Refresh(getSaveOptions())
-					Library:Notify("File dihapus: " .. fname, 4, "Deleted", "trash-2")
+					Library:Notify("File deleted: " .. fname, 4, "Deleted", "trash-2")
 				else
-					Library:Notify(err or "Gagal menghapus file.", 4, "Error", "x-circle")
+					Library:Notify(err or "Failed to delete file", 4, "Error", "x-circle")
 				end
 			end,
 		})
