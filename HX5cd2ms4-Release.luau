@@ -4119,7 +4119,9 @@ function Library:CreateWindow(config)
 
 			registerElement(window, tab, name, f, cfg, "colorpicker", obj)
 			return obj
-		end
+		    end
+  	return tab
+end   
 
 	-- Mini Toggle
 	local MINI_W, MINI_H = 168, 42
