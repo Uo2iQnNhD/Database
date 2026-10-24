@@ -42,6 +42,22 @@ local supportedScripts = {
             "https://raw.githubusercontent.com/Uo2iQnNhD/Maintenance/refs/heads/main/XptC65ba-MainVD.lua"
         }
     }
+
+    [12355337193] = { 
+        Name = "Murderer vs Sheriff Duels", 
+        Urls = {
+            "https://raw.githubusercontent.com/Uo2iQnNhD/Maintenance/refs/heads/main/eyPSrASq-MVSD.lua"
+        }
+    }
+
+    [116463962153167] = { 
+        Name = "The Hollow: Roblox", 
+        Urls = {
+            "https://raw.githubusercontent.com/Uo2iQnNhD/Maintenance/refs/heads/main/The%20Hollow%3A%20Roblox.lua"
+        }
+    }
+
+
 }
 
 -- 2. URL Script Universal (Fallback) - Bisa juga lebih dari 1
