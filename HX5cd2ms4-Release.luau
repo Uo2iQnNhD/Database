@@ -1,4 +1,4 @@
---[[ ZETHUB - Library V5.1 Updated by Exterminate0 ]]
+--[[ ZETHUB - Library V5.2 Updated by Exterminate0 ]]
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -1122,7 +1122,7 @@ function Library:SaveToFile(name)
 	local payload = {
 		Meta = {
 			Library = "ZethHub",
-			Version = 5.1,
+			Version = 5.2,
 			SavedAt = os.time(),
 			PlaceId = placeId,
 			FileName = name,
@@ -1616,7 +1616,7 @@ function Library:CreateWindow(config)
 
 	config = config or {}
 	local title = config.Title or "ZETHUB"
-	local subtitle = config.Subtitle or "V5.1 • RGB / Particle / Save-Load"
+	local subtitle = config.Subtitle or "V5.2 • RGB / Particle / Save-Load"
 	local OPEN_SIZE = UDim2.new(0, 560, 0, 420)
 
 	local gui = Instance.new("ScreenGui")
@@ -2092,7 +2092,7 @@ function Library:CreateWindow(config)
 	local tagsConfig = config.Tags
 	if tagsConfig == nil then
 		tagsConfig = {
-			{Text = "V5.1", Color = Color3.fromRGB(255, 204, 0), TextColor = Color3.fromRGB(0, 0, 0)},
+			{Text = "V5.2", Color = Color3.fromRGB(255, 204, 0), TextColor = Color3.fromRGB(0, 0, 0)},
 			{Text = "RGB / FX", Color = Color3.fromRGB(46, 230, 110), TextColor = Color3.fromRGB(0, 0, 0)},
 		}
 	end
@@ -2214,32 +2214,31 @@ function Library:CreateWindow(config)
 	end, window)
 
 	-- Sidebar
+	-- [FIX V5.2] Blok "sideTop" lama DIHAPUS karena menutupi bagian atas sidebar
+	-- sehingga Search UI / tab pertama terlihat terpotong. Sebagai gantinya
+	-- padding atas sidebar dinaikkan dan sidebar tidak lagi di-clip.
 	local sidebar = Instance.new("Frame")
 	sidebar.Size = UDim2.new(0, 150, 1, -TOPBAR_H)
 	sidebar.Position = UDim2.new(0, 0, 0, TOPBAR_H)
 	sidebar.BackgroundColor3 = Theme.Sidebar
 	sidebar.BorderSizePixel = 0
+	sidebar.ClipsDescendants = false
 	sidebar.ZIndex = 41
 	sidebar.Parent = main
 	Corner(sidebar, 10)
 
-	local sideTop = Instance.new("Frame")
-	sideTop.Size = UDim2.new(1, 0, 0, 12)
-	sideTop.Position = UDim2.new(0, 0, 0, TOPBAR_H)
-	sideTop.BackgroundColor3 = Theme.Sidebar
-	sideTop.BorderSizePixel = 0
-	sideTop.ZIndex = 41
-	sideTop.Parent = main
+	local sideStroke = Stroke(sidebar, Theme.Border, 1.2)
+	sideStroke.Transparency = 0.35
 
 	local sideList = Instance.new("UIListLayout")
 	sideList.SortOrder = Enum.SortOrder.LayoutOrder
 	sideList.Padding = UDim.new(0, 5)
 	sideList.Parent = sidebar
-	Pad(sidebar, 10, 8, 10, 8)
+	Pad(sidebar, 14, 8, 12, 8)
 
 	-- Content
 	local content = Instance.new("ScrollingFrame")
-	content.Size = UDim2.new(1, -150, 1, -(TOPBAR_H + 12))
+	content.Size = UDim2.new(1, -150, 1, -TOPBAR_H)
 	content.Position = UDim2.new(0, 150, 0, TOPBAR_H)
 	content.BackgroundTransparency = 1
 	content.BorderSizePixel = 0
@@ -2281,7 +2280,7 @@ function Library:CreateWindow(config)
 	searchBar.BackgroundTransparency = 0.08
 	searchBar.BorderSizePixel = 0
 	searchBar.LayoutOrder = -9999
-	searchBar.ZIndex = 42
+	searchBar.ZIndex = 43
 	searchBar.Parent = sidebar
 	Corner(searchBar, 8)
 	Stroke(searchBar, Theme.Border, 1.4)
@@ -2291,8 +2290,8 @@ function Library:CreateWindow(config)
 
 	local searchInput = Instance.new("TextBox")
 	searchInput.Name = "SearchInput"
-	searchInput.Size = UDim2.new(1, -(searchIconOffset + 10), 0, 28)
-	searchInput.Position = UDim2.new(0, searchIconOffset, 0.5, -14)
+	searchInput.Size = UDim2.new(1, -(searchIconOffset + 10), 0, 26)
+	searchInput.Position = UDim2.new(0, searchIconOffset, 0.5, -13)
 	searchInput.BackgroundTransparency = 1
 	searchInput.BorderSizePixel = 0
 	searchInput.PlaceholderText = "Search UI..."
@@ -2302,8 +2301,9 @@ function Library:CreateWindow(config)
 	searchInput.TextSize = 12
 	searchInput.Font = Enum.Font.GothamMedium
 	searchInput.TextXAlignment = Enum.TextXAlignment.Left
+	searchInput.TextYAlignment = Enum.TextYAlignment.Center
 	searchInput.ClearTextOnFocus = false
-	searchInput.ZIndex = 43
+	searchInput.ZIndex = 44
 	searchInput.Parent = searchBar
 
 	local searchResults = Instance.new("ScrollingFrame")
@@ -2395,6 +2395,7 @@ function Library:CreateWindow(config)
 		nameLabel.TextSize = 12
 		nameLabel.Font = Enum.Font.GothamMedium
 		nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+		nameLabel.TextYAlignment = Enum.TextYAlignment.Center
 		nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
 		nameLabel.ZIndex = 252
 		nameLabel.Parent = b
@@ -2409,6 +2410,7 @@ function Library:CreateWindow(config)
 		typeLabel.TextSize = 10
 		typeLabel.Font = Enum.Font.GothamBold
 		typeLabel.TextXAlignment = Enum.TextXAlignment.Right
+		typeLabel.TextYAlignment = Enum.TextYAlignment.Center
 		typeLabel.ZIndex = 252
 		typeLabel.Parent = b
 
@@ -2469,6 +2471,7 @@ function Library:CreateWindow(config)
 			empty.TextSize = 12
 			empty.Font = Enum.Font.Gotham
 			empty.TextXAlignment = Enum.TextXAlignment.Center
+			empty.TextYAlignment = Enum.TextYAlignment.Center
 			empty.ZIndex = 251
 			empty.Parent = searchResults
 
@@ -2533,6 +2536,7 @@ function Library:CreateWindow(config)
 	kbTitle.TextSize = 10
 	kbTitle.Font = Enum.Font.GothamBold
 	kbTitle.TextXAlignment = Enum.TextXAlignment.Left
+	kbTitle.TextYAlignment = Enum.TextYAlignment.Center
 	kbTitle.Parent = KeybindList
 
 	local kbRowsFrame = Instance.new("Frame")
@@ -2576,6 +2580,7 @@ function Library:CreateWindow(config)
 		nLbl.TextSize = 11
 		nLbl.Font = Enum.Font.Gotham
 		nLbl.TextXAlignment = Enum.TextXAlignment.Left
+		nLbl.TextYAlignment = Enum.TextYAlignment.Center
 		nLbl.TextTruncate = Enum.TextTruncate.AtEnd
 		nLbl.Parent = row
 
@@ -2588,6 +2593,7 @@ function Library:CreateWindow(config)
 		kLbl.TextSize = 11
 		kLbl.Font = Enum.Font.GothamBold
 		kLbl.TextXAlignment = Enum.TextXAlignment.Right
+		kLbl.TextYAlignment = Enum.TextYAlignment.Center
 		kLbl.Parent = row
 
 		window:onAccent(function(c)
@@ -2612,6 +2618,7 @@ function Library:CreateWindow(config)
 		btn.BorderSizePixel = 0
 		btn.Text = ""
 		btn.AutoButtonColor = false
+		btn.ZIndex = 42
 		btn.Parent = sidebar
 		Corner(btn, 7)
 
@@ -2621,10 +2628,12 @@ function Library:CreateWindow(config)
 		ind.BackgroundColor3 = window.accent
 		ind.BackgroundTransparency = 1
 		ind.BorderSizePixel = 0
+		ind.ZIndex = 43
 		ind.Parent = btn
 		Corner(ind, 2)
 
 		local tabIcon = makeIcon(btn, icon, UDim2.new(0, 16, 0, 16), UDim2.new(0, 14, 0.5, -8), Theme.SubText)
+		if tabIcon then tabIcon.ZIndex = 43 end
 		local labelX = tabIcon and 36 or 14
 
 		local tabLbl = Instance.new("TextLabel")
@@ -2636,7 +2645,9 @@ function Library:CreateWindow(config)
 		tabLbl.TextSize = 13
 		tabLbl.TextColor3 = Theme.SubText
 		tabLbl.TextXAlignment = Enum.TextXAlignment.Left
+		tabLbl.TextYAlignment = Enum.TextYAlignment.Center
 		tabLbl.TextTruncate = Enum.TextTruncate.AtEnd
+		tabLbl.ZIndex = 43
 		tabLbl.Parent = btn
 
 		local tabContent = Instance.new("Frame")
@@ -2777,6 +2788,7 @@ function Library:CreateWindow(config)
 			lbl.TextSize = 11
 			lbl.Font = Enum.Font.GothamBold
 			lbl.TextXAlignment = Enum.TextXAlignment.Left
+			lbl.TextYAlignment = Enum.TextYAlignment.Center
 			lbl.Parent = holder
 
 			window:onAccent(function(c)
@@ -2796,6 +2808,7 @@ function Library:CreateWindow(config)
 			lbl.TextSize = 12
 			lbl.Font = Enum.Font.Gotham
 			lbl.TextXAlignment = Enum.TextXAlignment.Left
+			lbl.TextYAlignment = Enum.TextYAlignment.Center
 			lbl.TextWrapped = true
 			lbl.Parent = tabContent
 
@@ -2974,6 +2987,7 @@ function Library:CreateWindow(config)
 			lbl.TextSize = 13
 			lbl.Font = Enum.Font.Gotham
 			lbl.TextXAlignment = Enum.TextXAlignment.Left
+			lbl.TextYAlignment = Enum.TextYAlignment.Center
 			lbl.Parent = f
 
 			local switch = Instance.new("TextButton")
@@ -3058,6 +3072,7 @@ function Library:CreateWindow(config)
 			lbl.TextSize = 13
 			lbl.Font = Enum.Font.Gotham
 			lbl.TextXAlignment = Enum.TextXAlignment.Left
+			lbl.TextYAlignment = Enum.TextYAlignment.Center
 			lbl.Parent = f
 
 			local val = Instance.new("TextLabel")
@@ -3069,6 +3084,7 @@ function Library:CreateWindow(config)
 			val.TextSize = 13
 			val.Font = Enum.Font.GothamBold
 			val.TextXAlignment = Enum.TextXAlignment.Right
+			val.TextYAlignment = Enum.TextYAlignment.Center
 			val.Parent = f
 
 			local track = Instance.new("Frame")
@@ -3184,6 +3200,8 @@ function Library:CreateWindow(config)
 			return obj
 		end
 
+-- PART 2 END
+-- JANGAN JALANKAN SENDIRI. LANJUTKAN DENGAN PART 3.
 		function tab:CreateButton(cfg)
 			cfg = cfg or {}
 			local col = cfg.Color
@@ -3200,6 +3218,7 @@ function Library:CreateWindow(config)
 			lbl.TextSize = 13
 			lbl.Font = Enum.Font.GothamMedium
 			lbl.TextXAlignment = Enum.TextXAlignment.Left
+			lbl.TextYAlignment = Enum.TextYAlignment.Center
 			lbl.Parent = f
 
 			local arrow = Instance.new("TextLabel")
@@ -3210,6 +3229,7 @@ function Library:CreateWindow(config)
 			arrow.TextColor3 = col or window.accent
 			arrow.TextSize = 18
 			arrow.Font = Enum.Font.GothamBold
+			arrow.TextYAlignment = Enum.TextYAlignment.Center
 			arrow.Parent = f
 
 			window:onAccent(function(c)
@@ -3294,6 +3314,7 @@ function Library:CreateWindow(config)
 			lbl.TextSize = 13
 			lbl.Font = Enum.Font.Gotham
 			lbl.TextXAlignment = Enum.TextXAlignment.Left
+			lbl.TextYAlignment = Enum.TextYAlignment.Center
 			lbl.Parent = f
 
 			local box = Instance.new("TextBox")
@@ -3337,7 +3358,10 @@ function Library:CreateWindow(config)
 			local obj = {
 				Set = function(self, t)
 					box.Text = tostring(t or "")
-				end
+				end,
+				Get = function()
+					return box.Text
+				end,
 			}
 
 			registerElement(window, tab, name, f, cfg, "textbox", obj)
@@ -3361,6 +3385,7 @@ function Library:CreateWindow(config)
 			lbl.TextSize = 13
 			lbl.Font = Enum.Font.Gotham
 			lbl.TextXAlignment = Enum.TextXAlignment.Left
+			lbl.TextYAlignment = Enum.TextYAlignment.Center
 			lbl.Parent = f
 
 			local box = Instance.new("TextBox")
@@ -3485,6 +3510,7 @@ function Library:CreateWindow(config)
 			lbl.TextSize = 13
 			lbl.Font = Enum.Font.Gotham
 			lbl.TextXAlignment = Enum.TextXAlignment.Left
+			lbl.TextYAlignment = Enum.TextYAlignment.Center
 			lbl.TextTruncate = Enum.TextTruncate.AtEnd
 			lbl.Parent = f
 
@@ -3498,6 +3524,7 @@ function Library:CreateWindow(config)
 			val.TextSize = 13
 			val.Font = Enum.Font.GothamMedium
 			val.TextXAlignment = Enum.TextXAlignment.Right
+			val.TextYAlignment = Enum.TextYAlignment.Center
 			val.TextTruncate = Enum.TextTruncate.AtEnd
 			val.Parent = f
 
@@ -3578,6 +3605,7 @@ function Library:CreateWindow(config)
 				o.TextSize = 12
 				o.Font = Enum.Font.Gotham
 				o.TextXAlignment = Enum.TextXAlignment.Left
+				o.TextYAlignment = Enum.TextYAlignment.Center
 				o.TextTruncate = Enum.TextTruncate.AtEnd
 				o.AutoButtonColor = false
 				o.Parent = list
@@ -3667,6 +3695,7 @@ function Library:CreateWindow(config)
 			lbl.TextSize = 13
 			lbl.Font = Enum.Font.Gotham
 			lbl.TextXAlignment = Enum.TextXAlignment.Left
+			lbl.TextYAlignment = Enum.TextYAlignment.Center
 			lbl.Parent = f
 
 			local badge = Instance.new("TextButton")
@@ -3782,6 +3811,7 @@ function Library:CreateWindow(config)
 			lbl.TextSize = 13
 			lbl.Font = Enum.Font.Gotham
 			lbl.TextXAlignment = Enum.TextXAlignment.Left
+			lbl.TextYAlignment = Enum.TextYAlignment.Center
 			lbl.Parent = f
 
 			local swatch = Instance.new("TextButton")
@@ -3950,6 +3980,7 @@ function Library:CreateWindow(config)
 	miniLbl.TextSize = 12
 	miniLbl.Font = Enum.Font.GothamBold
 	miniLbl.TextXAlignment = Enum.TextXAlignment.Left
+	miniLbl.TextYAlignment = Enum.TextYAlignment.Center
 	miniLbl.LayoutOrder = 3
 	miniLbl.ZIndex = 61
 	miniLbl.Parent = MiniToggle
@@ -4057,7 +4088,27 @@ function Library:CreateWindow(config)
 		window:Toggle(false)
 	end)
 
-	-- Close Confirmation
+	--// ==========================================================
+	--// [V5.2] CLOSE CONFIRMATION REDESIGN
+	--// - Header icon + Title tebal "System"
+	--// - Garis pembatas (divider) dengan fade gradient
+	--// - Subtitle / pesan konfirmasi
+	--// - Tombol NO / YES (cooldown)
+	--// ==========================================================
+	local CONFIRM_COOLDOWN = 5
+
+	window.confirmTitle = config.ConfirmTitle or "System"
+	window.confirmSubtitle = config.ConfirmSubtitle or "You are about to close this window. This action cannot be undone and all unsaved changes will be lost."
+
+	function window:SetConfirmText(title, subtitle)
+		if title ~= nil then
+			self.confirmTitle = tostring(title)
+		end
+		if subtitle ~= nil then
+			self.confirmSubtitle = tostring(subtitle)
+		end
+	end
+
 	local confirmModal, confirmBlocker = nil, nil
 
 	local function destroyCloseConfirm()
@@ -4094,6 +4145,7 @@ function Library:CreateWindow(config)
 
 		dragging = false
 		resizing = false
+		closeSearchResults()
 
 		local cd = window._closeButtonData
 		if cd and cd.btn and cd.btn.Parent then
@@ -4129,16 +4181,16 @@ function Library:CreateWindow(config)
 		confirmModal.Name = "CloseConfirmModal"
 		confirmModal.AnchorPoint = Vector2.new(0.5, 0.5)
 		confirmModal.Position = UDim2.new(0.5, 0, 0.5, 0)
-		confirmModal.Size = UDim2.new(0, 320, 0, 160)
+		confirmModal.Size = UDim2.new(0, 360, 0, 210)
 		confirmModal.BackgroundColor3 = Theme.ConfirmBackground
 		confirmModal.BackgroundTransparency = 0.18
 		confirmModal.BorderSizePixel = 0
 		confirmModal.ClipsDescendants = false
 		confirmModal.ZIndex = 9999
 		confirmModal.Parent = main
-		Corner(confirmModal, 10)
+		Corner(confirmModal, 12)
 
-		local modalStroke = Stroke(confirmModal, closeColor, 1.4)
+		local modalStroke = Stroke(confirmModal, closeColor, 1.6)
 		modalStroke.Transparency = 0.45
 
 		local modalScale = Instance.new("UIScale")
@@ -4149,37 +4201,112 @@ function Library:CreateWindow(config)
 		Tween(confirmModal, .18, {BackgroundTransparency = 0})
 		Tween(modalStroke, .22, {Transparency = 0.18})
 
-		local questionLbl = Instance.new("TextLabel")
-		questionLbl.Size = UDim2.new(1, -24, 0, 42)
-		questionLbl.Position = UDim2.new(0, 12, 0, 18)
-		questionLbl.BackgroundTransparency = 1
-		questionLbl.Text = "Do you want to close this window?"
-		questionLbl.TextColor3 = Theme.ConfirmText
-		questionLbl.TextTransparency = 1
-		questionLbl.TextSize = 14
-		questionLbl.Font = Enum.Font.GothamBold
-		questionLbl.TextWrapped = true
-		questionLbl.ZIndex = 10000
-		questionLbl.Parent = confirmModal
+		-- Header row: icon + title tebal "System"
+		local header = Instance.new("Frame")
+		header.Name = "Header"
+		header.Size = UDim2.new(1, -28, 0, 40)
+		header.Position = UDim2.new(0, 14, 0, 14)
+		header.BackgroundTransparency = 1
+		header.ZIndex = 10000
+		header.Parent = confirmModal
 
-		Tween(questionLbl, .2, {TextTransparency = 0})
+		local headerLayout = Instance.new("UIListLayout")
+		headerLayout.FillDirection = Enum.FillDirection.Horizontal
+		headerLayout.SortOrder = Enum.SortOrder.LayoutOrder
+		headerLayout.Padding = UDim.new(0, 10)
+		headerLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+		headerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+		headerLayout.Parent = header
 
+		local headIcon = Instance.new("ImageLabel")
+		headIcon.Name = "HeadIcon"
+		headIcon.Size = UDim2.new(0, 22, 0, 22)
+		headIcon.BackgroundTransparency = 1
+		headIcon.ImageColor3 = closeColor
+		headIcon.LayoutOrder = 1
+		headIcon.ZIndex = 10001
+		headIcon.Parent = header
+		setIcon(headIcon, "x-circle")
+
+		local titleLbl = Instance.new("TextLabel")
+		titleLbl.Name = "Title"
+		titleLbl.Size = UDim2.new(1, -32, 0, 22)
+		titleLbl.BackgroundTransparency = 1
+		titleLbl.Text = tostring(window.confirmTitle or "System")
+		titleLbl.TextColor3 = Theme.ConfirmText
+		titleLbl.TextTransparency = 1
+		titleLbl.TextSize = 17
+		titleLbl.Font = Enum.Font.GothamBlack
+		titleLbl.TextXAlignment = Enum.TextXAlignment.Left
+		titleLbl.TextYAlignment = Enum.TextYAlignment.Center
+		titleLbl.LayoutOrder = 2
+		titleLbl.ZIndex = 10001
+		titleLbl.Parent = header
+
+		Tween(titleLbl, .22, {TextTransparency = 0})
+
+		-- Garis pembatas (divider) dengan fade gradient di kiri-kanan
+		local divider = Instance.new("Frame")
+		divider.Name = "Divider"
+		divider.Size = UDim2.new(1, -28, 0, 1)
+		divider.Position = UDim2.new(0, 14, 0, 58)
+		divider.BackgroundColor3 = closeColor
+		divider.BackgroundTransparency = 0.55
+		divider.BorderSizePixel = 0
+		divider.ZIndex = 10000
+		divider.Parent = confirmModal
+		Corner(divider, 99)
+
+		local divGrad = Instance.new("UIGradient")
+		divGrad.Color = ColorSequence.new{
+			ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
+			ColorSequenceKeypoint.new(0.5, Color3.new(1, 1, 1)),
+			ColorSequenceKeypoint.new(1, Color3.new(1, 1, 1)),
+		}
+		divGrad.Transparency = NumberSequence.new{
+			NumberSequenceKeypoint.new(0, 1),
+			NumberSequenceKeypoint.new(0.12, 0),
+			NumberSequenceKeypoint.new(0.88, 0),
+			NumberSequenceKeypoint.new(1, 1),
+		}
+		divGrad.Parent = divider
+
+		-- Subtitle / pesan
+		local subtitleLbl = Instance.new("TextLabel")
+		subtitleLbl.Name = "Subtitle"
+		subtitleLbl.Size = UDim2.new(1, -28, 0, 56)
+		subtitleLbl.Position = UDim2.new(0, 14, 0, 68)
+		subtitleLbl.BackgroundTransparency = 1
+		subtitleLbl.Text = tostring(window.confirmSubtitle or "")
+		subtitleLbl.TextColor3 = Theme.ConfirmSubText
+		subtitleLbl.TextTransparency = 1
+		subtitleLbl.TextSize = 12
+		subtitleLbl.Font = Enum.Font.Gotham
+		subtitleLbl.TextXAlignment = Enum.TextXAlignment.Left
+		subtitleLbl.TextYAlignment = Enum.TextYAlignment.Top
+		subtitleLbl.TextWrapped = true
+		subtitleLbl.ZIndex = 10000
+		subtitleLbl.Parent = confirmModal
+
+		Tween(subtitleLbl, .26, {TextTransparency = 0})
+
+		-- Buttons
 		local btnContainer = Instance.new("Frame")
-		btnContainer.Size = UDim2.new(1, -24, 0, 40)
-		btnContainer.Position = UDim2.new(0, 12, 1, -54)
+		btnContainer.Size = UDim2.new(1, -28, 0, 40)
+		btnContainer.Position = UDim2.new(0, 14, 1, -54)
 		btnContainer.BackgroundTransparency = 1
 		btnContainer.ZIndex = 10000
 		btnContainer.Parent = confirmModal
 
 		local layout = Instance.new("UIListLayout")
 		layout.FillDirection = Enum.FillDirection.Horizontal
-		layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		layout.HorizontalAlignment = Enum.HorizontalAlignment.Right
 		layout.VerticalAlignment = Enum.VerticalAlignment.Center
-		layout.Padding = UDim.new(0, 14)
+		layout.Padding = UDim.new(0, 12)
 		layout.Parent = btnContainer
 
 		local noBtn = Instance.new("TextButton")
-		noBtn.Size = UDim2.new(0, 100, 0, 35)
+		noBtn.Size = UDim2.new(0, 100, 0, 36)
 		noBtn.BackgroundColor3 = Theme.Neutral
 		noBtn.Text = "NO"
 		noBtn.TextColor3 = Theme.ConfirmText
@@ -4188,7 +4315,7 @@ function Library:CreateWindow(config)
 		noBtn.AutoButtonColor = false
 		noBtn.ZIndex = 10001
 		noBtn.Parent = btnContainer
-		Corner(noBtn, 6)
+		Corner(noBtn, 7)
 
 		noBtn.MouseEnter:Connect(function()
 			Tween(noBtn, .15, {BackgroundColor3 = Theme.NeutralHover})
@@ -4203,7 +4330,7 @@ function Library:CreateWindow(config)
 		end)
 
 		local yesBtn = Instance.new("TextButton")
-		yesBtn.Size = UDim2.new(0, 100, 0, 35)
+		yesBtn.Size = UDim2.new(0, 100, 0, 36)
 		yesBtn.BackgroundColor3 = closeColor
 		yesBtn.Text = "YES"
 		yesBtn.TextColor3 = closeText
@@ -4212,7 +4339,7 @@ function Library:CreateWindow(config)
 		yesBtn.AutoButtonColor = false
 		yesBtn.ZIndex = 10001
 		yesBtn.Parent = btnContainer
-		Corner(yesBtn, 6)
+		Corner(yesBtn, 7)
 
 		local canClickYes = false
 
@@ -4232,7 +4359,7 @@ function Library:CreateWindow(config)
 			yesBtn.BackgroundColor3 = Theme.Disabled
 			yesBtn.TextColor3 = Theme.DisabledText
 
-			for i = 5, 1, -1 do
+			for i = CONFIRM_COOLDOWN, 1, -1 do
 				if not yesBtn.Parent then
 					break
 				end
@@ -4326,6 +4453,7 @@ function Library:CreateWindow(config)
 	nameLbl.TextSize = 13
 	nameLbl.Font = Enum.Font.GothamBold
 	nameLbl.TextXAlignment = Enum.TextXAlignment.Left
+	nameLbl.TextYAlignment = Enum.TextYAlignment.Center
 	nameLbl.TextTruncate = Enum.TextTruncate.AtEnd
 	nameLbl.Parent = info
 
@@ -4338,6 +4466,7 @@ function Library:CreateWindow(config)
 	userLbl.TextSize = 10
 	userLbl.Font = Enum.Font.Gotham
 	userLbl.TextXAlignment = Enum.TextXAlignment.Left
+	userLbl.TextYAlignment = Enum.TextYAlignment.Center
 	userLbl.TextTruncate = Enum.TextTruncate.AtEnd
 	userLbl.Parent = info
 
@@ -4350,6 +4479,7 @@ function Library:CreateWindow(config)
 	statsLbl.TextSize = 10
 	statsLbl.Font = Enum.Font.GothamMedium
 	statsLbl.TextXAlignment = Enum.TextXAlignment.Left
+	statsLbl.TextYAlignment = Enum.TextYAlignment.Center
 	statsLbl.Parent = info
 
 	window:onAccent(function(c)
