@@ -2294,7 +2294,7 @@ function Library:CreateWindow(config)
 	searchInput.Position = UDim2.new(0, searchIconOffset, 0.5, -13)
 	searchInput.BackgroundTransparency = 1
 	searchInput.BorderSizePixel = 0
-	searchInput.PlaceholderText = "Search UI..."
+	searchInput.PlaceholderText = "Search..."
 	searchInput.PlaceholderColor3 = Theme.SubText
 	searchInput.Text = ""
 	searchInput.TextColor3 = Theme.Text
@@ -4095,9 +4095,9 @@ function Library:CreateWindow(config)
 	--// - Subtitle / pesan konfirmasi
 	--// - Tombol NO / YES (cooldown)
 	--// ==========================================================
-	local CONFIRM_COOLDOWN = 5
+	local CONFIRM_COOLDOWN = 3
 
-	window.confirmTitle = config.ConfirmTitle or "System"
+	window.confirmTitle = config.ConfirmTitle or "Important Information"
 	window.confirmSubtitle = config.ConfirmSubtitle or "You are about to close this window. This action cannot be undone and all unsaved changes will be lost."
 
 	function window:SetConfirmText(title, subtitle)
