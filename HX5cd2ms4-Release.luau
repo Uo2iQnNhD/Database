@@ -3798,25 +3798,77 @@ function Library:CreateWindow(config)
 
 		function tab:CreateColorPicker(cfg)
 			cfg = cfg or {}
-			local col = cfg.Default or Color3.fromRGB(255, 80, 80)
+			local TextService = game:GetService("TextService")
+
+			-- Truncation manual (sama seperti dropdown) supaya nama tidak menimpa swatch
+			local function fitText(textObj, fullText)
+				if not textObj or not textObj.Parent then return end
+				fullText = tostring(fullText or "")
+				local w = textObj.AbsoluteSize.X
+				if w <= 1 then
+					textObj.Text = ""
+					return
+				end
+				w = w - 2
+				local big = Vector2.new(999999, 999999)
+				local b0 = TextService:GetTextSize(fullText, textObj.TextSize, textObj.Font, big)
+				if b0.X <= w then
+					textObj.Text = fullText
+					return
+				end
+				local lo, hi, best = 1, #fullText, ""
+				while lo <= hi do
+					local mid = math.floor((lo + hi) / 2)
+					local cand = string.sub(fullText, 1, mid) .. "..."
+					local bb = TextService:GetTextSize(cand, textObj.TextSize, textObj.Font, big)
+					if bb.X <= w then
+						best = cand
+						lo = mid + 1
+					else
+						hi = mid - 1
+					end
+				end
+				if best == "" then best = "..." end
+				textObj.Text = best
+			end
+
+			local startCol = (typeof(cfg.Default) == "Color3" and cfg.Default) or Color3.fromRGB(255, 80, 80)
+			local h0, s0, v0 = startCol:ToHSV()
+			local hue, sat, val = h0, s0, v0
+			local col = Color3.fromHSV(hue, sat, val)
+
 			local f, s = elementFrame(H_ELEMENT)
 			f.ClipsDescendants = true
 
+			local hasIcon = makeIcon(f, cfg.Icon, UDim2.new(0, 16, 0, 16), UDim2.new(0, 12, 0, 11), Theme.SubText)
+			local lx = hasIcon and 34 or 12
+
+			-- Label kiri (dibatasi supaya tidak menimpa swatch)
+			local nameFull = cfg.Name or cfg.Title or "Color Picker"
 			local lbl = Instance.new("TextLabel")
-			lbl.Size = UDim2.new(1, -66, 1, 0)
-			lbl.Position = UDim2.new(0, 12, 0, 0)
+			lbl.Size = UDim2.new(1, -(lx + 78), 0, H_ELEMENT)
+			lbl.Position = UDim2.new(0, lx, 0, 0)
 			lbl.BackgroundTransparency = 1
-			lbl.Text = cfg.Name or cfg.Title or "Color Picker"
+			lbl.Text = ""
 			lbl.TextColor3 = Theme.Text
 			lbl.TextSize = 13
 			lbl.Font = Enum.Font.Gotham
 			lbl.TextXAlignment = Enum.TextXAlignment.Left
 			lbl.TextYAlignment = Enum.TextYAlignment.Center
+			lbl.TextTruncate = Enum.TextTruncate.AtEnd
 			lbl.Parent = f
 
+			local function refreshLbl() fitText(lbl, nameFull) end
+			task.spawn(function()
+				task.wait()
+				refreshLbl()
+			end)
+			Connect(lbl:GetPropertyChangedSignal("AbsoluteSize"), refreshLbl, window)
+
+			-- Swatch kanan
 			local swatch = Instance.new("TextButton")
 			swatch.Size = UDim2.new(0, 42, 0, 20)
-			swatch.Position = UDim2.new(1, -54, 0.5, -10)
+			swatch.Position = UDim2.new(1, -54, 0, 9)
 			swatch.BackgroundColor3 = col
 			swatch.BorderSizePixel = 0
 			swatch.Text = ""
@@ -3825,58 +3877,223 @@ function Library:CreateWindow(config)
 			Corner(swatch, 5)
 			Stroke(swatch, Color3.new(1, 1, 1), 1).Transparency = .75
 
-			local picker = Instance.new("Frame")
-			picker.Size = UDim2.new(1, -16, 0, 0)
-			picker.Position = UDim2.new(0, 8, 0, 42)
-			picker.BackgroundTransparency = 1
-			picker.ClipsDescendants = true
-			picker.Parent = f
+			-- Layout area expand
+			local padTop = H_ELEMENT + 6
+			local svH = 84
+			local hueH = 12
+			local gridCell = 20
+			local gridPad = 4
+			local gridCols = 6
 
+			local presets = {
+				Color3.fromRGB(255, 70, 70),  Color3.fromRGB(255, 120, 60), Color3.fromRGB(255, 170, 50),
+				Color3.fromRGB(255, 215, 60), Color3.fromRGB(220, 240, 60), Color3.fromRGB(150, 235, 70),
+				Color3.fromRGB(80, 230, 110), Color3.fromRGB(50, 225, 160), Color3.fromRGB(50, 220, 210),
+				Color3.fromRGB(60, 180, 240), Color3.fromRGB(70, 130, 255), Color3.fromRGB(110, 90, 255),
+				Color3.fromRGB(150, 80, 255), Color3.fromRGB(190, 80, 250), Color3.fromRGB(230, 80, 220),
+				Color3.fromRGB(255, 80, 170), Color3.fromRGB(255, 90, 130), Color3.fromRGB(255, 255, 255),
+				Color3.fromRGB(200, 200, 210),Color3.fromRGB(150, 150, 160),Color3.fromRGB(110, 110, 120),
+				Color3.fromRGB(70, 70, 80),   Color3.fromRGB(40, 40, 48),   Color3.fromRGB(15, 15, 20),
+			}
+
+			local gridRows = math.ceil(#presets / gridCols)
+			local gridH = gridRows * (gridCell + gridPad) - gridPad
+			local openH = padTop + svH + 6 + hueH + 6 + gridH + 8
+
+			-- Saturation / Value pad (2D)
+			local svPad = Instance.new("Frame")
+			svPad.Size = UDim2.new(1, -16, 0, svH)
+			svPad.Position = UDim2.new(0, 8, 0, padTop)
+			svPad.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
+			svPad.BorderSizePixel = 0
+			svPad.Parent = f
+			Corner(svPad, 6)
+
+			local satLayer = Instance.new("Frame")
+			satLayer.Size = UDim2.new(1, 0, 1, 0)
+			satLayer.BackgroundColor3 = Color3.new(1, 1, 1)
+			satLayer.BorderSizePixel = 0
+			satLayer.Parent = svPad
+			local satGrad = Instance.new("UIGradient")
+			satGrad.Color = ColorSequence.new(Color3.new(1, 1, 1))
+			satGrad.Transparency = NumberSequence.new{
+				NumberSequenceKeypoint.new(0, 0),
+				NumberSequenceKeypoint.new(1, 1),
+			}
+			satGrad.Rotation = 0
+			satGrad.Parent = satLayer
+
+			local valLayer = Instance.new("Frame")
+			valLayer.Size = UDim2.new(1, 0, 1, 0)
+			valLayer.BackgroundColor3 = Color3.new(0, 0, 0)
+			valLayer.BorderSizePixel = 0
+			valLayer.Parent = satLayer
+			local valGrad = Instance.new("UIGradient")
+			valGrad.Color = ColorSequence.new(Color3.new(0, 0, 0))
+			valGrad.Transparency = NumberSequence.new{
+				NumberSequenceKeypoint.new(0, 1),
+				NumberSequenceKeypoint.new(1, 0),
+			}
+			valGrad.Rotation = 90
+			valGrad.Parent = valLayer
+
+			local svPointer = Instance.new("Frame")
+			svPointer.AnchorPoint = Vector2.new(0.5, 0.5)
+			svPointer.Size = UDim2.new(0, 12, 0, 12)
+			svPointer.Position = UDim2.new(sat, 0, val, 0)
+			svPointer.BackgroundColor3 = Color3.new(1, 1, 1)
+			svPointer.BorderSizePixel = 0
+			svPointer.ZIndex = 2
+			svPointer.Parent = valLayer
+			Corner(svPointer, 99)
+			Stroke(svPointer, Color3.new(0, 0, 0), 1.5)
+
+			-- Hue slider (pelangi)
+			local hueY = padTop + svH + 6
+			local hueBar = Instance.new("Frame")
+			hueBar.Size = UDim2.new(1, -16, 0, hueH)
+			hueBar.Position = UDim2.new(0, 8, 0, hueY)
+			hueBar.BackgroundColor3 = Color3.new(1, 1, 1)
+			hueBar.BorderSizePixel = 0
+			hueBar.Parent = f
+			Corner(hueBar, 99)
+			local hueGrad = Instance.new("UIGradient")
+			hueGrad.Color = ColorSequence.new{
+				ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 0, 0)),
+				ColorSequenceKeypoint.new(0.16, Color3.fromRGB(255, 150, 0)),
+				ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 255, 120)),
+				ColorSequenceKeypoint.new(0.50, Color3.fromRGB(0, 200, 255)),
+				ColorSequenceKeypoint.new(0.66, Color3.fromRGB(80, 80, 255)),
+				ColorSequenceKeypoint.new(0.83, Color3.fromRGB(255, 0, 200)),
+				ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 0, 0)),
+			}
+			hueGrad.Rotation = 0
+			hueGrad.Parent = hueBar
+
+			local huePointer = Instance.new("Frame")
+			huePointer.AnchorPoint = Vector2.new(0.5, 0.5)
+			huePointer.Size = UDim2.new(0, 10, 0, hueH + 4)
+			huePointer.Position = UDim2.new(hue, 0, 0.5, 0)
+			huePointer.BackgroundColor3 = Color3.new(1, 1, 1)
+			huePointer.BorderSizePixel = 0
+			huePointer.ZIndex = 2
+			huePointer.Parent = hueBar
+			Corner(huePointer, 99)
+
+			-- Grid preset
+			local gridY = hueY + hueH + 6
+			local gridFrame = Instance.new("Frame")
+			gridFrame.Size = UDim2.new(1, -16, 0, gridH)
+			gridFrame.Position = UDim2.new(0, 8, 0, gridY)
+			gridFrame.BackgroundTransparency = 1
+			gridFrame.BorderSizePixel = 0
+			gridFrame.Parent = f
 			local grid = Instance.new("UIGridLayout")
-			grid.CellSize = UDim2.new(0, 26, 0, 26)
-			grid.CellPadding = UDim2.new(0, 5, 0, 5)
+			grid.CellSize = UDim2.new(0, gridCell, 0, gridCell)
+			grid.CellPadding = UDim2.new(0, gridPad, 0, gridPad)
 			grid.SortOrder = Enum.SortOrder.LayoutOrder
-			grid.Parent = picker
+			grid.Parent = gridFrame
 
 			local isOpen = false
-			local function togglePicker()
-				isOpen = not isOpen
-				if isOpen then
-					Tween(f, .3, {Size = UDim2.new(1, 0, 0, 107)})
-					Tween(picker, .3, {Size = UDim2.new(1, -16, 0, 57)})
-				else
-					Tween(f, .3, {Size = UDim2.new(1, 0, 0, H_ELEMENT)})
-					Tween(picker, .3, {Size = UDim2.new(1, -16, 0, 0)})
+
+			local function applyVisuals(fire)
+				col = Color3.fromHSV(hue, sat, val)
+				svPad.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
+				svPointer.Position = UDim2.new(sat, 0, val, 0)
+				huePointer.Position = UDim2.new(hue, 0, 0.5, 0)
+				swatch.BackgroundColor3 = col
+				if cfg.Flag then
+					Library.Flags[cfg.Flag] = col
+				end
+				if fire and cfg.Callback and not Library._loading then
+					task.spawn(cfg.Callback, col)
 				end
 			end
 
-			local presets = {
-				Color3.fromRGB(255, 70, 70), Color3.fromRGB(255, 150, 60), Color3.fromRGB(255, 220, 60),
-				Color3.fromRGB(90, 230, 90), Color3.fromRGB(60, 220, 220), Color3.fromRGB(70, 130, 255),
-				Color3.fromRGB(140, 80, 255), Color3.fromRGB(255, 80, 180), Color3.fromRGB(255, 255, 255),
-				Color3.fromRGB(160, 160, 160),
-			}
+			applyVisuals(false)
 
-			for _, pc in ipairs(presets) do
+			local function togglePicker()
+				isOpen = not isOpen
+				if isOpen then
+					Tween(f, .3, {Size = UDim2.new(1, 0, 0, openH)})
+				else
+					Tween(f, .3, {Size = UDim2.new(1, 0, 0, H_ELEMENT)})
+				end
+			end
+
+			-- Drag Saturation/Value
+			local dragSV = false
+			local function svFromInput(inp)
+				local abs = svPad.AbsolutePosition
+				local sz = svPad.AbsoluteSize
+				if sz.X < 1 or sz.Y < 1 then return end
+				sat = math.clamp((inp.Position.X - abs.X) / sz.X, 0, 1)
+				val = 1 - math.clamp((inp.Position.Y - abs.Y) / sz.Y, 0, 1)
+				applyVisuals(false)
+			end
+			svPad.InputBegan:Connect(function(inp)
+				if not isOpen then return end
+				if isPressInput(inp) then
+					dragSV = true
+					svFromInput(inp)
+				end
+			end)
+			Connect(UserInputService.InputChanged, function(inp)
+				if dragSV and isOpen and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
+					svFromInput(inp)
+				end
+			end, window)
+			Connect(UserInputService.InputEnded, function(inp)
+				if dragSV and isPressInput(inp) then
+					dragSV = false
+					applyVisuals(true)
+				end
+			end, window)
+
+			-- Drag Hue
+			local dragHue = false
+			local function hueFromInput(inp)
+				local abs = hueBar.AbsolutePosition
+				local sz = hueBar.AbsoluteSize
+				if sz.X < 1 then return end
+				hue = math.clamp((inp.Position.X - abs.X) / sz.X, 0, 1)
+				applyVisuals(false)
+			end
+			hueBar.InputBegan:Connect(function(inp)
+				if not isOpen then return end
+				if isPressInput(inp) then
+					dragHue = true
+					hueFromInput(inp)
+				end
+			end)
+			Connect(UserInputService.InputChanged, function(inp)
+				if dragHue and isOpen and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
+					hueFromInput(inp)
+				end
+			end, window)
+			Connect(UserInputService.InputEnded, function(inp)
+				if dragHue and isPressInput(inp) then
+					dragHue = false
+					applyVisuals(true)
+				end
+			end, window)
+
+			-- Tombol preset
+			for i, pc in ipairs(presets) do
 				local b = Instance.new("TextButton")
-				b.Size = UDim2.new(0, 26, 0, 26)
+				b.Size = UDim2.new(0, gridCell, 0, gridCell)
 				b.BackgroundColor3 = pc
 				b.BorderSizePixel = 0
 				b.Text = ""
 				b.AutoButtonColor = false
-				b.Parent = picker
-				Corner(b, 6)
+				b.LayoutOrder = i
+				b.Parent = gridFrame
+				Corner(b, 5)
 
 				b.MouseButton1Click:Connect(function()
-					col = pc
-					swatch.BackgroundColor3 = pc
-					if cfg.Flag then
-						Library.Flags[cfg.Flag] = pc
-					end
-					togglePicker()
-					if cfg.Callback then
-						task.spawn(cfg.Callback, pc)
-					end
+					local hh, ss, vv = pc:ToHSV()
+					hue, sat, val = hh, ss, vv
+					applyVisuals(true)
 				end)
 			end
 
@@ -3890,23 +4107,19 @@ function Library:CreateWindow(config)
 
 			local obj = {
 				Set = function(self, c)
-					col = c
-					swatch.BackgroundColor3 = c
-					if cfg.Flag then
-						Library.Flags[cfg.Flag] = c
-					end
-					if cfg.Callback then
-						task.spawn(cfg.Callback, c)
-					end
-				end
+					if typeof(c) ~= "Color3" then return end
+					local hh, ss, vv = c:ToHSV()
+					hue, sat, val = hh, ss, vv
+					applyVisuals(true)
+				end,
+				Get = function()
+					return col
+				end,
 			}
 
 			registerElement(window, tab, name, f, cfg, "colorpicker", obj)
 			return obj
 		end
-
-		return tab
-	end
 
 	-- Mini Toggle
 	local MINI_W, MINI_H = 168, 42
