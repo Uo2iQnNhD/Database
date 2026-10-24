@@ -5037,7 +5037,6 @@ end
 			end,
 		})
 
-		systemTab:CreateLabel("Tip: gunakan Flag unik pada toggle/slider/input/dropdown/keybind/colorpicker agar tersimpan.")
 	end
 
 	if Library.AutoLoad.Enabled then
