@@ -5660,7 +5660,7 @@ function Library:CreateWindow(config)
 
 	-- Built-in Theme Tab
 	if config.ThemeTab ~= false then
-		local themeTab = window:CreateTab("Theme", "palette")
+		local themeTab = window:CreateTab("Theme & Settings", "palette")
 		themeTab.btn.LayoutOrder = 9998
 		themeTab.content.LayoutOrder = 9998
 
