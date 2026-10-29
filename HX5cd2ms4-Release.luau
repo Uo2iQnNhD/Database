@@ -5653,7 +5653,7 @@ function Library:CreateWindow(config)
 			local ok = Library:LoadFromFile(target)
 			if ok then
 				Library._saveFile = target
-				Library:Notify("Auto load: " .. target, 3, "ZethHub", "upload")
+				Library:Notify("Auto load: " .. target, 3, "Information Alert", "upload")
 			end
 		end)
 	end
@@ -5805,42 +5805,41 @@ function Library:CreateWindow(config)
 				Library.AnimationSpeed = v
 			end,
 		})
-	end
 
-themeTab:CreateSection("Settings")
+		-- [FIX] Section Settings DIPINDAH KE DALAM if agar themeTab masih valid (tidak nil)
+		themeTab:CreateSection("Settings")
 
-themeTab:CreateButton({
-	Name = "Go Back to Zeutron Hub",
-	Icon = "home",
-	Callback = function()
-		Library:Notify("Loading Zeutron Hub...", 3, "Navigation", "refresh-cw")
-		task.wait(1)
-		pcall(function()
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/Uo2iQnNhD/Maintenance/refs/heads/main/L3aun246-Universal.lua"))()
-		end)
-	end,
-})
+		themeTab:CreateButton({
+			Name = "Go Back to Zeutron Hub",
+			Icon = "home",
+			Callback = function()
+				Library:Notify("Loading Zeutron Hub...", 3, "Navigation", "refresh-cw")
+				task.wait(1)
+				pcall(function()
+					loadstring(game:HttpGet("https://raw.githubusercontent.com/Uo2iQnNhD/Maintenance/refs/heads/main/L3aun246-Universal.lua"))()
+				end)
+			end,
+		})
 
-themeTab:CreateButton({
-	Name = "Destroy Interface",
-	Icon = "trash-2",
-	Callback = function()
-		Library:Notify("Self-destructing in 7 seconds...", 7, "Warning", "shield-alert")
-		task.wait(7)
-		
-		-- Attempt to destroy via library method if exists, otherwise just hide/close
-		if type(Library.Destroy) == "function" then
-			Library:Destroy()
-		else
-			-- Fallback: Hide all windows manually if Destroy isn't implemented perfectly yet
-			for _, w in ipairs(Library._windows or {}) do
-				if type(w.Destroy) == "function" then
-					w:Destroy()
+		themeTab:CreateButton({
+			Name = "Destroy Interface",
+			Icon = "trash-2",
+			Callback = function()
+				Library:Notify("Self-destructing in 7 seconds...", 7, "Warning", "shield-alert")
+				task.wait(7)
+
+				if type(Library.Destroy) == "function" then
+					Library:Destroy()
+				else
+					for _, w in ipairs(Library._windows or {}) do
+						if type(w.Destroy) == "function" then
+							w:Destroy()
+						end
+					end
 				end
-			end
-		end
-	end,
-})
+			end,
+		})
+	end   -- ⬅️ penutup if sekarang SETELAH Settings (bukan sebelum)
 
 	-- Built-in Save / Load Tab
 	if config.SaveLoad ~= false then
