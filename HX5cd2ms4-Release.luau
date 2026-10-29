@@ -5978,8 +5978,6 @@ themeTab:CreateButton({
 				end
 			end,
 		})
-
-		systemTab:CreateLabel("Tip: gunakan Flag unik pada toggle/slider/input/dropdown/multidropdown/keybind/colorpicker agar tersimpan.")
 	end
 
 	if Library.AutoLoad.Enabled then
