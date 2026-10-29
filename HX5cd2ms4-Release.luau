@@ -1,4 +1,4 @@
---[[ ZETHUB - Library V5.2 Updated by Exterminate0 ]]
+--[[ ZETHUB - Library V5.3 Updated by Exterminate0 ]]
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -151,21 +151,294 @@ Theme.Presets = {
 	["Solid"] = {
 		Rainbow = false,
 		Accent = Color3.fromRGB(255, 255, 255),
+		Colors = {
+			Background = Color3.fromRGB(12, 12, 14),
+			Sidebar = Color3.fromRGB(8, 8, 10),
+			Element = Color3.fromRGB(22, 22, 26),
+			ElementHover = Color3.fromRGB(32, 32, 38),
+			Border = Color3.fromRGB(70, 70, 78),
+			Text = Color3.fromRGB(255, 255, 255),
+			SubText = Color3.fromRGB(165, 165, 172),
+		},
 	},
+
 	["RGB Rainbow"] = {
 		Rainbow = true,
+		Colors = {
+			Background = Color3.fromRGB(10, 10, 12),
+			Sidebar = Color3.fromRGB(7, 7, 9),
+			Element = Color3.fromRGB(20, 20, 24),
+			ElementHover = Color3.fromRGB(30, 30, 36),
+			Border = Color3.fromRGB(80, 80, 90),
+			Text = Color3.fromRGB(255, 255, 255),
+			SubText = Color3.fromRGB(170, 170, 178),
+		},
 	},
+
 	["Neon Blue"] = {
 		Rainbow = false,
 		Accent = Color3.fromRGB(60, 170, 255),
+		Colors = {
+			Background = Color3.fromRGB(9, 12, 18),
+			Sidebar = Color3.fromRGB(6, 9, 14),
+			Element = Color3.fromRGB(18, 24, 34),
+			ElementHover = Color3.fromRGB(28, 38, 54),
+			Border = Color3.fromRGB(55, 90, 130),
+			Text = Color3.fromRGB(240, 248, 255),
+			SubText = Color3.fromRGB(150, 175, 200),
+		},
 	},
+
 	["Emerald"] = {
 		Rainbow = false,
 		Accent = Color3.fromRGB(46, 230, 110),
+		Colors = {
+			Background = Color3.fromRGB(10, 14, 12),
+			Sidebar = Color3.fromRGB(7, 10, 9),
+			Element = Color3.fromRGB(18, 26, 22),
+			ElementHover = Color3.fromRGB(28, 40, 34),
+			Border = Color3.fromRGB(50, 90, 70),
+			Text = Color3.fromRGB(240, 255, 245),
+			SubText = Color3.fromRGB(150, 190, 165),
+		},
 	},
+
 	["Sunset"] = {
 		Rainbow = false,
 		Accent = Color3.fromRGB(255, 120, 60),
+		Colors = {
+			Background = Color3.fromRGB(16, 11, 12),
+			Sidebar = Color3.fromRGB(11, 8, 9),
+			Element = Color3.fromRGB(28, 20, 22),
+			ElementHover = Color3.fromRGB(42, 30, 34),
+			Border = Color3.fromRGB(100, 60, 55),
+			Text = Color3.fromRGB(255, 245, 240),
+			SubText = Color3.fromRGB(200, 160, 150),
+		},
+	},
+
+	["Ocean"] = {
+		Rainbow = false,
+		Accent = Color3.fromRGB(40, 210, 220),
+		Colors = {
+			Background = Color3.fromRGB(8, 14, 16),
+			Sidebar = Color3.fromRGB(5, 10, 12),
+			Element = Color3.fromRGB(16, 26, 30),
+			ElementHover = Color3.fromRGB(24, 38, 44),
+			Border = Color3.fromRGB(45, 95, 105),
+			Text = Color3.fromRGB(235, 255, 255),
+			SubText = Color3.fromRGB(145, 185, 190),
+		},
+	},
+
+	["Violet"] = {
+		Rainbow = false,
+		Accent = Color3.fromRGB(170, 90, 255),
+		Colors = {
+			Background = Color3.fromRGB(13, 10, 18),
+			Sidebar = Color3.fromRGB(9, 7, 13),
+			Element = Color3.fromRGB(24, 18, 34),
+			ElementHover = Color3.fromRGB(36, 28, 50),
+			Border = Color3.fromRGB(85, 60, 120),
+			Text = Color3.fromRGB(248, 240, 255),
+			SubText = Color3.fromRGB(180, 160, 205),
+		},
+	},
+
+	["Crimson"] = {
+		Rainbow = false,
+		Accent = Color3.fromRGB(255, 70, 90),
+		Colors = {
+			Background = Color3.fromRGB(16, 9, 11),
+			Sidebar = Color3.fromRGB(11, 6, 8),
+			Element = Color3.fromRGB(30, 16, 20),
+			ElementHover = Color3.fromRGB(44, 24, 30),
+			Border = Color3.fromRGB(110, 45, 55),
+			Text = Color3.fromRGB(255, 240, 242),
+			SubText = Color3.fromRGB(205, 150, 158),
+		},
+	},
+
+	["Gold"] = {
+		Rainbow = false,
+		Accent = Color3.fromRGB(255, 200, 70),
+		Colors = {
+			Background = Color3.fromRGB(15, 13, 9),
+			Sidebar = Color3.fromRGB(10, 9, 6),
+			Element = Color3.fromRGB(28, 24, 16),
+			ElementHover = Color3.fromRGB(42, 36, 24),
+			Border = Color3.fromRGB(105, 88, 45),
+			Text = Color3.fromRGB(255, 250, 235),
+			SubText = Color3.fromRGB(205, 190, 150),
+		},
+	},
+
+	["Cyberpunk"] = {
+		Rainbow = false,
+		Accent = Color3.fromRGB(255, 40, 200),
+		Colors = {
+			Background = Color3.fromRGB(10, 8, 16),
+			Sidebar = Color3.fromRGB(6, 5, 11),
+			Element = Color3.fromRGB(20, 14, 32),
+			ElementHover = Color3.fromRGB(32, 22, 50),
+			Border = Color3.fromRGB(90, 40, 130),
+			Text = Color3.fromRGB(255, 240, 255),
+			SubText = Color3.fromRGB(190, 150, 210),
+		},
+	},
+
+	["Toxic"] = {
+		Rainbow = false,
+		Accent = Color3.fromRGB(170, 255, 60),
+		Colors = {
+			Background = Color3.fromRGB(10, 13, 8),
+			Sidebar = Color3.fromRGB(7, 9, 5),
+			Element = Color3.fromRGB(18, 24, 14),
+			ElementHover = Color3.fromRGB(28, 38, 22),
+			Border = Color3.fromRGB(65, 95, 40),
+			Text = Color3.fromRGB(240, 255, 230),
+			SubText = Color3.fromRGB(160, 190, 135),
+		},
+	},
+
+	["Sakura"] = {
+		Rainbow = false,
+		Accent = Color3.fromRGB(255, 140, 190),
+		Colors = {
+			Background = Color3.fromRGB(16, 11, 14),
+			Sidebar = Color3.fromRGB(11, 8, 10),
+			Element = Color3.fromRGB(30, 20, 26),
+			ElementHover = Color3.fromRGB(44, 30, 38),
+			Border = Color3.fromRGB(110, 70, 90),
+			Text = Color3.fromRGB(255, 242, 248),
+			SubText = Color3.fromRGB(205, 165, 185),
+		},
+	},
+
+	["Ice"] = {
+		Rainbow = false,
+		Accent = Color3.fromRGB(150, 220, 255),
+		Colors = {
+			Background = Color3.fromRGB(10, 13, 16),
+			Sidebar = Color3.fromRGB(7, 9, 12),
+			Element = Color3.fromRGB(18, 24, 30),
+			ElementHover = Color3.fromRGB(28, 38, 46),
+			Border = Color3.fromRGB(60, 95, 120),
+			Text = Color3.fromRGB(240, 250, 255),
+			SubText = Color3.fromRGB(160, 185, 205),
+		},
+	},
+
+	["Blood Moon"] = {
+		Rainbow = false,
+		Accent = Color3.fromRGB(220, 40, 60),
+		Colors = {
+			Background = Color3.fromRGB(12, 7, 8),
+			Sidebar = Color3.fromRGB(8, 5, 6),
+			Element = Color3.fromRGB(24, 12, 15),
+			ElementHover = Color3.fromRGB(38, 20, 24),
+			Border = Color3.fromRGB(95, 35, 45),
+			Text = Color3.fromRGB(255, 235, 238),
+			SubText = Color3.fromRGB(195, 140, 148),
+		},
+	},
+
+	["Forest"] = {
+		Rainbow = false,
+		Accent = Color3.fromRGB(90, 200, 120),
+		Colors = {
+			Background = Color3.fromRGB(9, 12, 10),
+			Sidebar = Color3.fromRGB(6, 8, 7),
+			Element = Color3.fromRGB(16, 22, 18),
+			ElementHover = Color3.fromRGB(26, 34, 28),
+			Border = Color3.fromRGB(45, 80, 58),
+			Text = Color3.fromRGB(238, 255, 244),
+			SubText = Color3.fromRGB(150, 185, 160),
+		},
+	},
+
+	["Royal"] = {
+		Rainbow = false,
+		Accent = Color3.fromRGB(120, 90, 255),
+		Colors = {
+			Background = Color3.fromRGB(11, 10, 17),
+			Sidebar = Color3.fromRGB(7, 7, 12),
+			Element = Color3.fromRGB(20, 18, 32),
+			ElementHover = Color3.fromRGB(32, 28, 50),
+			Border = Color3.fromRGB(75, 65, 125),
+			Text = Color3.fromRGB(245, 242, 255),
+			SubText = Color3.fromRGB(170, 165, 210),
+		},
+	},
+
+	["Amber"] = {
+		Rainbow = false,
+		Accent = Color3.fromRGB(255, 170, 50),
+		Colors = {
+			Background = Color3.fromRGB(15, 12, 8),
+			Sidebar = Color3.fromRGB(10, 8, 5),
+			Element = Color3.fromRGB(28, 22, 14),
+			ElementHover = Color3.fromRGB(42, 34, 22),
+			Border = Color3.fromRGB(105, 80, 40),
+			Text = Color3.fromRGB(255, 248, 235),
+			SubText = Color3.fromRGB(205, 180, 140),
+		},
+	},
+
+	["Mono"] = {
+		Rainbow = false,
+		Accent = Color3.fromRGB(210, 210, 210),
+		Colors = {
+			Background = Color3.fromRGB(14, 14, 14),
+			Sidebar = Color3.fromRGB(9, 9, 9),
+			Element = Color3.fromRGB(24, 24, 24),
+			ElementHover = Color3.fromRGB(34, 34, 34),
+			Border = Color3.fromRGB(70, 70, 70),
+			Text = Color3.fromRGB(245, 245, 245),
+			SubText = Color3.fromRGB(160, 160, 160),
+		},
+	},
+
+	["Lava"] = {
+		Rainbow = false,
+		Accent = Color3.fromRGB(255, 90, 30),
+		Colors = {
+			Background = Color3.fromRGB(14, 8, 6),
+			Sidebar = Color3.fromRGB(9, 5, 4),
+			Element = Color3.fromRGB(26, 14, 10),
+			ElementHover = Color3.fromRGB(40, 22, 16),
+			Border = Color3.fromRGB(100, 45, 30),
+			Text = Color3.fromRGB(255, 240, 230),
+			SubText = Color3.fromRGB(200, 150, 130),
+		},
+	},
+
+	["Mint"] = {
+		Rainbow = false,
+		Accent = Color3.fromRGB(80, 240, 190),
+		Colors = {
+			Background = Color3.fromRGB(9, 14, 13),
+			Sidebar = Color3.fromRGB(6, 10, 9),
+			Element = Color3.fromRGB(16, 26, 24),
+			ElementHover = Color3.fromRGB(24, 38, 35),
+			Border = Color3.fromRGB(45, 95, 85),
+			Text = Color3.fromRGB(235, 255, 250),
+			SubText = Color3.fromRGB(145, 190, 180),
+		},
+	},
+
+	["Peach"] = {
+		Rainbow = false,
+		Accent = Color3.fromRGB(255, 155, 120),
+		Colors = {
+			Background = Color3.fromRGB(16, 12, 11),
+			Sidebar = Color3.fromRGB(11, 8, 7),
+			Element = Color3.fromRGB(30, 22, 20),
+			ElementHover = Color3.fromRGB(44, 32, 29),
+			Border = Color3.fromRGB(110, 75, 68),
+			Text = Color3.fromRGB(255, 245, 240),
+			SubText = Color3.fromRGB(205, 170, 160),
+		},
 	},
 }
 
@@ -230,7 +503,8 @@ local fallbackIcons = {
 	["droplet"]="rbxassetid://7734021595", ["border-all"]="rbxassetid://7733955179",
 	["border-inner"]="rbxassetid://7734058260", ["clock"]="rbxassetid://7743873443",
 	["save"]="rbxassetid://7733770755", ["load"]="rbxassetid://7743875428",
-	["theme"]="rbxassetid://7734021595",
+	["theme"]="rbxassetid://7734021595", ["layers"]="rbxassetid://7733917120",
+	["copy"]="rbxassetid://7733734762", ["list"]="rbxassetid://7733789088",
 }
 
 for name, asset in pairs(fallbackIcons) do
@@ -640,6 +914,16 @@ function ThemeManager:NotifyWindows()
 	end
 end
 
+function ThemeManager:RefreshWindows()
+	for _, w in ipairs(Library._windows) do
+		if w and not w._destroyed and type(w.ApplyTheme) == "function" then
+			pcall(function()
+				w:ApplyTheme()
+			end)
+		end
+	end
+end
+
 function ThemeManager:Update()
 	if ThemeManager.Mode == "RGB Rainbow" then
 		Library.Accent = currentRainbowColor(0)
@@ -768,6 +1052,12 @@ function Library:SetTheme(name)
 		return false
 	end
 
+	if type(preset.Colors) == "table" then
+		for k, v in pairs(preset.Colors) do
+			Theme[k] = v
+		end
+	end
+
 	if preset.Accent then
 		Library.Accent = preset.Accent
 	end
@@ -779,6 +1069,7 @@ function Library:SetTheme(name)
 		ThemeManager:Update()
 	end
 
+	ThemeManager:RefreshWindows()
 	return true
 end
 
@@ -1122,7 +1413,7 @@ function Library:SaveToFile(name)
 	local payload = {
 		Meta = {
 			Library = "ZethHub",
-			Version = 5.2,
+			Version = 5.3,
 			SavedAt = os.time(),
 			PlaceId = placeId,
 			FileName = name,
@@ -1174,6 +1465,8 @@ function Library:LoadFromFile(name)
 					el.Object:Set(tostring(value or ""))
 				elseif el.Type == "dropdown" then
 					el.Object:Set(tostring(value or ""))
+				elseif el.Type == "multidropdown" then
+					el.Object:Set(value)
 				elseif el.Type == "keybind" then
 					local kc = value
 					if typeof(kc) == "string" then
@@ -1607,7 +1900,7 @@ function Library:Notify(...)
 end
 
 -- PART 1 END
--- JANGAN JALANKAN SENDIRI. LANJUTKAN DENGAN PART 2.
+-- JANGAN JALANKAN SENDIRI. LANJUTKAN DENGAN PART 2
 --// Window
 function Library:CreateWindow(config)
 	if Library._destroyed or (type(Env) == "table" and Env.ZethHubGeneration ~= Library.Generation) then
@@ -1616,7 +1909,7 @@ function Library:CreateWindow(config)
 
 	config = config or {}
 	local title = config.Title or "ZETHUB"
-	local subtitle = config.Subtitle or "V5.2 • RGB / Particle / Save-Load"
+	local subtitle = config.Subtitle or "V5.3 • RGB / Particle / Multi-Select"
 	local OPEN_SIZE = UDim2.new(0, 560, 0, 420)
 
 	local gui = Instance.new("ScreenGui")
@@ -1631,6 +1924,15 @@ function Library:CreateWindow(config)
 		gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 	end
 
+	--// Theme live-refresh references
+	-- Tiap entri: {obj = Instance, prop = "BackgroundColor3"/"BorderColor3"/..., key = "Background"/"Sidebar"/...}
+	local themeRefs = {}
+
+	local function registerThemeRef(obj, prop, key)
+		if not obj then return end
+		table.insert(themeRefs, {obj = obj, prop = prop, key = key})
+	end
+
 	local main = Instance.new("Frame")
 	main.Name = "Main"
 	main.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -1643,6 +1945,7 @@ function Library:CreateWindow(config)
 	main.ZIndex = 40
 	main.Parent = gui
 	Corner(main, 12)
+	registerThemeRef(main, "BackgroundColor3", "Background")
 
 	local mainStroke = Stroke(main, Color3.new(1, 1, 1), Theme.MainBorderThickness)
 	registerRGB(mainStroke)
@@ -1756,6 +2059,7 @@ function Library:CreateWindow(config)
 	titleLbl.LayoutOrder = 1
 	titleLbl.ZIndex = 47
 	titleLbl.Parent = titleRow
+	registerThemeRef(titleLbl, "TextColor3", "Text")
 
 	local subLbl = Instance.new("TextLabel")
 	subLbl.Size = UDim2.new(0.6, 0, 0, 14)
@@ -1768,6 +2072,7 @@ function Library:CreateWindow(config)
 	subLbl.TextXAlignment = Enum.TextXAlignment.Left
 	subLbl.ZIndex = 46
 	subLbl.Parent = topbar
+	registerThemeRef(subLbl, "TextColor3", "SubText")
 
 	local tagRow = Instance.new("Frame")
 	tagRow.Size = UDim2.new(0, 0, 0, 22)
@@ -1815,6 +2120,7 @@ function Library:CreateWindow(config)
 		b.ZIndex = 48
 		b.Parent = topbar
 		Corner(b, 6)
+		registerThemeRef(b, "BackgroundColor3", "Element")
 
 		local scale = Instance.new("UIScale")
 		scale.Parent = b
@@ -1846,6 +2152,7 @@ function Library:CreateWindow(config)
 				l.ZIndex = 49
 				l.Parent = b
 				table.insert(lines, l)
+				registerThemeRef(l, "BackgroundColor3", "SubText")
 			end
 
 			b.MouseEnter:Connect(function()
@@ -1871,6 +2178,7 @@ function Library:CreateWindow(config)
 			l.ZIndex = 49
 			l.Parent = b
 			table.insert(lines, l)
+			registerThemeRef(l, "BackgroundColor3", "SubText")
 
 			b.MouseEnter:Connect(function()
 				if Library._confirmOpen then return end
@@ -1953,6 +2261,7 @@ function Library:CreateWindow(config)
 		_closeConfirmCleanup = nil,
 		_closeButtonData = nil,
 		_minimizeButtonData = nil,
+		_themeRefs = themeRefs,
 	}
 
 	window._closeButtonData = closeBtnData
@@ -1961,6 +2270,25 @@ function Library:CreateWindow(config)
 	if config.Accent and typeof(config.Accent) == "Color3" then
 		Library.Accent = config.Accent
 		ThemeManager.Dirty = true
+	end
+
+	--// Apply theme ke semua referensi elemen window
+	function window:ApplyTheme()
+		if self._destroyed then return end
+
+		for _, ref in ipairs(themeRefs) do
+			if ref.obj and ref.obj.Parent then
+				local c = Theme[ref.key]
+				if c then
+					pcall(function()
+						ref.obj[ref.prop] = c
+					end)
+				end
+			end
+		end
+
+		-- Refresh RGB gradients/strokes agar ikut mode terbaru
+		refreshRGBColors()
 	end
 
 	function window:Destroy()
@@ -1979,6 +2307,7 @@ function Library:CreateWindow(config)
 
 		self._connections = {}
 		self.listeners = {}
+		self._themeRefs = {}
 
 		local removeFlags = {}
 		for flag, el in pairs(Library._elements) do
@@ -2092,8 +2421,8 @@ function Library:CreateWindow(config)
 	local tagsConfig = config.Tags
 	if tagsConfig == nil then
 		tagsConfig = {
-			{Text = "V5.2", Color = Color3.fromRGB(255, 204, 0), TextColor = Color3.fromRGB(0, 0, 0)},
-			{Text = "RGB / FX", Color = Color3.fromRGB(46, 230, 110), TextColor = Color3.fromRGB(0, 0, 0)},
+			{Text = "V5.3", Color = Color3.fromRGB(255, 204, 0), TextColor = Color3.fromRGB(0, 0, 0)},
+			{Text = "Multi-Select", Color = Color3.fromRGB(46, 230, 110), TextColor = Color3.fromRGB(0, 0, 0)},
 		}
 	end
 
@@ -2126,6 +2455,7 @@ function Library:CreateWindow(config)
 		d.BorderSizePixel = 0
 		d.ZIndex = 51
 		d.Parent = resizeHandle
+		registerThemeRef(d, "BackgroundColor3", "SubText")
 	end
 
 	local resizing, resizeStart, resizeOrig = false, nil, nil
@@ -2214,9 +2544,6 @@ function Library:CreateWindow(config)
 	end, window)
 
 	-- Sidebar
-	-- [FIX V5.2] Blok "sideTop" lama DIHAPUS karena menutupi bagian atas sidebar
-	-- sehingga Search UI / tab pertama terlihat terpotong. Sebagai gantinya
-	-- padding atas sidebar dinaikkan dan sidebar tidak lagi di-clip.
 	local sidebar = Instance.new("Frame")
 	sidebar.Size = UDim2.new(0, 150, 1, -TOPBAR_H)
 	sidebar.Position = UDim2.new(0, 0, 0, TOPBAR_H)
@@ -2226,9 +2553,11 @@ function Library:CreateWindow(config)
 	sidebar.ZIndex = 41
 	sidebar.Parent = main
 	Corner(sidebar, 10)
+	registerThemeRef(sidebar, "BackgroundColor3", "Sidebar")
 
 	local sideStroke = Stroke(sidebar, Theme.Border, 1.2)
 	sideStroke.Transparency = 0.35
+	registerThemeRef(sideStroke, "Color", "Border")
 
 	local sideList = Instance.new("UIListLayout")
 	sideList.SortOrder = Enum.SortOrder.LayoutOrder
@@ -2283,9 +2612,13 @@ function Library:CreateWindow(config)
 	searchBar.ZIndex = 43
 	searchBar.Parent = sidebar
 	Corner(searchBar, 8)
-	Stroke(searchBar, Theme.Border, 1.4)
+	registerThemeRef(searchBar, "BackgroundColor3", "Element")
+
+	local searchStroke = Stroke(searchBar, Theme.Border, 1.4)
+	registerThemeRef(searchStroke, "Color", "Border")
 
 	local searchIcon = makeIcon(searchBar, "search", UDim2.new(0, 14, 0, 14), UDim2.new(0, 10, 0.5, -7), Theme.SubText)
+	if searchIcon then registerThemeRef(searchIcon, "ImageColor3", "SubText") end
 	local searchIconOffset = searchIcon and 32 or 12
 
 	local searchInput = Instance.new("TextBox")
@@ -2305,6 +2638,8 @@ function Library:CreateWindow(config)
 	searchInput.ClearTextOnFocus = false
 	searchInput.ZIndex = 44
 	searchInput.Parent = searchBar
+	registerThemeRef(searchInput, "TextColor3", "Text")
+	registerThemeRef(searchInput, "PlaceholderColor3", "SubText")
 
 	local searchResults = Instance.new("ScrollingFrame")
 	searchResults.Name = "SearchResults"
@@ -2321,7 +2656,10 @@ function Library:CreateWindow(config)
 	searchResults.ZIndex = 250
 	searchResults.Parent = gui
 	Corner(searchResults, 8)
-	Stroke(searchResults, Theme.Border, 1.5)
+	registerThemeRef(searchResults, "BackgroundColor3", "Element")
+
+	local searchResStroke = Stroke(searchResults, Theme.Border, 1.5)
+	registerThemeRef(searchResStroke, "Color", "Border")
 	Pad(searchResults, 4, 4, 4, 4)
 
 	local searchResultList = Instance.new("UIListLayout")
@@ -2523,9 +2861,11 @@ function Library:CreateWindow(config)
 	KeybindList.Visible = false
 	KeybindList.Parent = gui
 	Corner(KeybindList, 8)
+	registerThemeRef(KeybindList, "BackgroundColor3", "Background")
 	registerRGB(Stroke(KeybindList, Color3.new(1, 1, 1), 2.2))
 
-	makeIcon(KeybindList, "key", UDim2.new(0, 14, 0, 14), UDim2.new(0, 9, 0, 7), Theme.Text)
+	local kbIcon = makeIcon(KeybindList, "key", UDim2.new(0, 14, 0, 14), UDim2.new(0, 9, 0, 7), Theme.Text)
+	if kbIcon then registerThemeRef(kbIcon, "ImageColor3", "Text") end
 
 	local kbTitle = Instance.new("TextLabel")
 	kbTitle.Size = UDim2.new(1, -32, 0, 28)
@@ -2538,6 +2878,7 @@ function Library:CreateWindow(config)
 	kbTitle.TextXAlignment = Enum.TextXAlignment.Left
 	kbTitle.TextYAlignment = Enum.TextYAlignment.Center
 	kbTitle.Parent = KeybindList
+	registerThemeRef(kbTitle, "TextColor3", "Text")
 
 	local kbRowsFrame = Instance.new("Frame")
 	kbRowsFrame.Size = UDim2.new(1, -12, 0, 0)
@@ -2583,6 +2924,7 @@ function Library:CreateWindow(config)
 		nLbl.TextYAlignment = Enum.TextYAlignment.Center
 		nLbl.TextTruncate = Enum.TextTruncate.AtEnd
 		nLbl.Parent = row
+		registerThemeRef(nLbl, "TextColor3", "SubText")
 
 		local kLbl = Instance.new("TextLabel")
 		kLbl.Size = UDim2.new(0, 58, 1, 0)
@@ -2633,7 +2975,10 @@ function Library:CreateWindow(config)
 		Corner(ind, 2)
 
 		local tabIcon = makeIcon(btn, icon, UDim2.new(0, 16, 0, 16), UDim2.new(0, 14, 0.5, -8), Theme.SubText)
-		if tabIcon then tabIcon.ZIndex = 43 end
+		if tabIcon then
+			tabIcon.ZIndex = 43
+			registerThemeRef(tabIcon, "ImageColor3", "SubText")
+		end
 		local labelX = tabIcon and 36 or 14
 
 		local tabLbl = Instance.new("TextLabel")
@@ -2649,6 +2994,7 @@ function Library:CreateWindow(config)
 		tabLbl.TextTruncate = Enum.TextTruncate.AtEnd
 		tabLbl.ZIndex = 43
 		tabLbl.Parent = btn
+		registerThemeRef(tabLbl, "TextColor3", "SubText")
 
 		local tabContent = Instance.new("Frame")
 		tabContent.Size = UDim2.new(1, 0, 0, 0)
@@ -2742,8 +3088,10 @@ function Library:CreateWindow(config)
 			f.BorderSizePixel = 0
 			f.Parent = tabContent
 			Corner(f, 8)
+			registerThemeRef(f, "BackgroundColor3", "Element")
 
 			local s = Stroke(f, Theme.Border, Theme.ElementBorderThickness)
+			registerThemeRef(s, "Color", "Border")
 			return f, s
 		end
 
@@ -2790,6 +3138,7 @@ function Library:CreateWindow(config)
 			lbl.TextXAlignment = Enum.TextXAlignment.Left
 			lbl.TextYAlignment = Enum.TextYAlignment.Center
 			lbl.Parent = holder
+			registerThemeRef(lbl, "TextColor3", "SubText")
 
 			window:onAccent(function(c)
 				bar.BackgroundColor3 = c
@@ -2811,6 +3160,7 @@ function Library:CreateWindow(config)
 			lbl.TextYAlignment = Enum.TextYAlignment.Center
 			lbl.TextWrapped = true
 			lbl.Parent = tabContent
+			registerThemeRef(lbl, "TextColor3", "Text")
 
 			local obj = {
 				Set = function(self, t)
@@ -2826,6 +3176,8 @@ function Library:CreateWindow(config)
 			return obj
 		end
 
+		--// Paragraph dengan DIVIDER/PEMBATAS antara title tebal dan subtext
+		--// (gaya sama seperti close confirmation frame)
 		function tab:CreateParagraph(cfg)
 			cfg = cfg or {}
 
@@ -2838,6 +3190,8 @@ function Library:CreateWindow(config)
 
 			local titleText = toText(cfg.Title)
 			local contentText = toText(cfg.Content)
+			local hasTitle = titleText ~= ""
+			local hasContent = contentText ~= ""
 
 			local f = Instance.new("Frame")
 			f.Size = UDim2.new(1, 0, 0, 0)
@@ -2847,8 +3201,10 @@ function Library:CreateWindow(config)
 			f.BorderSizePixel = 0
 			f.Parent = tabContent
 			Corner(f, 8)
+			registerThemeRef(f, "BackgroundColor3", "Element")
 
 			local s = Stroke(f, Theme.Border, Theme.ElementBorderThickness)
+			registerThemeRef(s, "Color", "Border")
 
 			local pad = Instance.new("UIPadding")
 			pad.PaddingTop = UDim.new(0, 12)
@@ -2859,7 +3215,7 @@ function Library:CreateWindow(config)
 
 			local layout = Instance.new("UIListLayout")
 			layout.SortOrder = Enum.SortOrder.LayoutOrder
-			layout.Padding = UDim.new(0, 7)
+			layout.Padding = UDim.new(0, 0)
 			layout.Parent = f
 
 			local sizeConstraint = Instance.new("UISizeConstraint")
@@ -2867,6 +3223,7 @@ function Library:CreateWindow(config)
 			sizeConstraint.MaxSize = Vector2.new(999999, 999999)
 			sizeConstraint.Parent = f
 
+			-- Row judul + icon
 			local titleRow = Instance.new("Frame")
 			titleRow.Size = UDim2.new(1, 0, 0, 0)
 			titleRow.AutomaticSize = Enum.AutomaticSize.Y
@@ -2921,10 +3278,47 @@ function Library:CreateWindow(config)
 			titleObj.TextYAlignment = Enum.TextYAlignment.Top
 			titleObj.TextWrapped = true
 			titleObj.LayoutOrder = 2
-			titleObj.Visible = titleText ~= ""
+			titleObj.Visible = hasTitle
 			titleObj.Parent = titleRow
+			registerThemeRef(titleObj, "TextColor3", "Text")
 
-			titleRow.Visible = (iconOffset > 0) or (titleText ~= "")
+			titleRow.Visible = (iconOffset > 0) or hasTitle
+
+			-- DIVIDER / GARIS PEMBATAS (fade gradient kiri-kanan)
+			local divider = Instance.new("Frame")
+			divider.Name = "Divider"
+			divider.Size = UDim2.new(1, 0, 0, 1)
+			divider.BackgroundColor3 = window.accent
+			divider.BackgroundTransparency = 0.45
+			divider.BorderSizePixel = 0
+			divider.LayoutOrder = 2
+			divider.Visible = hasTitle and hasContent
+			divider.Parent = f
+			Corner(divider, 99)
+
+			local divGrad = Instance.new("UIGradient")
+			divGrad.Transparency = NumberSequence.new{
+				NumberSequenceKeypoint.new(0, 1),
+				NumberSequenceKeypoint.new(0.12, 0),
+				NumberSequenceKeypoint.new(0.88, 0),
+				NumberSequenceKeypoint.new(1, 1),
+			}
+			divGrad.Parent = divider
+
+			window:onAccent(function(c)
+				if divider and divider.Parent then
+					divider.BackgroundColor3 = c
+				end
+			end)
+
+			-- Spacer kecil antara divider dan content
+			local dividerSpacer = Instance.new("Frame")
+			dividerSpacer.Size = UDim2.new(1, 0, 0, 8)
+			dividerSpacer.BackgroundTransparency = 1
+			dividerSpacer.BorderSizePixel = 0
+			dividerSpacer.LayoutOrder = 3
+			dividerSpacer.Visible = hasTitle and hasContent
+			dividerSpacer.Parent = f
 
 			local contentObj = Instance.new("TextLabel")
 			contentObj.Size = UDim2.new(1, 0, 0, 0)
@@ -2937,9 +3331,10 @@ function Library:CreateWindow(config)
 			contentObj.TextXAlignment = Enum.TextXAlignment.Left
 			contentObj.TextYAlignment = Enum.TextYAlignment.Top
 			contentObj.TextWrapped = true
-			contentObj.LayoutOrder = 2
-			contentObj.Visible = contentText ~= ""
+			contentObj.LayoutOrder = 4
+			contentObj.Visible = hasContent
 			contentObj.Parent = f
+			registerThemeRef(contentObj, "TextColor3", "SubText")
 
 			hoverBorder(f, s, function()
 				return window.accent
@@ -2950,21 +3345,27 @@ function Library:CreateWindow(config)
 				if type(newCfg) == "table" then
 					if newCfg.Title ~= nil then
 						titleText = toText(newCfg.Title)
+						hasTitle = titleText ~= ""
 						titleObj.Text = titleText
-						titleObj.Visible = titleText ~= ""
-						titleRow.Visible = (iconOffset > 0) or (titleText ~= "")
+						titleObj.Visible = hasTitle
+						titleRow.Visible = (iconOffset > 0) or hasTitle
 					end
 
 					if newCfg.Content ~= nil then
 						contentText = toText(newCfg.Content)
+						hasContent = contentText ~= ""
 						contentObj.Text = contentText
-						contentObj.Visible = contentText ~= ""
+						contentObj.Visible = hasContent
 					end
 				else
 					contentText = toText(newCfg)
+					hasContent = contentText ~= ""
 					contentObj.Text = contentText
-					contentObj.Visible = contentText ~= ""
+					contentObj.Visible = hasContent
 				end
+
+				divider.Visible = hasTitle and hasContent
+				dividerSpacer.Visible = hasTitle and hasContent
 			end
 
 			registerElement(window, tab, name, f, cfg, "paragraph", para)
@@ -2976,6 +3377,7 @@ function Library:CreateWindow(config)
 			local col = cfg.Color
 			local f, s = elementFrame(H_ELEMENT)
 			local hasIcon = makeIcon(f, cfg.Icon)
+			if hasIcon then registerThemeRef(hasIcon, "ImageColor3", "Text") end
 			local lx = hasIcon and 34 or 12
 
 			local lbl = Instance.new("TextLabel")
@@ -2989,6 +3391,7 @@ function Library:CreateWindow(config)
 			lbl.TextXAlignment = Enum.TextXAlignment.Left
 			lbl.TextYAlignment = Enum.TextYAlignment.Center
 			lbl.Parent = f
+			registerThemeRef(lbl, "TextColor3", "Text")
 
 			local switch = Instance.new("TextButton")
 			switch.Size = UDim2.new(0, 40, 0, 20)
@@ -2999,6 +3402,7 @@ function Library:CreateWindow(config)
 			switch.AutoButtonColor = false
 			switch.Parent = f
 			Corner(switch, 99)
+			registerThemeRef(switch, "BackgroundColor3", "Border")
 
 			local circle = Instance.new("Frame")
 			circle.Size = UDim2.new(0, 14, 0, 14)
@@ -3007,6 +3411,7 @@ function Library:CreateWindow(config)
 			circle.BorderSizePixel = 0
 			circle.Parent = switch
 			Corner(circle, 99)
+			registerThemeRef(circle, "BackgroundColor3", "SubText")
 
 			local enabled = cfg.Default or false
 			local function accent() return col or window.accent end
@@ -3061,6 +3466,7 @@ function Library:CreateWindow(config)
 			local f, s = elementFrame(H_SLIDER)
 
 			local hasIcon = makeIcon(f, cfg.Icon, UDim2.new(0, 16, 0, 16), UDim2.new(0, 12, 0, 7))
+			if hasIcon then registerThemeRef(hasIcon, "ImageColor3", "Text") end
 			local lx = hasIcon and 34 or 12
 
 			local lbl = Instance.new("TextLabel")
@@ -3074,6 +3480,7 @@ function Library:CreateWindow(config)
 			lbl.TextXAlignment = Enum.TextXAlignment.Left
 			lbl.TextYAlignment = Enum.TextYAlignment.Center
 			lbl.Parent = f
+			registerThemeRef(lbl, "TextColor3", "Text")
 
 			local val = Instance.new("TextLabel")
 			val.Size = UDim2.new(0.4, -12, 0, 16)
@@ -3094,6 +3501,7 @@ function Library:CreateWindow(config)
 			track.BorderSizePixel = 0
 			track.Parent = f
 			Corner(track, 99)
+			registerThemeRef(track, "BackgroundColor3", "Border")
 
 			local fill = Instance.new("Frame")
 			fill.BackgroundColor3 = col or window.accent
@@ -3207,6 +3615,7 @@ function Library:CreateWindow(config)
 			local col = cfg.Color
 			local f, s = elementFrame(H_ELEMENT)
 			local hasIcon = makeIcon(f, cfg.Icon)
+			if hasIcon then registerThemeRef(hasIcon, "ImageColor3", "Text") end
 			local lx = hasIcon and 34 or 12
 
 			local lbl = Instance.new("TextLabel")
@@ -3220,6 +3629,7 @@ function Library:CreateWindow(config)
 			lbl.TextXAlignment = Enum.TextXAlignment.Left
 			lbl.TextYAlignment = Enum.TextYAlignment.Center
 			lbl.Parent = f
+			registerThemeRef(lbl, "TextColor3", "Text")
 
 			local arrow = Instance.new("TextLabel")
 			arrow.Size = UDim2.new(0, 20, 1, 0)
@@ -3303,6 +3713,7 @@ function Library:CreateWindow(config)
 			local col = cfg.Color
 			local f, s = elementFrame(H_ELEMENT)
 			local hasIcon = makeIcon(f, cfg.Icon)
+			if hasIcon then registerThemeRef(hasIcon, "ImageColor3", "Text") end
 			local lx = hasIcon and 34 or 12
 
 			local lbl = Instance.new("TextLabel")
@@ -3316,6 +3727,7 @@ function Library:CreateWindow(config)
 			lbl.TextXAlignment = Enum.TextXAlignment.Left
 			lbl.TextYAlignment = Enum.TextYAlignment.Center
 			lbl.Parent = f
+			registerThemeRef(lbl, "TextColor3", "Text")
 
 			local box = Instance.new("TextBox")
 			box.Size = UDim2.new(0, 140, 0, 24)
@@ -3330,7 +3742,10 @@ function Library:CreateWindow(config)
 			box.Font = Enum.Font.Gotham
 			box.Parent = f
 			Corner(box, 6)
-			Stroke(box, Theme.Border, 1)
+			registerThemeRef(box, "BackgroundColor3", "Background")
+			registerThemeRef(box, "PlaceholderColor3", "SubText")
+			local boxStroke = Stroke(box, Theme.Border, 1)
+			registerThemeRef(boxStroke, "Color", "Border")
 			Pad(box, 0, 8, 0, 8)
 
 			if cfg.Flag then
@@ -3374,6 +3789,7 @@ function Library:CreateWindow(config)
 			local value = cfg.CurrentValue or cfg.Default or ""
 			local f, s = elementFrame(H_ELEMENT)
 			local hasIcon = makeIcon(f, cfg.Icon)
+			if hasIcon then registerThemeRef(hasIcon, "ImageColor3", "Text") end
 			local lx = hasIcon and 34 or 12
 
 			local lbl = Instance.new("TextLabel")
@@ -3387,6 +3803,7 @@ function Library:CreateWindow(config)
 			lbl.TextXAlignment = Enum.TextXAlignment.Left
 			lbl.TextYAlignment = Enum.TextYAlignment.Center
 			lbl.Parent = f
+			registerThemeRef(lbl, "TextColor3", "Text")
 
 			local box = Instance.new("TextBox")
 			box.Size = UDim2.new(0, 140, 0, 24)
@@ -3401,7 +3818,10 @@ function Library:CreateWindow(config)
 			box.Font = Enum.Font.Gotham
 			box.Parent = f
 			Corner(box, 6)
-			Stroke(box, Theme.Border, 1)
+			registerThemeRef(box, "BackgroundColor3", "Background")
+			registerThemeRef(box, "PlaceholderColor3", "SubText")
+			local boxStroke = Stroke(box, Theme.Border, 1)
+			registerThemeRef(boxStroke, "Color", "Border")
 			Pad(box, 0, 8, 0, 8)
 
 			if cfg.Flag then
@@ -3467,6 +3887,7 @@ function Library:CreateWindow(config)
 			f.ClipsDescendants = true
 
 			local hasIcon = makeIcon(f, cfg.Icon, UDim2.new(0, 16, 0, 16), UDim2.new(0, 12, 0, 11), Theme.SubText)
+			if hasIcon then registerThemeRef(hasIcon, "ImageColor3", "SubText") end
 			local lx = hasIcon and 34 or 12
 
 			local function fitText(textObj, fullText)
@@ -3513,6 +3934,7 @@ function Library:CreateWindow(config)
 			lbl.TextYAlignment = Enum.TextYAlignment.Center
 			lbl.TextTruncate = Enum.TextTruncate.AtEnd
 			lbl.Parent = f
+			registerThemeRef(lbl, "TextColor3", "SubText")
 
 			local valueFull = tostring(cfg.Default or (options[1] or "..."))
 			local val = Instance.new("TextLabel")
@@ -3527,6 +3949,7 @@ function Library:CreateWindow(config)
 			val.TextYAlignment = Enum.TextYAlignment.Center
 			val.TextTruncate = Enum.TextTruncate.AtEnd
 			val.Parent = f
+			registerThemeRef(val, "TextColor3", "Text")
 
 			local function refreshLbl() fitText(lbl, nameFull) end
 			local function refreshVal() fitText(val, valueFull) end
@@ -3554,6 +3977,7 @@ function Library:CreateWindow(config)
 			arrow.Font = Enum.Font.GothamBold
 			arrow.Rotation = 90
 			arrow.Parent = f
+			registerThemeRef(arrow, "TextColor3", "SubText")
 
 			local list = Instance.new("ScrollingFrame")
 			list.Size = UDim2.new(1, -12, 0, 0)
@@ -3679,11 +4103,475 @@ function Library:CreateWindow(config)
 			return obj
 		end
 
+		--// ==========================================================
+		--// [V5.3 BARU] MULTI-DROPDOWN
+		--// - Bisa pilih lebih dari 1 opsi
+		--// - Checkbox visual + counter "N selected"
+		--// - Tombol Select All / Clear All
+		--// - Tidak auto-close saat klik opsi (beda dari dropdown biasa)
+		--// - Support Save/Load (nilai = table array of string)
+		--// ==========================================================
+		function tab:CreateMultiDropdown(cfg)
+			cfg = cfg or {}
+			local options = {}
+			for _, v in ipairs(cfg.Options or {}) do
+				table.insert(options, tostring(v))
+			end
+			local col = cfg.Color
+			local TextService = game:GetService("TextService")
+			local headerH = H_ELEMENT
+			local gap = 4
+			local actionH = 30
+			local optH = 30
+			local maxList = 180
+
+			-- selected: array ordered + map set
+			local selected = {}
+			local selectedMap = {}
+
+			local function initSelected(def)
+				selected = {}
+				selectedMap = {}
+				if type(def) == "table" then
+					for _, v in ipairs(def) do
+						local sv = tostring(v)
+						if not selectedMap[sv] then
+							selectedMap[sv] = true
+							table.insert(selected, sv)
+						end
+					end
+				elseif type(def) == "string" and def ~= "" then
+					-- kompatibel: "A, B, C"
+					for part in def:gmatch("[^,]+") do
+						local sv = part:gsub("^%s*(.-)%s*$", "%1")
+						if sv ~= "" and not selectedMap[sv] then
+							selectedMap[sv] = true
+							table.insert(selected, sv)
+						end
+					end
+				end
+			end
+
+			initSelected(cfg.Default)
+
+			local listH = math.min(#options * optH + actionH, maxList)
+			local openH = headerH + gap + listH + 6
+			local f, s = elementFrame(headerH)
+			f.ClipsDescendants = true
+
+			local hasIcon = makeIcon(f, cfg.Icon, UDim2.new(0, 16, 0, 16), UDim2.new(0, 12, 0, 11), Theme.SubText)
+			if hasIcon then registerThemeRef(hasIcon, "ImageColor3", "SubText") end
+			local lx = hasIcon and 34 or 12
+
+			local function fitText(textObj, fullText)
+				if not textObj or not textObj.Parent then return end
+				fullText = tostring(fullText or "")
+				local w = textObj.AbsoluteSize.X
+				if w <= 1 then
+					textObj.Text = ""
+					return
+				end
+				w = w - 2
+				local big = Vector2.new(999999, 999999)
+				local b0 = TextService:GetTextSize(fullText, textObj.TextSize, textObj.Font, big)
+				if b0.X <= w then
+					textObj.Text = fullText
+					return
+				end
+				local lo, hi, best = 1, #fullText, ""
+				while lo <= hi do
+					local mid = math.floor((lo + hi) / 2)
+					local cand = string.sub(fullText, 1, mid) .. "..."
+					local bb = TextService:GetTextSize(cand, textObj.TextSize, textObj.Font, big)
+					if bb.X <= w then
+						best = cand
+						lo = mid + 1
+					else
+						hi = mid - 1
+					end
+				end
+				if best == "" then best = "..." end
+				textObj.Text = best
+			end
+
+			local nameFull = cfg.Name or cfg.Title or "Multi Select"
+			local lbl = Instance.new("TextLabel")
+			lbl.Size = UDim2.new(0.5, -lx - 10, 0, headerH)
+			lbl.Position = UDim2.new(0, lx, 0, 0)
+			lbl.BackgroundTransparency = 1
+			lbl.Text = ""
+			lbl.TextColor3 = Theme.SubText
+			lbl.TextSize = 13
+			lbl.Font = Enum.Font.Gotham
+			lbl.TextXAlignment = Enum.TextXAlignment.Left
+			lbl.TextYAlignment = Enum.TextYAlignment.Center
+			lbl.TextTruncate = Enum.TextTruncate.AtEnd
+			lbl.Parent = f
+			registerThemeRef(lbl, "TextColor3", "SubText")
+
+			local val = Instance.new("TextLabel")
+			val.Size = UDim2.new(0.5, -40, 0, headerH)
+			val.Position = UDim2.new(0.5, 6, 0, 0)
+			val.BackgroundTransparency = 1
+			val.Text = ""
+			val.TextColor3 = Theme.Text
+			val.TextSize = 13
+			val.Font = Enum.Font.GothamMedium
+			val.TextXAlignment = Enum.TextXAlignment.Right
+			val.TextYAlignment = Enum.TextYAlignment.Center
+			val.TextTruncate = Enum.TextTruncate.AtEnd
+			val.Parent = f
+			registerThemeRef(val, "TextColor3", "Text")
+
+			local function formatValue()
+				if cfg.Format then
+					return tostring(cfg.Format(selected))
+				end
+				local n = #selected
+				if n == 0 then
+					return cfg.Placeholder or "None"
+				elseif n == 1 then
+					return selected[1]
+				else
+					return n .. " selected"
+				end
+			end
+
+			local function refreshLbl() fitText(lbl, nameFull) end
+			local function refreshVal() fitText(val, formatValue()) end
+
+			task.spawn(function()
+				task.wait()
+				refreshLbl()
+				refreshVal()
+			end)
+
+			Connect(lbl:GetPropertyChangedSignal("AbsoluteSize"), refreshLbl, window)
+			Connect(val:GetPropertyChangedSignal("AbsoluteSize"), refreshVal, window)
+
+			if cfg.Flag then
+				Library.Flags[cfg.Flag] = table.clone(selected)
+			end
+
+			local arrow = Instance.new("TextLabel")
+			arrow.Size = UDim2.new(0, 16, 0, 16)
+			arrow.Position = UDim2.new(1, -26, 0, 11)
+			arrow.BackgroundTransparency = 1
+			arrow.Text = "›"
+			arrow.TextColor3 = Theme.SubText
+			arrow.TextSize = 16
+			arrow.Font = Enum.Font.GothamBold
+			arrow.Rotation = 90
+			arrow.Parent = f
+			registerThemeRef(arrow, "TextColor3", "SubText")
+
+			local list = Instance.new("ScrollingFrame")
+			list.Size = UDim2.new(1, -12, 0, 0)
+			list.Position = UDim2.new(0, 6, 0, headerH + gap)
+			list.BackgroundTransparency = 1
+			list.BorderSizePixel = 0
+			list.ScrollBarThickness = 2
+			list.ScrollBarImageColor3 = Theme.Border
+			list.AutomaticCanvasSize = Enum.AutomaticSize.Y
+			list.CanvasSize = UDim2.new(0, 0, 0, 0)
+			list.Parent = f
+
+			local listLayout = Instance.new("UIListLayout")
+			listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+			listLayout.Padding = UDim.new(0, 2)
+			listLayout.Parent = list
+
+			-- Baris aksi: Select All / Clear All
+			local actionBar = Instance.new("Frame")
+			actionBar.Size = UDim2.new(1, 0, 0, actionH - 4)
+			actionBar.BackgroundTransparency = 1
+			actionBar.BorderSizePixel = 0
+			actionBar.LayoutOrder = 0
+			actionBar.Parent = list
+
+			local actionLayout = Instance.new("UIListLayout")
+			actionLayout.FillDirection = Enum.FillDirection.Horizontal
+			actionLayout.SortOrder = Enum.SortOrder.LayoutOrder
+			actionLayout.Padding = UDim.new(0, 6)
+			actionLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+			actionLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+			actionLayout.Parent = actionBar
+
+			local function actionButton(text, order, fn)
+				local b = Instance.new("TextButton")
+				b.Size = UDim2.new(0.5, -3, 1, -4)
+				b.BackgroundColor3 = Theme.ElementHover
+				b.BackgroundTransparency = 0.25
+				b.BorderSizePixel = 0
+				b.Text = text
+				b.TextColor3 = Theme.SubText
+				b.TextSize = 11
+				b.Font = Enum.Font.GothamBold
+				b.AutoButtonColor = false
+				b.LayoutOrder = order
+				b.Parent = actionBar
+				Corner(b, 5)
+
+				b.MouseEnter:Connect(function()
+					Tween(b, .14, {BackgroundTransparency = 0, TextColor3 = Theme.Text})
+				end)
+				b.MouseLeave:Connect(function()
+					Tween(b, .14, {BackgroundTransparency = 0.25, TextColor3 = Theme.SubText})
+				end)
+				b.MouseButton1Click:Connect(fn)
+				return b
+			end
+
+			-- registry checkbox per option
+			local optionRows = {}
+
+			local function contrastColor(bg)
+				local bright = (bg.R + bg.G + bg.B) / 3
+				return bright > 0.6 and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(255, 255, 255)
+			end
+
+			local function refreshRowVisual(opt)
+				local row = optionRows[opt]
+				if not row then return end
+				local isOn = selectedMap[opt] == true
+				local ac = col or window.accent
+
+				if isOn then
+					Tween(row.box, .15, {BackgroundColor3 = ac})
+					row.check.ImageTransparency = 0
+					row.check.ImageColor3 = contrastColor(ac)
+					Tween(row.lbl, .15, {TextColor3 = Theme.Text})
+					Tween(row.row, .15, {BackgroundTransparency = 0.9})
+				else
+					Tween(row.box, .15, {BackgroundColor3 = Color3.fromRGB(0, 0, 0)})
+					row.box.BackgroundTransparency = 0.4
+					row.check.ImageTransparency = 1
+					Tween(row.lbl, .15, {TextColor3 = Theme.SubText})
+					Tween(row.row, .15, {BackgroundTransparency = 1})
+				end
+			end
+
+			local function refreshAllVisuals()
+				for opt in pairs(optionRows) do
+					refreshRowVisual(opt)
+				end
+				refreshVal()
+			end
+
+			local function commit(fire)
+				if cfg.Flag then
+					Library.Flags[cfg.Flag] = table.clone(selected)
+				end
+				refreshVal()
+				if fire and cfg.Callback and not Library._loading then
+					task.spawn(cfg.Callback, table.clone(selected))
+				end
+			end
+
+			local function toggleOption(opt)
+				opt = tostring(opt)
+				if selectedMap[opt] then
+					selectedMap[opt] = nil
+					for i = #selected, 1, -1 do
+						if selected[i] == opt then
+							table.remove(selected, i)
+							break
+						end
+					end
+				else
+					selectedMap[opt] = true
+					table.insert(selected, opt)
+				end
+				refreshRowVisual(opt)
+				commit(true)
+			end
+
+			local function selectAll()
+				selected = {}
+				selectedMap = {}
+				for _, opt in ipairs(options) do
+					selectedMap[opt] = true
+					table.insert(selected, opt)
+				end
+				refreshAllVisuals()
+				commit(true)
+			end
+
+			local function clearAll()
+				selected = {}
+				selectedMap = {}
+				refreshAllVisuals()
+				commit(true)
+			end
+
+			actionButton("Select All", 1, selectAll)
+			actionButton("Clear All", 2, clearAll)
+
+			local function addOption(opt, order)
+				opt = tostring(opt or "")
+				local row = Instance.new("TextButton")
+				row.Size = UDim2.new(1, 0, 0, optH)
+				row.BackgroundColor3 = Color3.new(1, 1, 1)
+				row.BackgroundTransparency = 1
+				row.BorderSizePixel = 0
+				row.Text = ""
+				row.AutoButtonColor = false
+				row.LayoutOrder = order
+				row.Parent = list
+				Corner(row, 5)
+				Pad(row, 0, 8, 0, 8)
+
+				local box = Instance.new("Frame")
+				box.AnchorPoint = Vector2.new(0, 0.5)
+				box.Size = UDim2.new(0, 16, 0, 16)
+				box.Position = UDim2.new(0, 0, 0.5, 0)
+				box.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+				box.BackgroundTransparency = 0.4
+				box.BorderSizePixel = 0
+				box.Parent = row
+				Corner(box, 4)
+				Stroke(box, Theme.Border, 1.2)
+
+				local check = Instance.new("ImageLabel")
+				check.AnchorPoint = Vector2.new(0.5, 0.5)
+				check.Size = UDim2.new(0, 12, 0, 12)
+				check.Position = UDim2.new(0.5, 0, 0.5, 0)
+				check.BackgroundTransparency = 1
+				check.ImageTransparency = 1
+				check.ImageColor3 = Color3.fromRGB(255, 255, 255)
+				check.Parent = box
+				setIcon(check, "check")
+
+				local lblOpt = Instance.new("TextLabel")
+				lblOpt.Size = UDim2.new(1, -28, 1, 0)
+				lblOpt.Position = UDim2.new(0, 24, 0, 0)
+				lblOpt.BackgroundTransparency = 1
+				lblOpt.Text = opt
+				lblOpt.TextColor3 = Theme.SubText
+				lblOpt.TextSize = 12
+				lblOpt.Font = Enum.Font.Gotham
+				lblOpt.TextXAlignment = Enum.TextXAlignment.Left
+				lblOpt.TextYAlignment = Enum.TextYAlignment.Center
+				lblOpt.TextTruncate = Enum.TextTruncate.AtEnd
+				lblOpt.Parent = row
+
+				row.MouseEnter:Connect(function()
+					if not selectedMap[opt] then
+						Tween(row, .14, {BackgroundTransparency = 0.9})
+					end
+				end)
+				row.MouseLeave:Connect(function()
+					if not selectedMap[opt] then
+						Tween(row, .14, {BackgroundTransparency = 1})
+					end
+				end)
+
+				row.MouseButton1Click:Connect(function()
+					toggleOption(opt)
+				end)
+
+				optionRows[opt] = {row = row, box = box, check = check, lbl = lblOpt}
+				refreshRowVisual(opt)
+			end
+
+			for i, opt in ipairs(options) do
+				addOption(opt, i)
+			end
+
+			local isOpen = false
+			local function toggleOpen()
+				isOpen = not isOpen
+				if isOpen then
+					listH = math.min(#options * optH + actionH, maxList)
+					openH = headerH + gap + listH + 6
+					Tween(f, .3, {Size = UDim2.new(1, 0, 0, openH)})
+					Tween(list, .3, {Size = UDim2.new(1, -12, 0, listH)})
+					Tween(arrow, .3, {Rotation = -90, TextColor3 = col or window.accent})
+				else
+					Tween(f, .3, {Size = UDim2.new(1, 0, 0, headerH)})
+					Tween(list, .3, {Size = UDim2.new(1, -12, 0, 0)})
+					Tween(arrow, .3, {Rotation = 90, TextColor3 = Theme.SubText})
+				end
+			end
+
+			local head = Instance.new("TextButton")
+			head.Size = UDim2.new(1, 0, 0, headerH)
+			head.BackgroundTransparency = 1
+			head.Text = ""
+			head.AutoButtonColor = false
+			head.Parent = f
+			head.MouseButton1Click:Connect(toggleOpen)
+
+			hoverBorder(f, s, function() return col or window.accent end)
+			addTooltip(f, cfg.Tooltip)
+
+			window:onAccent(function()
+				refreshAllVisuals()
+			end)
+
+			local obj = {
+				Refresh = function(self, newOpts)
+					for _, c in ipairs(list:GetChildren()) do
+						if c:IsA("TextButton") then
+							c:Destroy()
+						end
+					end
+					optionRows = {}
+					options = {}
+					for _, v in ipairs(newOpts or {}) do
+						table.insert(options, tostring(v))
+					end
+					-- buang selected yang tidak ada di opsi baru
+					local newMap = {}
+					local newArr = {}
+					for _, opt in ipairs(options) do
+						newMap[opt] = true
+					end
+					for _, opt in ipairs(selected) do
+						if newMap[opt] then
+							table.insert(newArr, opt)
+						end
+					end
+					selected = newArr
+					selectedMap = {}
+					for _, opt in ipairs(selected) do
+						selectedMap[opt] = true
+					end
+					for i, opt in ipairs(options) do
+						addOption(opt, i)
+					end
+					refreshAllVisuals()
+
+					if isOpen then
+						listH = math.min(#options * optH + actionH, maxList)
+						openH = headerH + gap + listH + 6
+						Tween(f, .25, {Size = UDim2.new(1, 0, 0, openH)})
+						Tween(list, .25, {Size = UDim2.new(1, -12, 0, listH)})
+					end
+				end,
+				Set = function(self, t)
+					initSelected(t)
+					refreshAllVisuals()
+					commit(true)
+				end,
+				Get = function()
+					return table.clone(selected)
+				end,
+				GetString = function(sep)
+					return table.concat(selected, sep or ", ")
+				end,
+			}
+
+			registerElement(window, tab, name, f, cfg, "multidropdown", obj)
+			return obj
+		end
+
 		function tab:CreateKeybind(cfg)
 			cfg = cfg or {}
 			local col = cfg.Color
 			local f, s = elementFrame(H_ELEMENT)
 			local hasIcon = makeIcon(f, cfg.Icon)
+			if hasIcon then registerThemeRef(hasIcon, "ImageColor3", "Text") end
 			local lx = hasIcon and 34 or 12
 
 			local lbl = Instance.new("TextLabel")
@@ -3697,6 +4585,7 @@ function Library:CreateWindow(config)
 			lbl.TextXAlignment = Enum.TextXAlignment.Left
 			lbl.TextYAlignment = Enum.TextYAlignment.Center
 			lbl.Parent = f
+			registerThemeRef(lbl, "TextColor3", "Text")
 
 			local badge = Instance.new("TextButton")
 			badge.Size = UDim2.new(0, 78, 0, 22)
@@ -3709,7 +4598,9 @@ function Library:CreateWindow(config)
 			badge.AutoButtonColor = false
 			badge.Parent = f
 			Corner(badge, 5)
-			Stroke(badge, Theme.Border, 1)
+			registerThemeRef(badge, "BackgroundColor3", "Background")
+			local badgeStroke = Stroke(badge, Theme.Border, 1)
+			registerThemeRef(badgeStroke, "Color", "Border")
 
 			local current = cfg.CurrentKeybind or cfg.Default or Enum.KeyCode.Unknown
 			if type(current) == "string" then
@@ -3796,355 +4687,340 @@ function Library:CreateWindow(config)
 			return obj
 		end
 
-function tab:CreateColorPicker(cfg)
-	cfg = cfg or {}
-	local TextService = game:GetService("TextService")
+		--// [V5.3] COLOR PICKER HSV FIX (pointer tidak terbalik + mobile)
+		function tab:CreateColorPicker(cfg)
+			cfg = cfg or {}
+			local TextService = game:GetService("TextService")
 
-	-- Truncation manual (sama seperti dropdown) supaya nama tidak menimpa swatch
-	local function fitText(textObj, fullText)
-		if not textObj or not textObj.Parent then return end
-		fullText = tostring(fullText or "")
-		local w = textObj.AbsoluteSize.X
-		if w <= 1 then
-			textObj.Text = ""
-			return
-		end
-		w = w - 2
-		local big = Vector2.new(999999, 999999)
-		local b0 = TextService:GetTextSize(fullText, textObj.TextSize, textObj.Font, big)
-		if b0.X <= w then
-			textObj.Text = fullText
-			return
-		end
-		local lo, hi, best = 1, #fullText, ""
-		while lo <= hi do
-			local mid = math.floor((lo + hi) / 2)
-			local cand = string.sub(fullText, 1, mid) .. "..."
-			local bb = TextService:GetTextSize(cand, textObj.TextSize, textObj.Font, big)
-			if bb.X <= w then
-				best = cand
-				lo = mid + 1
-			else
-				hi = mid - 1
+			local function fitText(textObj, fullText)
+				if not textObj or not textObj.Parent then return end
+				fullText = tostring(fullText or "")
+				local w = textObj.AbsoluteSize.X
+				if w <= 1 then
+					textObj.Text = ""
+					return
+				end
+				w = w - 2
+				local big = Vector2.new(999999, 999999)
+				local b0 = TextService:GetTextSize(fullText, textObj.TextSize, textObj.Font, big)
+				if b0.X <= w then
+					textObj.Text = fullText
+					return
+				end
+				local lo, hi, best = 1, #fullText, ""
+				while lo <= hi do
+					local mid = math.floor((lo + hi) / 2)
+					local cand = string.sub(fullText, 1, mid) .. "..."
+					local bb = TextService:GetTextSize(cand, textObj.TextSize, textObj.Font, big)
+					if bb.X <= w then
+						best = cand
+						lo = mid + 1
+					else
+						hi = mid - 1
+					end
+				end
+				if best == "" then best = "..." end
+				textObj.Text = best
 			end
-		end
-		if best == "" then best = "..." end
-		textObj.Text = best
-	end
 
-	local startCol = (typeof(cfg.Default) == "Color3" and cfg.Default) or Color3.fromRGB(255, 80, 80)
-	local h0, s0, v0 = startCol:ToHSV()
-	local hue, sat, val = h0, s0, v0
-	local col = Color3.fromHSV(hue, sat, val)
+			local startCol = (typeof(cfg.Default) == "Color3" and cfg.Default) or Color3.fromRGB(255, 80, 80)
+			local h0, s0, v0 = startCol:ToHSV()
+			local hue, sat, val = h0, s0, v0
+			local col = Color3.fromHSV(hue, sat, val)
 
-	local f, s = elementFrame(H_ELEMENT)
-	f.ClipsDescendants = true
+			local f, s = elementFrame(H_ELEMENT)
+			f.ClipsDescendants = true
 
-	local hasIcon = makeIcon(f, cfg.Icon, UDim2.new(0, 16, 0, 16), UDim2.new(0, 12, 0, 11), Theme.SubText)
-	local lx = hasIcon and 34 or 12
+			local hasIcon = makeIcon(f, cfg.Icon, UDim2.new(0, 16, 0, 16), UDim2.new(0, 12, 0, 11), Theme.SubText)
+			if hasIcon then registerThemeRef(hasIcon, "ImageColor3", "SubText") end
+			local lx = hasIcon and 34 or 12
 
-	-- Label kiri (dibatasi supaya tidak menimpa swatch)
-	local nameFull = cfg.Name or cfg.Title or "Color Picker"
-	local lbl = Instance.new("TextLabel")
-	lbl.Size = UDim2.new(1, -(lx + 78), 0, H_ELEMENT)
-	lbl.Position = UDim2.new(0, lx, 0, 0)
-	lbl.BackgroundTransparency = 1
-	lbl.Text = ""
-	lbl.TextColor3 = Theme.Text
-	lbl.TextSize = 13
-	lbl.Font = Enum.Font.Gotham
-	lbl.TextXAlignment = Enum.TextXAlignment.Left
-	lbl.TextYAlignment = Enum.TextYAlignment.Center
-	lbl.TextTruncate = Enum.TextTruncate.AtEnd
-	lbl.Parent = f
+			local nameFull = cfg.Name or cfg.Title or "Color Picker"
+			local lbl = Instance.new("TextLabel")
+			lbl.Size = UDim2.new(1, -(lx + 78), 0, H_ELEMENT)
+			lbl.Position = UDim2.new(0, lx, 0, 0)
+			lbl.BackgroundTransparency = 1
+			lbl.Text = ""
+			lbl.TextColor3 = Theme.Text
+			lbl.TextSize = 13
+			lbl.Font = Enum.Font.Gotham
+			lbl.TextXAlignment = Enum.TextXAlignment.Left
+			lbl.TextYAlignment = Enum.TextYAlignment.Center
+			lbl.TextTruncate = Enum.TextTruncate.AtEnd
+			lbl.Parent = f
+			registerThemeRef(lbl, "TextColor3", "Text")
 
-	local function refreshLbl() fitText(lbl, nameFull) end
-	task.spawn(function()
-		task.wait()
-		refreshLbl()
-	end)
-	Connect(lbl:GetPropertyChangedSignal("AbsoluteSize"), refreshLbl, window)
+			local function refreshLbl() fitText(lbl, nameFull) end
+			task.spawn(function()
+				task.wait()
+				refreshLbl()
+			end)
+			Connect(lbl:GetPropertyChangedSignal("AbsoluteSize"), refreshLbl, window)
 
-	-- Swatch kanan
-	local swatch = Instance.new("TextButton")
-	swatch.Size = UDim2.new(0, 42, 0, 20)
-	swatch.Position = UDim2.new(1, -54, 0, 9)
-	swatch.BackgroundColor3 = col
-	swatch.BorderSizePixel = 0
-	swatch.Text = ""
-	swatch.AutoButtonColor = false
-	swatch.Parent = f
-	Corner(swatch, 5)
-	Stroke(swatch, Color3.new(1, 1, 1), 1).Transparency = .75
+			local swatch = Instance.new("TextButton")
+			swatch.Size = UDim2.new(0, 42, 0, 20)
+			swatch.Position = UDim2.new(1, -54, 0, 9)
+			swatch.BackgroundColor3 = col
+			swatch.BorderSizePixel = 0
+			swatch.Text = ""
+			swatch.AutoButtonColor = false
+			swatch.Parent = f
+			Corner(swatch, 5)
+			Stroke(swatch, Color3.new(1, 1, 1), 1).Transparency = .75
 
-	-- Layout area expand
-	local padTop = H_ELEMENT + 6
-	local svH = 84
-	local hueH = 12
-	local gridCell = 20
-	local gridPad = 4
-	local gridCols = 6
+			local padTop = H_ELEMENT + 6
+			local svH = 84
+			local hueH = 12
+			local gridCell = 20
+			local gridPad = 4
+			local gridCols = 6
 
-	local presets = {
-		Color3.fromRGB(255, 70, 70),  Color3.fromRGB(255, 120, 60), Color3.fromRGB(255, 170, 50),
-		Color3.fromRGB(255, 215, 60), Color3.fromRGB(220, 240, 60), Color3.fromRGB(150, 235, 70),
-		Color3.fromRGB(80, 230, 110), Color3.fromRGB(50, 225, 160), Color3.fromRGB(50, 220, 210),
-		Color3.fromRGB(60, 180, 240), Color3.fromRGB(70, 130, 255), Color3.fromRGB(110, 90, 255),
-		Color3.fromRGB(150, 80, 255), Color3.fromRGB(190, 80, 250), Color3.fromRGB(230, 80, 220),
-		Color3.fromRGB(255, 80, 170), Color3.fromRGB(255, 90, 130), Color3.fromRGB(255, 255, 255),
-		Color3.fromRGB(200, 200, 210),Color3.fromRGB(150, 150, 160),Color3.fromRGB(110, 110, 120),
-		Color3.fromRGB(70, 70, 80),   Color3.fromRGB(40, 40, 48),   Color3.fromRGB(15, 15, 20),
-	}
+			local presets = {
+				Color3.fromRGB(255, 70, 70),  Color3.fromRGB(255, 120, 60), Color3.fromRGB(255, 170, 50),
+				Color3.fromRGB(255, 215, 60), Color3.fromRGB(220, 240, 60), Color3.fromRGB(150, 235, 70),
+				Color3.fromRGB(80, 230, 110), Color3.fromRGB(50, 225, 160), Color3.fromRGB(50, 220, 210),
+				Color3.fromRGB(60, 180, 240), Color3.fromRGB(70, 130, 255), Color3.fromRGB(110, 90, 255),
+				Color3.fromRGB(150, 80, 255), Color3.fromRGB(190, 80, 250), Color3.fromRGB(230, 80, 220),
+				Color3.fromRGB(255, 80, 170), Color3.fromRGB(255, 90, 130), Color3.fromRGB(255, 255, 255),
+				Color3.fromRGB(200, 200, 210),Color3.fromRGB(150, 150, 160),Color3.fromRGB(110, 110, 120),
+				Color3.fromRGB(70, 70, 80),   Color3.fromRGB(40, 40, 48),   Color3.fromRGB(15, 15, 20),
+			}
 
-	local gridRows = math.ceil(#presets / gridCols)
-	local gridH = gridRows * (gridCell + gridPad) - gridPad
-	local openH = padTop + svH + 6 + hueH + 6 + gridH + 8
+			local gridRows = math.ceil(#presets / gridCols)
+			local gridH = gridRows * (gridCell + gridPad) - gridPad
+			local openH = padTop + svH + 6 + hueH + 6 + gridH + 8
 
-	-- Saturation / Value pad (2D)
-	local svPad = Instance.new("Frame")
-	svPad.Size = UDim2.new(1, -16, 0, svH)
-	svPad.Position = UDim2.new(0, 8, 0, padTop)
-	svPad.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
-	svPad.BorderSizePixel = 0
-	svPad.Parent = f
-	Corner(svPad, 6)
+			local svPad = Instance.new("Frame")
+			svPad.Size = UDim2.new(1, -16, 0, svH)
+			svPad.Position = UDim2.new(0, 8, 0, padTop)
+			svPad.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
+			svPad.BorderSizePixel = 0
+			svPad.Parent = f
+			Corner(svPad, 6)
 
-	local satLayer = Instance.new("Frame")
-	satLayer.Size = UDim2.new(1, 0, 1, 0)
-	satLayer.BackgroundColor3 = Color3.new(1, 1, 1)
-	satLayer.BorderSizePixel = 0
-	satLayer.Parent = svPad
-	local satGrad = Instance.new("UIGradient")
-	satGrad.Color = ColorSequence.new(Color3.new(1, 1, 1))
-	satGrad.Transparency = NumberSequence.new{
-		NumberSequenceKeypoint.new(0, 0),
-		NumberSequenceKeypoint.new(1, 1),
-	}
-	satGrad.Rotation = 0
-	satGrad.Parent = satLayer
+			local satLayer = Instance.new("Frame")
+			satLayer.Size = UDim2.new(1, 0, 1, 0)
+			satLayer.BackgroundColor3 = Color3.new(1, 1, 1)
+			satLayer.BorderSizePixel = 0
+			satLayer.Parent = svPad
+			local satGrad = Instance.new("UIGradient")
+			satGrad.Color = ColorSequence.new(Color3.new(1, 1, 1))
+			satGrad.Transparency = NumberSequence.new{
+				NumberSequenceKeypoint.new(0, 0),
+				NumberSequenceKeypoint.new(1, 1),
+			}
+			satGrad.Rotation = 0
+			satGrad.Parent = satLayer
 
-	local valLayer = Instance.new("Frame")
-	valLayer.Size = UDim2.new(1, 0, 1, 0)
-	valLayer.BackgroundColor3 = Color3.new(0, 0, 0)
-	valLayer.BorderSizePixel = 0
-	valLayer.Parent = satLayer
-	local valGrad = Instance.new("UIGradient")
-	valGrad.Color = ColorSequence.new(Color3.new(0, 0, 0))
-	valGrad.Transparency = NumberSequence.new{
-		NumberSequenceKeypoint.new(0, 1),
-		NumberSequenceKeypoint.new(1, 0),
-	}
-	valGrad.Rotation = 90
-	valGrad.Parent = valLayer
+			local valLayer = Instance.new("Frame")
+			valLayer.Size = UDim2.new(1, 0, 1, 0)
+			valLayer.BackgroundColor3 = Color3.new(0, 0, 0)
+			valLayer.BorderSizePixel = 0
+			valLayer.Parent = satLayer
+			local valGrad = Instance.new("UIGradient")
+			valGrad.Color = ColorSequence.new(Color3.new(0, 0, 0))
+			valGrad.Transparency = NumberSequence.new{
+				NumberSequenceKeypoint.new(0, 1),
+				NumberSequenceKeypoint.new(1, 0),
+			}
+			valGrad.Rotation = 90
+			valGrad.Parent = valLayer
 
-	local svPointer = Instance.new("Frame")
-	svPointer.AnchorPoint = Vector2.new(0.5, 0.5)
-	svPointer.Size = UDim2.new(0, 12, 0, 12)
-	svPointer.Position = UDim2.new(sat, 0, 1 - val, 0)  -- FIX: 1 - val supaya pointer tidak terbalik
-	svPointer.BackgroundColor3 = Color3.new(1, 1, 1)
-	svPointer.BorderSizePixel = 0
-	svPointer.ZIndex = 2
-	svPointer.Parent = valLayer
-	Corner(svPointer, 99)
-	Stroke(svPointer, Color3.new(0, 0, 0), 1.5)
+			local svPointer = Instance.new("Frame")
+			svPointer.AnchorPoint = Vector2.new(0.5, 0.5)
+			svPointer.Size = UDim2.new(0, 12, 0, 12)
+			svPointer.Position = UDim2.new(sat, 0, 1 - val, 0)
+			svPointer.BackgroundColor3 = Color3.new(1, 1, 1)
+			svPointer.BorderSizePixel = 0
+			svPointer.ZIndex = 2
+			svPointer.Parent = valLayer
+			Corner(svPointer, 99)
+			Stroke(svPointer, Color3.new(0, 0, 0), 1.5)
 
-	-- Hue slider (pelangi)
-	local hueY = padTop + svH + 6
-	local hueBar = Instance.new("Frame")
-	hueBar.Size = UDim2.new(1, -16, 0, hueH)
-	hueBar.Position = UDim2.new(0, 8, 0, hueY)
-	hueBar.BackgroundColor3 = Color3.new(1, 1, 1)
-	hueBar.BorderSizePixel = 0
-	hueBar.Parent = f
-	Corner(hueBar, 99)
-	local hueGrad = Instance.new("UIGradient")
-	hueGrad.Color = ColorSequence.new{
-		ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 0, 0)),
-		ColorSequenceKeypoint.new(0.16, Color3.fromRGB(255, 150, 0)),
-		ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 255, 120)),
-		ColorSequenceKeypoint.new(0.50, Color3.fromRGB(0, 200, 255)),
-		ColorSequenceKeypoint.new(0.66, Color3.fromRGB(80, 80, 255)),
-		ColorSequenceKeypoint.new(0.83, Color3.fromRGB(255, 0, 200)),
-		ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 0, 0)),
-	}
-	hueGrad.Rotation = 0
-	hueGrad.Parent = hueBar
+			local hueY = padTop + svH + 6
+			local hueBar = Instance.new("Frame")
+			hueBar.Size = UDim2.new(1, -16, 0, hueH)
+			hueBar.Position = UDim2.new(0, 8, 0, hueY)
+			hueBar.BackgroundColor3 = Color3.new(1, 1, 1)
+			hueBar.BorderSizePixel = 0
+			hueBar.Parent = f
+			Corner(hueBar, 99)
+			local hueGrad = Instance.new("UIGradient")
+			hueGrad.Color = ColorSequence.new{
+				ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 0, 0)),
+				ColorSequenceKeypoint.new(0.16, Color3.fromRGB(255, 150, 0)),
+				ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 255, 120)),
+				ColorSequenceKeypoint.new(0.50, Color3.fromRGB(0, 200, 255)),
+				ColorSequenceKeypoint.new(0.66, Color3.fromRGB(80, 80, 255)),
+				ColorSequenceKeypoint.new(0.83, Color3.fromRGB(255, 0, 200)),
+				ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 0, 0)),
+			}
+			hueGrad.Rotation = 0
+			hueGrad.Parent = hueBar
 
-	local huePointer = Instance.new("Frame")
-	huePointer.AnchorPoint = Vector2.new(0.5, 0.5)
-	huePointer.Size = UDim2.new(0, 10, 0, hueH + 4)
-	huePointer.Position = UDim2.new(hue, 0, 0.5, 0)
-	huePointer.BackgroundColor3 = Color3.new(1, 1, 1)
-	huePointer.BorderSizePixel = 0
-	huePointer.ZIndex = 2
-	huePointer.Parent = hueBar
-	Corner(huePointer, 99)
+			local huePointer = Instance.new("Frame")
+			huePointer.AnchorPoint = Vector2.new(0.5, 0.5)
+			huePointer.Size = UDim2.new(0, 10, 0, hueH + 4)
+			huePointer.Position = UDim2.new(hue, 0, 0.5, 0)
+			huePointer.BackgroundColor3 = Color3.new(1, 1, 1)
+			huePointer.BorderSizePixel = 0
+			huePointer.ZIndex = 2
+			huePointer.Parent = hueBar
+			Corner(huePointer, 99)
 
-	-- Grid preset
-	local gridY = hueY + hueH + 6
-	local gridFrame = Instance.new("Frame")
-	gridFrame.Size = UDim2.new(1, -16, 0, gridH)
-	gridFrame.Position = UDim2.new(0, 8, 0, gridY)
-	gridFrame.BackgroundTransparency = 1
-	gridFrame.BorderSizePixel = 0
-	gridFrame.Parent = f
-	local grid = Instance.new("UIGridLayout")
-	grid.CellSize = UDim2.new(0, gridCell, 0, gridCell)
-	grid.CellPadding = UDim2.new(0, gridPad, 0, gridPad)
-	grid.SortOrder = Enum.SortOrder.LayoutOrder
-	grid.Parent = gridFrame
+			local gridY = hueY + hueH + 6
+			local gridFrame = Instance.new("Frame")
+			gridFrame.Size = UDim2.new(1, -16, 0, gridH)
+			gridFrame.Position = UDim2.new(0, 8, 0, gridY)
+			gridFrame.BackgroundTransparency = 1
+			gridFrame.BorderSizePixel = 0
+			gridFrame.Parent = f
+			local grid = Instance.new("UIGridLayout")
+			grid.CellSize = UDim2.new(0, gridCell, 0, gridCell)
+			grid.CellPadding = UDim2.new(0, gridPad, 0, gridPad)
+			grid.SortOrder = Enum.SortOrder.LayoutOrder
+			grid.Parent = gridFrame
 
-	local isOpen = false
+			local isOpen = false
 
-	local function applyVisuals(fire)
-		col = Color3.fromHSV(hue, sat, val)
-		svPad.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
-		svPointer.Position = UDim2.new(sat, 0, 1 - val, 0)  -- FIX: 1 - val
-		huePointer.Position = UDim2.new(hue, 0, 0.5, 0)
-		swatch.BackgroundColor3 = col
-		if cfg.Flag then
-			Library.Flags[cfg.Flag] = col
-		end
-		if fire and cfg.Callback and not Library._loading then
-			task.spawn(cfg.Callback, col)
-		end
-	end
-
-	applyVisuals(false)
-
-	local function togglePicker()
-		isOpen = not isOpen
-		if isOpen then
-			Tween(f, .3, {Size = UDim2.new(1, 0, 0, openH)})
-		else
-			Tween(f, .3, {Size = UDim2.new(1, 0, 0, H_ELEMENT)})
-		end
-	end
-
-	-- Drag Saturation/Value (FIX: Y-axis tidak terbalik + support mobile)
-	local dragSV = false
-	local function svFromInput(inp)
-		local abs = svPad.AbsolutePosition
-		local sz = svPad.AbsoluteSize
-		if sz.X < 1 or sz.Y < 1 then return end
-
-		-- Normalisasi posisi mouse/touch ke 0..1
-		local nx = math.clamp((inp.Position.X - abs.X) / sz.X, 0, 1)
-		local ny = math.clamp((inp.Position.Y - abs.Y) / sz.Y, 0, 1)
-
-		-- Saturation: kiri (0) → kanan (1)
-		sat = nx
-
-		-- Value: atas (1/terang) → bawah (0/gelap)
-		-- Karena UDim2 scale Y: 0=atas, 1=bawah
-		-- Maka value = 1 - ny  (supaya atas = terang, bawah = gelap)
-		val = 1 - ny
-
-		applyVisuals(false)
-	end
-
-	svPad.InputBegan:Connect(function(inp)
-		if not isOpen then return end
-		if isPressInput(inp) then
-			dragSV = true
-			svFromInput(inp)
-		end
-	end)
-
-	Connect(UserInputService.InputChanged, function(inp)
-		if dragSV and isOpen then
-			if inp.UserInputType == Enum.UserInputType.MouseMovement
-				or inp.UserInputType == Enum.UserInputType.Touch then
-				svFromInput(inp)
+			local function applyVisuals(fire)
+				col = Color3.fromHSV(hue, sat, val)
+				svPad.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
+				svPointer.Position = UDim2.new(sat, 0, 1 - val, 0)
+				huePointer.Position = UDim2.new(hue, 0, 0.5, 0)
+				swatch.BackgroundColor3 = col
+				if cfg.Flag then
+					Library.Flags[cfg.Flag] = col
+				end
+				if fire and cfg.Callback and not Library._loading then
+					task.spawn(cfg.Callback, col)
+				end
 			end
-		end
-	end, window)
 
-	Connect(UserInputService.InputEnded, function(inp)
-		if dragSV and isPressInput(inp) then
-			dragSV = false
-			applyVisuals(true)
-		end
-	end, window)
+			applyVisuals(false)
 
-	-- Drag Hue (support mobile/touch)
-	local dragHue = false
-	local function hueFromInput(inp)
-		local abs = hueBar.AbsolutePosition
-		local sz = hueBar.AbsoluteSize
-		if sz.X < 1 then return end
-		hue = math.clamp((inp.Position.X - abs.X) / sz.X, 0, 1)
-		applyVisuals(false)
-	end
-
-	hueBar.InputBegan:Connect(function(inp)
-		if not isOpen then return end
-		if isPressInput(inp) then
-			dragHue = true
-			hueFromInput(inp)
-		end
-	end)
-
-	Connect(UserInputService.InputChanged, function(inp)
-		if dragHue and isOpen then
-			if inp.UserInputType == Enum.UserInputType.MouseMovement
-				or inp.UserInputType == Enum.UserInputType.Touch then
-				hueFromInput(inp)
+			local function togglePicker()
+				isOpen = not isOpen
+				if isOpen then
+					Tween(f, .3, {Size = UDim2.new(1, 0, 0, openH)})
+				else
+					Tween(f, .3, {Size = UDim2.new(1, 0, 0, H_ELEMENT)})
+				end
 			end
+
+			local dragSV = false
+			local function svFromInput(inp)
+				local abs = svPad.AbsolutePosition
+				local sz = svPad.AbsoluteSize
+				if sz.X < 1 or sz.Y < 1 then return end
+				local nx = math.clamp((inp.Position.X - abs.X) / sz.X, 0, 1)
+				local ny = math.clamp((inp.Position.Y - abs.Y) / sz.Y, 0, 1)
+				sat = nx
+				val = 1 - ny
+				applyVisuals(false)
+			end
+
+			svPad.InputBegan:Connect(function(inp)
+				if not isOpen then return end
+				if isPressInput(inp) then
+					dragSV = true
+					svFromInput(inp)
+				end
+			end)
+
+			Connect(UserInputService.InputChanged, function(inp)
+				if dragSV and isOpen then
+					if inp.UserInputType == Enum.UserInputType.MouseMovement
+						or inp.UserInputType == Enum.UserInputType.Touch then
+						svFromInput(inp)
+					end
+				end
+			end, window)
+
+			Connect(UserInputService.InputEnded, function(inp)
+				if dragSV and isPressInput(inp) then
+					dragSV = false
+					applyVisuals(true)
+				end
+			end, window)
+
+			local dragHue = false
+			local function hueFromInput(inp)
+				local abs = hueBar.AbsolutePosition
+				local sz = hueBar.AbsoluteSize
+				if sz.X < 1 then return end
+				hue = math.clamp((inp.Position.X - abs.X) / sz.X, 0, 1)
+				applyVisuals(false)
+			end
+
+			hueBar.InputBegan:Connect(function(inp)
+				if not isOpen then return end
+				if isPressInput(inp) then
+					dragHue = true
+					hueFromInput(inp)
+				end
+			end)
+
+			Connect(UserInputService.InputChanged, function(inp)
+				if dragHue and isOpen then
+					if inp.UserInputType == Enum.UserInputType.MouseMovement
+						or inp.UserInputType == Enum.UserInputType.Touch then
+						hueFromInput(inp)
+					end
+				end
+			end, window)
+
+			Connect(UserInputService.InputEnded, function(inp)
+				if dragHue and isPressInput(inp) then
+					dragHue = false
+					applyVisuals(true)
+				end
+			end, window)
+
+			for i, pc in ipairs(presets) do
+				local b = Instance.new("TextButton")
+				b.Size = UDim2.new(0, gridCell, 0, gridCell)
+				b.BackgroundColor3 = pc
+				b.BorderSizePixel = 0
+				b.Text = ""
+				b.AutoButtonColor = false
+				b.LayoutOrder = i
+				b.Parent = gridFrame
+				Corner(b, 5)
+
+				b.MouseButton1Click:Connect(function()
+					local hh, ss, vv = pc:ToHSV()
+					hue, sat, val = hh, ss, vv
+					applyVisuals(true)
+				end)
+			end
+
+			if cfg.Flag then
+				Library.Flags[cfg.Flag] = col
+			end
+
+			swatch.MouseButton1Click:Connect(togglePicker)
+			hoverBorder(f, s, function() return col end)
+			addTooltip(f, cfg.Tooltip)
+
+			local obj = {
+				Set = function(self, c)
+					if typeof(c) ~= "Color3" then return end
+					local hh, ss, vv = c:ToHSV()
+					hue, sat, val = hh, ss, vv
+					applyVisuals(true)
+				end,
+				Get = function()
+					return col
+				end,
+			}
+
+			registerElement(window, tab, name, f, cfg, "colorpicker", obj)
+			return obj
 		end
-	end, window)
 
-	Connect(UserInputService.InputEnded, function(inp)
-		if dragHue and isPressInput(inp) then
-			dragHue = false
-			applyVisuals(true)
-		end
-	end, window)
-
-	-- Tombol preset
-	for i, pc in ipairs(presets) do
-		local b = Instance.new("TextButton")
-		b.Size = UDim2.new(0, gridCell, 0, gridCell)
-		b.BackgroundColor3 = pc
-		b.BorderSizePixel = 0
-		b.Text = ""
-		b.AutoButtonColor = false
-		b.LayoutOrder = i
-		b.Parent = gridFrame
-		Corner(b, 5)
-
-		b.MouseButton1Click:Connect(function()
-			local hh, ss, vv = pc:ToHSV()
-			hue, sat, val = hh, ss, vv
-			applyVisuals(true)
-		end)
+		return tab
 	end
-
-	if cfg.Flag then
-		Library.Flags[cfg.Flag] = col
-	end
-
-	swatch.MouseButton1Click:Connect(togglePicker)
-	hoverBorder(f, s, function() return col end)
-	addTooltip(f, cfg.Tooltip)
-
-	local obj = {
-		Set = function(self, c)
-			if typeof(c) ~= "Color3" then return end
-			local hh, ss, vv = c:ToHSV()
-			hue, sat, val = hh, ss, vv
-			applyVisuals(true)
-		end,
-		Get = function()
-			return col
-		end,
-	}
-
-	       registerElement(window, tab, name, f, cfg, "colorpicker", obj)
-	       return obj
-       end
-   return tab
-end
 
 	-- Mini Toggle
 	local MINI_W, MINI_H = 168, 42
@@ -4164,6 +5040,7 @@ end
 	MiniToggle.ZIndex = 60
 	MiniToggle.Parent = gui
 	Corner(MiniToggle, 12)
+	registerThemeRef(MiniToggle, "BackgroundColor3", "Background")
 	registerRGB(Stroke(MiniToggle, Color3.new(1, 1, 1), Theme.MainBorderThickness))
 	Pad(MiniToggle, 0, 14, 0, 14)
 
@@ -4194,6 +5071,7 @@ end
 		l.Parent = miniIconFrame
 		Corner(l, 2)
 		table.insert(miniLines, l)
+		registerThemeRef(l, "BackgroundColor3", "Text")
 		return l
 	end
 
@@ -4208,6 +5086,7 @@ end
 	miniSeparator.LayoutOrder = 2
 	miniSeparator.ZIndex = 61
 	miniSeparator.Parent = MiniToggle
+	registerThemeRef(miniSeparator, "BackgroundColor3", "Border")
 
 	local miniLbl = Instance.new("TextLabel")
 	miniLbl.Size = UDim2.new(0, 0, 0, MINI_ICON)
@@ -4222,6 +5101,7 @@ end
 	miniLbl.LayoutOrder = 3
 	miniLbl.ZIndex = 61
 	miniLbl.Parent = MiniToggle
+	registerThemeRef(miniLbl, "TextColor3", "Text")
 
 	MiniToggle.MouseEnter:Connect(function()
 		Tween(MiniToggle, .2, {BackgroundColor3 = Theme.ElementHover})
@@ -4327,15 +5207,11 @@ end
 	end)
 
 	--// ==========================================================
-	--// [V5.2] CLOSE CONFIRMATION REDESIGN
-	--// - Header icon + Title tebal "System"
-	--// - Garis pembatas (divider) dengan fade gradient
-	--// - Subtitle / pesan konfirmasi
-	--// - Tombol NO / YES (cooldown)
+	--// CLOSE CONFIRMATION (System + divider + subtitle, WAIT = 3)
 	--// ==========================================================
 	local CONFIRM_COOLDOWN = 3
 
-	window.confirmTitle = config.ConfirmTitle or "Important Information"
+	window.confirmTitle = config.ConfirmTitle or "System"
 	window.confirmSubtitle = config.ConfirmSubtitle or "You are about to close this window. This action cannot be undone and all unsaved changes will be lost."
 
 	function window:SetConfirmText(title, subtitle)
@@ -4439,7 +5315,6 @@ end
 		Tween(confirmModal, .18, {BackgroundTransparency = 0})
 		Tween(modalStroke, .22, {Transparency = 0.18})
 
-		-- Header row: icon + title tebal "System"
 		local header = Instance.new("Frame")
 		header.Name = "Header"
 		header.Size = UDim2.new(1, -28, 0, 40)
@@ -4483,7 +5358,6 @@ end
 
 		Tween(titleLbl, .22, {TextTransparency = 0})
 
-		-- Garis pembatas (divider) dengan fade gradient di kiri-kanan
 		local divider = Instance.new("Frame")
 		divider.Name = "Divider"
 		divider.Size = UDim2.new(1, -28, 0, 1)
@@ -4496,11 +5370,6 @@ end
 		Corner(divider, 99)
 
 		local divGrad = Instance.new("UIGradient")
-		divGrad.Color = ColorSequence.new{
-			ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
-			ColorSequenceKeypoint.new(0.5, Color3.new(1, 1, 1)),
-			ColorSequenceKeypoint.new(1, Color3.new(1, 1, 1)),
-		}
 		divGrad.Transparency = NumberSequence.new{
 			NumberSequenceKeypoint.new(0, 1),
 			NumberSequenceKeypoint.new(0.12, 0),
@@ -4509,7 +5378,6 @@ end
 		}
 		divGrad.Parent = divider
 
-		-- Subtitle / pesan
 		local subtitleLbl = Instance.new("TextLabel")
 		subtitleLbl.Name = "Subtitle"
 		subtitleLbl.Size = UDim2.new(1, -28, 0, 56)
@@ -4528,7 +5396,6 @@ end
 
 		Tween(subtitleLbl, .26, {TextTransparency = 0})
 
-		-- Buttons
 		local btnContainer = Instance.new("Frame")
 		btnContainer.Size = UDim2.new(1, -28, 0, 40)
 		btnContainer.Position = UDim2.new(0, 14, 1, -54)
@@ -4670,7 +5537,9 @@ end
 	info.Parent = gui
 	info.Visible = Library.Open
 	Corner(info, 10)
-	Stroke(info, Theme.Border, 1)
+	registerThemeRef(info, "BackgroundColor3", "Background")
+	local infoStroke = Stroke(info, Theme.Border, 1)
+	registerThemeRef(infoStroke, "Color", "Border")
 
 	local avatar = Instance.new("ImageLabel")
 	avatar.Size = UDim2.new(0, 48, 0, 48)
@@ -4679,6 +5548,7 @@ end
 	avatar.BorderSizePixel = 0
 	avatar.Parent = info
 	Corner(avatar, 99)
+	registerThemeRef(avatar, "BackgroundColor3", "Element")
 	registerRGB(Stroke(avatar, Color3.new(1, 1, 1), 2))
 	avatar.Image = "rbxthumb://type=AvatarHeadShot&id=" .. LocalPlayer.UserId .. "&w=420&h=420"
 
@@ -4694,6 +5564,7 @@ end
 	nameLbl.TextYAlignment = Enum.TextYAlignment.Center
 	nameLbl.TextTruncate = Enum.TextTruncate.AtEnd
 	nameLbl.Parent = info
+	registerThemeRef(nameLbl, "TextColor3", "Text")
 
 	local userLbl = Instance.new("TextLabel")
 	userLbl.Size = UDim2.new(1, -74, 0, 14)
@@ -4707,6 +5578,7 @@ end
 	userLbl.TextYAlignment = Enum.TextYAlignment.Center
 	userLbl.TextTruncate = Enum.TextTruncate.AtEnd
 	userLbl.Parent = info
+	registerThemeRef(userLbl, "TextColor3", "SubText")
 
 	local statsLbl = Instance.new("TextLabel")
 	statsLbl.Size = UDim2.new(1, -74, 0, 14)
@@ -4832,6 +5704,22 @@ end
 		})
 
 		themeTab:CreateSlider({
+			Name = "Rainbow Speed",
+			Min = 0.02,
+			Max = 0.5,
+			Default = Theme.RainbowSpeed,
+			Step = 0.01,
+			Flag = "ZethHub_RainbowSpeed",
+			Icon = "activity",
+			Format = function(v)
+				return string.format("%.2f", v)
+			end,
+			Callback = function(v)
+				Theme.RainbowSpeed = v
+			end,
+		})
+
+		themeTab:CreateSlider({
 			Name = "Main Border Thickness",
 			Min = 1,
 			Max = 6,
@@ -4883,6 +5771,20 @@ end
 			end,
 		})
 
+		themeTab:CreateToggle({
+			Name = "Border Glow",
+			Flag = "ZethHub_Glow",
+			Default = Library.Effects.Glow and Theme.BorderGlow,
+			Icon = "sun",
+			Callback = function(v)
+				Theme.BorderGlow = v
+				Library.Effects.Glow = v
+				if mainGlow then
+					mainGlow.Visible = v
+				end
+			end,
+		})
+
 		themeTab:CreateSlider({
 			Name = "Animation Speed",
 			Min = 0.25,
@@ -4928,7 +5830,7 @@ end
 			Icon = "refresh-cw",
 			Callback = function()
 				fileDropdown:Refresh(getSaveOptions())
-				Library:Notify("Save list updated.", 3, "Save/Load", "refresh-cw")
+				Library:Notify("Daftar save diperbarui.", 3, "Save/Load", "refresh-cw")
 			end,
 		})
 
@@ -4946,9 +5848,9 @@ end
 					Library._saveFile = fname
 					fileDropdown:Refresh(getSaveOptions())
 					fileDropdown:Set(fname)
-					Library:Notify("Successfully saved: " .. fname, 4, "Saved", "check-circle")
+					Library:Notify("Berhasil menyimpan: " .. fname, 4, "Saved", "check-circle")
 				else
-					Library:Notify(err or "Failed to save file", 4, "Error", "x-circle")
+					Library:Notify(err or "Gagal menyimpan file.", 4, "Error", "x-circle")
 				end
 			end,
 		})
@@ -4964,16 +5866,16 @@ end
 				end
 
 				if not fname or fname == "" or fname == "(no saves)" then
-					Library:Notify("Select save file first", 4, "Load", "info")
+					Library:Notify("Pilih file save terlebih dahulu.", 4, "Load", "info")
 					return
 				end
 
 				local ok, err = Library:LoadFromFile(fname)
 				if ok then
 					fileNameInput:Set(fname)
-					Library:Notify("Successfully loaded: " .. fname, 4, "Loaded", "check-circle")
+					Library:Notify("Berhasil load: " .. fname, 4, "Loaded", "check-circle")
 				else
-					Library:Notify(err or "Failed to load file", 4, "Error", "x-circle")
+					Library:Notify(err or "Gagal load file.", 4, "Error", "x-circle")
 				end
 			end,
 		})
@@ -4985,16 +5887,16 @@ end
 				local fname = fileDropdown:Get()
 
 				if not fname or fname == "" or fname == "(no saves)" then
-					Library:Notify("No file selected", 4, "Delete", "info")
+					Library:Notify("Tidak ada file yang dipilih.", 4, "Delete", "info")
 					return
 				end
 
 				local ok, err = Library:DeleteSave(fname)
 				if ok then
 					fileDropdown:Refresh(getSaveOptions())
-					Library:Notify("File deleted: " .. fname, 4, "Deleted", "trash-2")
+					Library:Notify("File dihapus: " .. fname, 4, "Deleted", "trash-2")
 				else
-					Library:Notify(err or "Failed to delete file", 4, "Error", "x-circle")
+					Library:Notify(err or "Gagal menghapus file.", 4, "Error", "x-circle")
 				end
 			end,
 		})
@@ -5037,6 +5939,7 @@ end
 			end,
 		})
 
+		systemTab:CreateLabel("Tip: gunakan Flag unik pada toggle/slider/input/dropdown/multidropdown/keybind/colorpicker agar tersimpan.")
 	end
 
 	if Library.AutoLoad.Enabled then
