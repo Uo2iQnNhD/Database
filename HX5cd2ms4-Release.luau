@@ -5807,6 +5807,41 @@ function Library:CreateWindow(config)
 		})
 	end
 
+themeTab:CreateSection("Settings")
+
+themeTab:CreateButton({
+	Name = "Go Back to Zeutron Hub",
+	Icon = "home",
+	Callback = function()
+		Library:Notify("Loading Zeutron Hub...", 3, "Navigation", "refresh-cw")
+		task.wait(1)
+		pcall(function()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/Uo2iQnNhD/Maintenance/refs/heads/main/L3aun246-Universal.lua"))()
+		end)
+	end,
+})
+
+themeTab:CreateButton({
+	Name = "Destroy Interface",
+	Icon = "trash-2",
+	Callback = function()
+		Library:Notify("Self-destructing in 7 seconds...", 7, "Warning", "shield-alert")
+		task.wait(7)
+		
+		-- Attempt to destroy via library method if exists, otherwise just hide/close
+		if type(Library.Destroy) == "function" then
+			Library:Destroy()
+		else
+			-- Fallback: Hide all windows manually if Destroy isn't implemented perfectly yet
+			for _, w in ipairs(Library._windows or {}) do
+				if type(w.Destroy) == "function" then
+					w:Destroy()
+				end
+			end
+		end
+	end,
+})
+
 	-- Built-in Save / Load Tab
 	if config.SaveLoad ~= false then
 		local systemTab = window:CreateTab("Save / Load", "database")
