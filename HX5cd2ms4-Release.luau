@@ -3177,7 +3177,7 @@ function Library:CreateWindow(config)
 		end
 
 		--// Paragraph dengan DIVIDER/PEMBATAS antara title tebal dan subtext
-		--// (gaya sama seperti close confirmation frame)
+		--// [V5.3.1 FIX] jarak title<->divider diperbesar, divider solid & lebih tebal, tetap ikut theme
 		function tab:CreateParagraph(cfg)
 			cfg = cfg or {}
 
@@ -3284,39 +3284,42 @@ function Library:CreateWindow(config)
 
 			titleRow.Visible = (iconOffset > 0) or hasTitle
 
-			-- DIVIDER / GARIS PEMBATAS (fade gradient kiri-kanan)
+			-- Spacer di ATAS divider supaya title tebal tidak menempel ke garis
+			local titleSpacer = Instance.new("Frame")
+			titleSpacer.Name = "TitleSpacer"
+			titleSpacer.Size = UDim2.new(1, 0, 0, 10)
+			titleSpacer.BackgroundTransparency = 1
+			titleSpacer.BorderSizePixel = 0
+			titleSpacer.LayoutOrder = 2
+			titleSpacer.Visible = hasTitle and hasContent
+			titleSpacer.Parent = f
+
+			-- DIVIDER / GARIS PEMBATAS: solid, lebih tebal (2px), tanpa fade, tetap ikut theme/accent
 			local divider = Instance.new("Frame")
 			divider.Name = "Divider"
-			divider.Size = UDim2.new(1, 0, 0, 1)
+			divider.Size = UDim2.new(1, 0, 0, 2)
 			divider.BackgroundColor3 = window.accent
-			divider.BackgroundTransparency = 0.45
+			divider.BackgroundTransparency = 0.25
 			divider.BorderSizePixel = 0
-			divider.LayoutOrder = 2
+			divider.LayoutOrder = 3
 			divider.Visible = hasTitle and hasContent
 			divider.Parent = f
-			Corner(divider, 99)
-
-			local divGrad = Instance.new("UIGradient")
-			divGrad.Transparency = NumberSequence.new{
-				NumberSequenceKeypoint.new(0, 1),
-				NumberSequenceKeypoint.new(0.12, 0),
-				NumberSequenceKeypoint.new(0.88, 0),
-				NumberSequenceKeypoint.new(1, 1),
-			}
-			divGrad.Parent = divider
+			Corner(divider, 1)
 
 			window:onAccent(function(c)
 				if divider and divider.Parent then
 					divider.BackgroundColor3 = c
+					divider.BackgroundTransparency = 0.25
 				end
 			end)
 
 			-- Spacer kecil antara divider dan content
 			local dividerSpacer = Instance.new("Frame")
-			dividerSpacer.Size = UDim2.new(1, 0, 0, 8)
+			dividerSpacer.Name = "DividerSpacer"
+			dividerSpacer.Size = UDim2.new(1, 0, 0, 10)
 			dividerSpacer.BackgroundTransparency = 1
 			dividerSpacer.BorderSizePixel = 0
-			dividerSpacer.LayoutOrder = 3
+			dividerSpacer.LayoutOrder = 4
 			dividerSpacer.Visible = hasTitle and hasContent
 			dividerSpacer.Parent = f
 
@@ -3331,7 +3334,7 @@ function Library:CreateWindow(config)
 			contentObj.TextXAlignment = Enum.TextXAlignment.Left
 			contentObj.TextYAlignment = Enum.TextYAlignment.Top
 			contentObj.TextWrapped = true
-			contentObj.LayoutOrder = 4
+			contentObj.LayoutOrder = 5
 			contentObj.Visible = hasContent
 			contentObj.Parent = f
 			registerThemeRef(contentObj, "TextColor3", "SubText")
@@ -3364,8 +3367,10 @@ function Library:CreateWindow(config)
 					contentObj.Visible = hasContent
 				end
 
-				divider.Visible = hasTitle and hasContent
-				dividerSpacer.Visible = hasTitle and hasContent
+				local showLine = hasTitle and hasContent
+				titleSpacer.Visible = showLine
+				divider.Visible = showLine
+				dividerSpacer.Visible = showLine
 			end
 
 			registerElement(window, tab, name, f, cfg, "paragraph", para)
