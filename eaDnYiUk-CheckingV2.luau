@@ -30,7 +30,7 @@ local NotificationSettings = {
     Enabled = true,
 
     -- Notification title prefix
-    TitlePrefix = "Loader",
+    TitlePrefix = "",
 
     -- Default notification duration in seconds
     Duration = 5,
