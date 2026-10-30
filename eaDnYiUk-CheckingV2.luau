@@ -1,14 +1,3 @@
---[[
-    Clean Loader v3 + Notification
-    - Fast checker: uses indexed tables instead of scanning loops
-    - More accurate: separates GameId and PlaceId
-    - Numeric ID validation
-    - Prevents reloading the same URL
-    - Separates download, compile, and runtime errors
-    - Easy to add new games
-    - Notification system with fallbacks and queue
-]]
-
 --------------------------------------------------
 -- SETTINGS
 --------------------------------------------------
@@ -444,7 +433,7 @@ local function registerIndex(index, id, entry, idKind)
 
     if index[id] ~= nil then
         logWarn(string.format(
-            "Duplicate %s %d for %s. The last entry will be used.",
+            "Duplicate %s %d for %s. The last entry will be used",
             idKind,
             id,
             tostring(entry.Name)
@@ -471,7 +460,7 @@ for i, entry in ipairs(LoaderConfig.Games) do
             registerIndex(placeIndex, id, entry, "PlaceId")
         end
     else
-        logWarn("Game entry #" .. i .. " is not a table and was skipped.")
+        logWarn("Game entry #" .. i .. " is not a table and was skipped")
     end
 end
 
@@ -498,9 +487,9 @@ local function loadRemoteScript(url, label)
     local previousStatus = loadedUrls[url]
     if previousStatus ~= nil then
         if previousStatus then
-            logSuccess(label .. ": URL has already been successfully loaded, skipped.")
+            logSuccess(label .. ": URL has already been successfully loaded, skipped")
         else
-            logWarn(label .. ": URL previously failed, not retrying.")
+            logWarn(label .. ": URL previously failed, not retrying")
         end
 
         return previousStatus
@@ -804,7 +793,7 @@ if matched then
     end
 else
     warn(string.format(
-        "⚠️ UNIVERSAL | Game is not registered. GameId=%s, PlaceId=%s",
+        "⚠️ UNIVERSAL | Game is not registered. GameId: %s, PlaceId: %s",
         tostring(game.GameId),
         tostring(game.PlaceId)
     ))
@@ -813,7 +802,7 @@ else
         notify(
             "Unsupported",
             string.format(
-                "GameId %s | PlaceId %s is not registered. Using Universal.",
+                "GameId %s | PlaceId %s is not registered, Using Universal.",
                 tostring(game.GameId),
                 tostring(game.PlaceId)
             ),
