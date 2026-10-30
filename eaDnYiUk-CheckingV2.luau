@@ -267,7 +267,7 @@ local function buildNotificationTitle(title)
     title = tostring(title or "Notification")
 
     if NotificationSettings.TitlePrefix and NotificationSettings.TitlePrefix ~= "" then
-        title = NotificationSettings.TitlePrefix .. " • " .. title
+        title = NotificationSettings.TitlePrefix .. "" .. title
     end
 
     return cleanNotificationString(title, NotificationSettings.MaxTitleLength)
