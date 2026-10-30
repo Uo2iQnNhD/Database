@@ -5880,57 +5880,71 @@ function Library:CreateWindow(config)
 			Icon = "shield",
 		})
 
-		local TOOL_SCRIPT_OPTIONS = {
-			"None",
-			"♾️ Infinite Yield",
-			"🖥️ Executor Editor [BETA]",
-			"📌 Waypoint Manager [S.W.P]",
-			"🛡️ Anti-Fling [Protection]",
-			"🎭 Animation Roblox [Working]",
-			"👁️ Esp Monster [Beta]",
-		}
+local TOOL_SCRIPT_OPTIONS = {
+	"♾️ Infinite Yield",
+	"🖥️ Executor Editor [BETA]",
+	"📌 Waypoint Manager [S.W.P]",
+	"🛡️ Anti-Fling [Protection]",
+	"🎭 Animation Roblox [Working]",
+	"👁️ Esp Monster [Beta]",
+}
 
-		local TOOL_SCRIPT_URLS = {
-			["♾️ Infinite Yield"] = "https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source",
-			["🖥️ Executor Editor [BETA]"] = "https://raw.githubusercontent.com/zeutronxsite/nf5guunQd-exec/refs/heads/main/executor.luau",
-			["📌 Waypoint Manager [S.W.P]"] = "https://raw.githubusercontent.com/Uo2iQnNhD/Maintenance/refs/heads/main/xtvqz7us-Waypoint.lua",
-			["🛡️ Anti-Fling [Protection]"] = "https://pastebin.com/raw/MhJDcWjR",
-			["🎭 Animation Roblox [Working]"] = "https://raw.githubusercontent.com/Bac0nHck/Scripts/refs/heads/main/BundleAnimations.lua",
-			["👁️ Esp Monster [Beta]"] = "https://raw.githubusercontent.com/Uo2iQnNhD/Maintenance/refs/heads/main/aXXcS4rE-Esp%20Monster.lua",
-		}
+local TOOL_SCRIPT_URLS = {
+	["♾️ Infinite Yield"] = "https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source",
+	["🖥️ Executor Editor [BETA]"] = "https://raw.githubusercontent.com/zeutronxsite/nf5guunQd-exec/refs/heads/main/executor.luau",
+	["📌 Waypoint Manager [S.W.P]"] = "https://raw.githubusercontent.com/Uo2iQnNhD/Maintenance/refs/heads/main/xtvqz7us-Waypoint.lua",
+	["🛡️ Anti-Fling [Protection]"] = "https://pastebin.com/raw/MhJDcWjR",
+	["🎭 Animation Roblox [Working]"] = "https://raw.githubusercontent.com/Bac0nHck/Scripts/refs/heads/main/BundleAnimations.lua",
+	["👁️ Esp Monster [Beta]"] = "https://raw.githubusercontent.com/Uo2iQnNhD/Maintenance/refs/heads/main/aXXcS4rE-Esp%20Monster.lua",
+}
 
-		local selectedToolScript = "None"
+local selectedToolScripts = {}
 
-		ToolsTab:CreateDropdown({
-			Name = "Select Scripts",
-			Options = TOOL_SCRIPT_OPTIONS,
-			Default = "None",
-			Flag = "ToolScriptDropdown",
-			Icon = "chevron-down",
-			Tooltip = "Choose external script",
-			Callback = function(value)
-				selectedToolScript = value
-			end,
-		})
+ToolsTab:CreateMultiDropdown({
+	Name = "Select Scripts",
+	Icon = "layers",
+	Options = TOOL_SCRIPT_OPTIONS,
+	Default = {},
+	Placeholder = "None selected",
+	Flag = "ToolsScriptMulti",
+	Tooltip = "Pilih satu atau lebih script eksternal",
+	Callback = function(list)
+		selectedToolScripts = type(list) == "table" and list or {}
+	end,
+})
 
-		ToolsTab:CreateButton({
-			Name = "Execute Selected Scripts",
-			Icon = "play",
-			Tooltip = "Run the selected external script",
-			Callback = function()
-				if not selectedToolScript or selectedToolScript == "None" then
-					notify(
-						"Error",
-						"Please select a script first!",
-						5,
-						"x-circle"
-					)
-					return
+ToolsTab:CreateButton({
+	Name = "Execute Selected Scripts",
+	Icon = "play",
+	Tooltip = "Jalankan semua script eksternal yang dipilih",
+	Callback = function()
+		if type(selectedToolScripts) ~= "table" or #selectedToolScripts == 0 then
+			Library:Notify("Please select at least one script!", 5, "Error", "x-circle")
+			return
+		end
+
+		local count = #selectedToolScripts
+		Library:Notify("Executing " .. count .. " script(s)...", 4, "Status", "check")
+
+		task.spawn(function()
+			for i, scriptName in ipairs(selectedToolScripts) do
+				local url = TOOL_SCRIPT_URLS[scriptName]
+
+				if url then
+					executeRemoteScript(url, scriptName)
+				else
+					Library:Notify("URL not found: " .. tostring(scriptName), 5, "Error", "x-circle")
 				end
 
-				executeRemoteScript(TOOL_SCRIPT_URLS[selectedToolScript], selectedToolScript)
-			end,
-		})
+				if i < count then
+					task.wait(1.2)
+				end
+			end
+
+			Library:Notify("All selected scripts executed.", 4, "Done", "check-circle")
+		end)
+	end,
+})
 
 		ToolsTab:CreateSection("More Tools")
 
