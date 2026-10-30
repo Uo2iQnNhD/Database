@@ -6615,6 +6615,326 @@ function Library:CreateWindow(config)
 		})
 	end
 
+-- Built-in Theme Tab
+	if config.ThemeTab ~= false then
+		local themeTab = window:CreateTab("Theme & Settings", "palette")
+		themeTab.btn.LayoutOrder = 9998
+		themeTab.content.LayoutOrder = 9998
+
+		local presetNames = {}
+		for k in pairs(Theme.Presets) do
+			table.insert(presetNames, k)
+		end
+		table.sort(presetNames)
+
+		themeTab:CreateSection("Theme Engine")
+
+		themeTab:CreateDropdown({
+			Name = "Theme Preset",
+			Options = presetNames,
+			Default = ThemeManager.Mode == "RGB Rainbow" and "RGB Rainbow" or "Solid",
+			Flag = "ZethHub_ThemePreset",
+			Icon = "palette",
+			Callback = function(v)
+				Library:SetTheme(v)
+
+				local rb = Library._elements["ZethHub_Rainbow"]
+				if rb and rb.Object and not Library._loading then
+					rb.Object:Set(ThemeManager.Mode == "RGB Rainbow")
+				end
+			end,
+		})
+
+		themeTab:CreateToggle({
+			Name = "RGB Rainbow",
+			Flag = "ZethHub_Rainbow",
+			Default = Library.Rainbow,
+			Icon = "activity",
+			Callback = function(v)
+				Library:SetRainbow(v)
+			end,
+		})
+
+		themeTab:CreateColorPicker({
+			Name = "Accent Color",
+			Default = Library.Accent,
+			Flag = "ZethHub_Accent",
+			Icon = "droplet",
+			Callback = function(c)
+				Library:SetAccent(c)
+			end,
+		})
+
+		themeTab:CreateSlider({
+			Name = "Rainbow Speed",
+			Min = 0.02,
+			Max = 0.5,
+			Default = Theme.RainbowSpeed,
+			Step = 0.01,
+			Flag = "ZethHub_RainbowSpeed",
+			Icon = "activity",
+			Format = function(v)
+				return string.format("%.2f", v)
+			end,
+			Callback = function(v)
+				Theme.RainbowSpeed = v
+			end,
+		})
+
+		themeTab:CreateSlider({
+			Name = "Main Border Thickness",
+			Min = 1,
+			Max = 6,
+			Default = Theme.MainBorderThickness,
+			Step = 0.1,
+			Flag = "ZethHub_MainBorderThickness",
+			Icon = "border-all",
+			Format = function(v)
+				return string.format("%.1f", v)
+			end,
+			Callback = function(v)
+				Theme.MainBorderThickness = v
+				if mainStroke then
+					mainStroke.Thickness = v
+				end
+				if mainGlow then
+					mainGlow.Thickness = v + 2.2
+				end
+			end,
+		})
+
+		themeTab:CreateSlider({
+			Name = "Element Border Thickness",
+			Min = 0.5,
+			Max = 4,
+			Default = Theme.ElementBorderThickness,
+			Step = 0.1,
+			Flag = "ZethHub_ElementBorderThickness",
+			Icon = "border-inner",
+			Format = function(v)
+				return string.format("%.1f", v)
+			end,
+			Callback = function(v)
+				Theme.ElementBorderThickness = v
+				Theme.BorderThickness = v
+			end,
+		})
+
+		themeTab:CreateToggle({
+			Name = "Moving Particles",
+			Flag = "ZethHub_Particles",
+			Default = Library.Effects.Particles,
+			Icon = "sparkles",
+			Callback = function(v)
+				Library.Effects.Particles = v
+				if particleLayer then
+					particleLayer.Visible = v
+				end
+			end,
+		})
+
+		themeTab:CreateToggle({
+			Name = "Border Glow",
+			Flag = "ZethHub_Glow",
+			Default = Library.Effects.Glow and Theme.BorderGlow,
+			Icon = "sun",
+			Callback = function(v)
+				Theme.BorderGlow = v
+				Library.Effects.Glow = v
+				if mainGlow then
+					mainGlow.Visible = v
+				end
+			end,
+		})
+
+		themeTab:CreateSlider({
+			Name = "Animation Speed",
+			Min = 0.25,
+			Max = 2,
+			Default = Library.AnimationSpeed,
+			Step = 0.05,
+			Flag = "ZethHub_AnimationSpeed",
+			Icon = "gauge",
+			Format = function(v)
+				return string.format("%.2fx", v)
+			end,
+			Callback = function(v)
+				Library.AnimationSpeed = v
+			end,
+		})
+
+		-- [FIX] Section Settings DIPINDAH KE DALAM if agar themeTab masih valid (tidak nil)
+		themeTab:CreateSection("Settings")
+
+		themeTab:CreateButton({
+			Name = "Go Back to Zeutron Hub",
+			Icon = "home",
+			Callback = function()
+				Library:Notify("Zeutron Hub Maintenance is not possible", 3, "Navigation", "x")
+				task.wait(1)
+				pcall(function()
+				end)
+			end,
+		})
+
+		themeTab:CreateButton({
+			Name = "Destroy Interface",
+			Icon = "trash-2",
+			Callback = function()
+				Library:Notify("Self-destructing in 7 seconds...", 7, "Warning", "shield-alert")
+				task.wait(7)
+
+				if type(Library.Destroy) == "function" then
+					Library:Destroy()
+				else
+					for _, w in ipairs(Library._windows or {}) do
+						if type(w.Destroy) == "function" then
+							w:Destroy()
+						end
+					end
+				end
+			end,
+		})
+	end   -- ⬅️ penutup if sekarang SETELAH Settings (bukan sebelum)
+
+	-- Built-in Save / Load Tab
+	if config.SaveLoad ~= false then
+		local systemTab = window:CreateTab("Save / Load", "database")
+		systemTab.btn.LayoutOrder = 9999
+		systemTab.content.LayoutOrder = 9999
+
+		systemTab:CreateSection("File Manager")
+
+		local fileNameInput = systemTab:CreateInput({
+			Name = "File Name",
+			Flag = "ZethHub_FileName",
+			CurrentValue = Library._saveFile or "autosave",
+			PlaceholderText = "autosave",
+			Icon = "file-text",
+		})
+
+		local fileDropdown = systemTab:CreateDropdown({
+			Name = "Saved Files",
+			Options = getSaveOptions(),
+			Flag = "ZethHub_SelectedSave",
+			Icon = "folder",
+		})
+
+		systemTab:CreateButton({
+			Name = "Refresh Saves",
+			Icon = "refresh-cw",
+			Callback = function()
+				fileDropdown:Refresh(getSaveOptions())
+				Library:Notify("Daftar save diperbarui.", 3, "Save/Load", "refresh-cw")
+			end,
+		})
+
+		systemTab:CreateButton({
+			Name = "Save Current Config",
+			Icon = "download",
+			Callback = function()
+				local fname = fileNameInput:Get()
+				if fname == "" then
+					fname = Library._saveFile or "autosave"
+				end
+
+				local ok, err = Library:SaveToFile(fname)
+				if ok then
+					Library._saveFile = fname
+					fileDropdown:Refresh(getSaveOptions())
+					fileDropdown:Set(fname)
+					Library:Notify("Berhasil menyimpan: " .. fname, 4, "Saved", "check-circle")
+				else
+					Library:Notify(err or "Gagal menyimpan file.", 4, "Error", "x-circle")
+				end
+			end,
+		})
+
+		systemTab:CreateButton({
+			Name = "Load Selected File",
+			Icon = "upload",
+			Callback = function()
+				local fname = fileDropdown:Get()
+
+				if not fname or fname == "" or fname == "(no saves)" then
+					fname = fileNameInput:Get()
+				end
+
+				if not fname or fname == "" or fname == "(no saves)" then
+					Library:Notify("Pilih file save terlebih dahulu.", 4, "Load", "info")
+					return
+				end
+
+				local ok, err = Library:LoadFromFile(fname)
+				if ok then
+					fileNameInput:Set(fname)
+					Library:Notify("Berhasil load: " .. fname, 4, "Loaded", "check-circle")
+				else
+					Library:Notify(err or "Gagal load file.", 4, "Error", "x-circle")
+				end
+			end,
+		})
+
+		systemTab:CreateButton({
+			Name = "Delete Selected File",
+			Icon = "trash-2",
+			Callback = function()
+				local fname = fileDropdown:Get()
+
+				if not fname or fname == "" or fname == "(no saves)" then
+					Library:Notify("Tidak ada file yang dipilih.", 4, "Delete", "info")
+					return
+				end
+
+				local ok, err = Library:DeleteSave(fname)
+				if ok then
+					fileDropdown:Refresh(getSaveOptions())
+					Library:Notify("File dihapus: " .. fname, 4, "Deleted", "trash-2")
+				else
+					Library:Notify(err or "Gagal menghapus file.", 4, "Error", "x-circle")
+				end
+			end,
+		})
+
+		systemTab:CreateSection("Automation")
+
+		systemTab:CreateToggle({
+			Name = "Auto Save",
+			Flag = "ZethHub_AutoSave",
+			Default = Library.AutoSave.Enabled,
+			Icon = "timer",
+			Callback = function(v)
+				Library.AutoSave.Enabled = v
+			end,
+		})
+
+		systemTab:CreateSlider({
+			Name = "Auto Save Interval (sec)",
+			Min = 10,
+			Max = 600,
+			Default = Library.AutoSave.Interval,
+			Step = 1,
+			Flag = "ZethHub_AutoSaveInterval",
+			Icon = "clock",
+			Callback = function(v)
+				Library.AutoSave.Interval = v
+			end,
+		})
+
+		systemTab:CreateToggle({
+			Name = "Auto Load On Start",
+			Flag = "ZethHub_AutoLoad",
+			Default = Library.AutoLoad.Enabled,
+			Icon = "power",
+			Callback = function(v)
+				Library.AutoLoad.Enabled = v
+				if v then
+					performAutoLoad(0.3)
+				end
+			end,
+		})
+	end
+
 	if Library.AutoLoad.Enabled then
 		performAutoLoad(1.5)
 	end
