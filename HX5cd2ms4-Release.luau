@@ -5909,7 +5909,13 @@ ToolsTab:CreateMultiDropdown({
 	Flag = "ToolsScriptMulti",
 	Tooltip = "Pilih satu atau lebih script eksternal",
 	Callback = function(list)
-		selectedToolScripts = type(list) == "table" and list or {}
+		if type(list) == "string" then
+			selectedToolScripts = { list }
+		elseif type(list) == "table" then
+			selectedToolScripts = list
+		else
+			selectedToolScripts = {}
+		end
 	end,
 })
 
@@ -5931,9 +5937,42 @@ ToolsTab:CreateButton({
 				local url = TOOL_SCRIPT_URLS[scriptName]
 
 				if url then
-					executeRemoteScript(url, scriptName)
+					if type(executeRemoteScript) == "function" then
+						executeRemoteScript(url, scriptName)
+					else
+						local ok, source = pcall(function()
+							return game:HttpGet(url)
+						end)
+
+						if ok and source and source ~= "" then
+							local chunk, loadErr = loadstring(source)
+
+							if chunk then
+								task.spawn(chunk)
+							else
+								Library:Notify(
+									"Load error: " .. tostring(scriptName) .. "\n" .. tostring(loadErr),
+									5,
+									"Error",
+									"x-circle"
+								)
+							end
+						else
+							Library:Notify(
+								"Failed to fetch: " .. tostring(scriptName),
+								5,
+								"Error",
+								"x-circle"
+							)
+						end
+					end
 				else
-					Library:Notify("URL not found: " .. tostring(scriptName), 5, "Error", "x-circle")
+					Library:Notify(
+						"URL not found: " .. tostring(scriptName),
+						5,
+						"Error",
+						"x-circle"
+					)
 				end
 
 				if i < count then
