@@ -5658,11 +5658,22 @@ function Library:CreateWindow(config)
 		end)
 	end
 
-	-- Built-in Tools Tab (V5.3.1) -> muncul otomatis, tanpa dibuat di script hub
+	-- Built-in Tools Tab
 	if config.ToolsTab ~= false then
-		local toolsTab = window:CreateTab("Tools", "wrench")
-		toolsTab.btn.LayoutOrder = 9997
-		toolsTab.content.LayoutOrder = 9997
+		local ToolsTab = window:CreateTab("Tools", "wrench")
+		ToolsTab.btn.LayoutOrder = 9997
+		ToolsTab.content.LayoutOrder = 9997
+
+		local Players = game:GetService("Players")
+		local LocalPlayer = Players.LocalPlayer
+		local UserInputService = game:GetService("UserInputService")
+		local RunService = game:GetService("RunService")
+		local TweenService = game:GetService("TweenService")
+		local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+		ToolsTab:CreateSection("Movement")
+
+		_G.infinjump = false
 
 		local function getHumanoid()
 			local char = LocalPlayer.Character
@@ -5672,73 +5683,107 @@ function Library:CreateWindow(config)
 			return nil
 		end
 
-		toolsTab:CreateSection("Player Movement")
-
-		-- Infinite Jump
-		_G.infinjump = false
-
-		toolsTab:CreateToggle({
+		ToolsTab:CreateToggle({
 			Name = "Infinite Jump",
 			Default = false,
-			Flag = "ZethHub_InfiniteJump",
+			Flag = "InfiniteJumpToggle",
 			Icon = "activity",
-			Tooltip = "Turn ON/OFF Infinite Jump",
+			Tooltip = "Turn ON/OFF Inf Jump",
 			Callback = function(value)
 				_G.infinjump = value
-				Library:Notify({
-					Title = "System",
-					Content = value and "Infinite Jump activated." or "Infinite Jump disabled.",
-					Duration = 4,
-					Image = value and "check-circle" or "x-circle",
-				})
+
+				if value then
+					notify(
+						"System Information",
+						"Infinite Jump Has Been Activated",
+						5,
+						"info"
+					)
+				else
+					notify(
+						"System Information",
+						"Infinite Jump Has Been Disabled",
+						5,
+						"info"
+					)
+				end
 			end,
 		})
 
-		Connect(UserInputService.JumpRequest, function()
-			if not _G.infinjump then return end
+		UserInputService.JumpRequest:Connect(function()
+			if not _G.infinjump then
+				return
+			end
+
 			local char = LocalPlayer.Character
-			if not char then return end
+			if not char then
+				return
+			end
+
 			local humanoid = char:FindFirstChildOfClass("Humanoid")
-			if not humanoid then return end
+			if not humanoid then
+				return
+			end
+
 			humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-		end, window)
+		end)
 
 		-- WalkSpeed
 		_G.walkspeedValue = 16
 		_G.walkspeedActive = false
 
-		toolsTab:CreateSlider({
+		ToolsTab:CreateSlider({
 			Name = "WalkSpeed",
 			Min = 0,
 			Max = 5000,
 			Default = 16,
-			Flag = "ZethHub_WalkSpeed",
+			Flag = "WalkSpeedSlider",
 			Icon = "gauge",
-			Tooltip = "Set WalkSpeed value",
+			Tooltip = "Value WalkSpeed",
 			Callback = function(value)
 				_G.walkspeedValue = value
+
 				if _G.walkspeedActive then
 					local humanoid = getHumanoid()
-					if humanoid then humanoid.WalkSpeed = value end
+					if humanoid then
+						humanoid.WalkSpeed = value
+					end
 				end
 			end,
 		})
 
-		toolsTab:CreateToggle({
-			Name = "Enable WalkSpeed",
+		ToolsTab:CreateToggle({
+			Name = "Turn ON/OFF WalkSpeed",
 			Default = false,
-			Flag = "ZethHub_WalkSpeedEnable",
+			Flag = "WalkSpeedToggle",
 			Icon = "toggle-right",
 			Tooltip = "Turn ON/OFF WalkSpeed",
 			Callback = function(value)
 				_G.walkspeedActive = value
 				local humanoid = getHumanoid()
+
 				if value then
-					if humanoid then humanoid.WalkSpeed = _G.walkspeedValue end
-					Library:Notify({Title = "WalkSpeed ON", Content = "Value: " .. tostring(_G.walkspeedValue), Duration = 4, Image = "check-circle"})
+					if humanoid then
+						humanoid.WalkSpeed = _G.walkspeedValue
+					end
+
+					notify(
+						"WalkSpeed ON",
+						"WalkSpeed on with value " .. tostring(_G.walkspeedValue),
+						5,
+						"check-circle"
+					)
 				else
-					if humanoid then humanoid.WalkSpeed = 16 end
-					Library:Notify({Title = "WalkSpeed OFF", Content = "Reset to 16.", Duration = 4, Image = "x-circle"})
+					if humanoid then
+						humanoid.WalkSpeed = 16
+					end
+
+					notify(
+						"WalkSpeed OFF",
+						"WalkSpeed disable (reset to 16)",
+						5,
+						"x-circle"
+					)
 				end
 			end,
 		})
@@ -5747,16 +5792,17 @@ function Library:CreateWindow(config)
 		_G.jumppowerValue = 50
 		_G.jumppowerActive = false
 
-		toolsTab:CreateSlider({
+		ToolsTab:CreateSlider({
 			Name = "JumpPower",
 			Min = 0,
 			Max = 5000,
 			Default = 50,
-			Flag = "ZethHub_JumpPower",
+			Flag = "JumpPowerSlider",
 			Icon = "chevron-up",
-			Tooltip = "Set JumpPower value",
+			Tooltip = "Value JumpPower",
 			Callback = function(value)
 				_G.jumppowerValue = value
+
 				if _G.jumppowerActive then
 					local humanoid = getHumanoid()
 					if humanoid then
@@ -5767,114 +5813,189 @@ function Library:CreateWindow(config)
 			end,
 		})
 
-		toolsTab:CreateToggle({
-			Name = "Enable JumpPower",
+		ToolsTab:CreateToggle({
+			Name = "Turn ON/OFF JumpPower",
 			Default = false,
-			Flag = "ZethHub_JumpPowerEnable",
+			Flag = "JumpPowerToggle",
 			Icon = "toggle-right",
-			Tooltip = "Turn ON/OFF JumpPower",
+			Tooltip = "Turn ON/OFFJumpPower",
 			Callback = function(value)
 				_G.jumppowerActive = value
 				local humanoid = getHumanoid()
+
 				if value then
 					if humanoid then
 						humanoid.UseJumpPower = true
 						humanoid.JumpPower = _G.jumppowerValue
 					end
-					Library:Notify({Title = "JumpPower ON", Content = "Value: " .. tostring(_G.jumppowerValue), Duration = 4, Image = "check-circle"})
+
+					notify(
+						"JumpPower ON",
+						"JumpPower on with value " .. tostring(_G.jumppowerValue),
+						5,
+						"check-circle"
+					)
 				else
 					if humanoid then
 						humanoid.UseJumpPower = true
 						humanoid.JumpPower = 50
 					end
-					Library:Notify({Title = "JumpPower OFF", Content = "Reset to 50.", Duration = 4, Image = "x-circle"})
+
+					notify(
+						"JumpPower OFF",
+						"JumpPower disable (reset to 50)",
+						5,
+						"x-circle"
+					)
 				end
 			end,
 		})
 
-		-- Re-apply setelah respawn (aman: timeout + nil-check, tidak akan 'index nil WaitForChild')
-		Connect(LocalPlayer.CharacterAdded, function(char)
+		LocalPlayer.CharacterAdded:Connect(function(char)
 			task.wait(1)
-			if not char or not char.Parent then return end
+
 			local humanoid = char:WaitForChild("Humanoid", 5)
-			if not humanoid then return end
-			if _G.walkspeedActive then humanoid.WalkSpeed = _G.walkspeedValue end
+			if not humanoid then
+				return
+			end
+
+			if _G.walkspeedActive then
+				humanoid.WalkSpeed = _G.walkspeedValue
+			end
+
 			if _G.jumppowerActive then
 				humanoid.UseJumpPower = true
 				humanoid.JumpPower = _G.jumppowerValue
 			end
-		end, window)
+		end)
 
-		-- External Scripts (data-driven dari config.ToolScripts, library tetap universal)
-		local extOptions = {"None"}
-		local extUrls = {}
+		-- =========================================================
+		-- TOOLS TAB - EXTERNAL SCRIPTS
+		-- =========================================================
+		ToolsTab:CreateSection("External Scripts")
 
-		if type(config.ToolScripts) == "table" then
-			for _, item in ipairs(config.ToolScripts) do
-				local nm = tostring(item.Name or item.title or "")
-				local ul = tostring(item.Url or item.url or item.Link or "")
-				if nm ~= "" and ul ~= "" then
-					table.insert(extOptions, nm)
-					extUrls[nm] = ul
+		ToolsTab:CreateParagraph({
+			Title = "System Information",
+			Content = "All these scripts work with all games",
+			Icon = "shield",
+		})
+
+		local TOOL_SCRIPT_OPTIONS = {
+			"None",
+			"♾️ Infinite Yield",
+			"🖥️ Executor Editor [BETA]",
+			"📌 Waypoint Manager [S.W.P]",
+			"🛡️ Anti-Fling [Protection]",
+			"🎭 Animation Roblox [Working]",
+			"👁️ Esp Monster [Beta]",
+		}
+
+		local TOOL_SCRIPT_URLS = {
+			["♾️ Infinite Yield"] = "https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source",
+			["🖥️ Executor Editor [BETA]"] = "https://raw.githubusercontent.com/zeutronxsite/nf5guunQd-exec/refs/heads/main/executor.luau",
+			["📌 Waypoint Manager [S.W.P]"] = "https://raw.githubusercontent.com/Uo2iQnNhD/Maintenance/refs/heads/main/xtvqz7us-Waypoint.lua",
+			["🛡️ Anti-Fling [Protection]"] = "https://pastebin.com/raw/MhJDcWjR",
+			["🎭 Animation Roblox [Working]"] = "https://raw.githubusercontent.com/Bac0nHck/Scripts/refs/heads/main/BundleAnimations.lua",
+			["👁️ Esp Monster [Beta]"] = "https://raw.githubusercontent.com/Uo2iQnNhD/Maintenance/refs/heads/main/aXXcS4rE-Esp%20Monster.lua",
+		}
+
+		local selectedToolScript = "None"
+
+		ToolsTab:CreateDropdown({
+			Name = "Select Scripts",
+			Options = TOOL_SCRIPT_OPTIONS,
+			Default = "None",
+			Flag = "ToolScriptDropdown",
+			Icon = "chevron-down",
+			Tooltip = "Choose external script",
+			Callback = function(value)
+				selectedToolScript = value
+			end,
+		})
+
+		ToolsTab:CreateButton({
+			Name = "Execute Selected Scripts",
+			Icon = "play",
+			Tooltip = "Run the selected external script",
+			Callback = function()
+				if not selectedToolScript or selectedToolScript == "None" then
+					notify(
+						"Error",
+						"Please select a script first!",
+						5,
+						"x-circle"
+					)
+					return
+				end
+
+				executeRemoteScript(TOOL_SCRIPT_URLS[selectedToolScript], selectedToolScript)
+			end,
+		})
+
+		ToolsTab:CreateSection("More Tools")
+
+		-- =========================================================
+		-- TOOLS TAB - PLAYER JOIN/LEAVE NOTIFICATION
+		-- =========================================================
+
+		_G.JoinLeaveEnabled = false
+
+		-- Bersihkan GUI lama jika script dijalankan ulang
+		local function removeOldJoinLeaveGui()
+			local parents = { PlayerGui }
+
+			if typeof(gethui) == "function" then
+				local ok, hui = pcall(gethui)
+				if ok and hui then
+					table.insert(parents, hui)
+				end
+			end
+
+			local okCore, CoreGui = pcall(function()
+				return game:GetService("CoreGui")
+			end)
+
+			if okCore and CoreGui then
+				table.insert(parents, CoreGui)
+			end
+
+			for _, parent in ipairs(parents) do
+				if parent then
+					for _, child in ipairs(parent:GetChildren()) do
+						if child:IsA("ScreenGui") and child.Name == "JoinLeaveNotificationGui" then
+							pcall(function()
+								child:Destroy()
+							end)
+						end
+					end
 				end
 			end
 		end
 
-		if #extOptions > 1 then
-			toolsTab:CreateSection("External Scripts")
+		removeOldJoinLeaveGui()
 
-			toolsTab:CreateParagraph({
-				Title = "System Information",
-				Content = "Script eksternal dijalankan via HTTP + loadstring. Tidak semua兼容 di setiap executor.",
-				Icon = "shield",
-			})
+		local NotificationGui = Instance.new("ScreenGui")
+		NotificationGui.Name = "JoinLeaveNotificationGui"
+		NotificationGui.ResetOnSpawn = false
+		NotificationGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		NotificationGui.IgnoreGuiInset = true
+		NotificationGui.DisplayOrder = 999999
 
-			local selectedExt = "None"
+		local notifParent = PlayerGui
 
-			toolsTab:CreateDropdown({
-				Name = "Select Script",
-				Options = extOptions,
-				Default = "None",
-				Flag = "ZethHub_ToolScript",
-				Icon = "chevron-down",
-				Tooltip = "Pilih script eksternal",
-				Callback = function(v)
-					selectedExt = v
-				end,
-			})
-
-			toolsTab:CreateButton({
-				Name = "Execute Selected Script",
-				Icon = "play",
-				Tooltip = "Jalankan script eksternal terpilih",
-				Callback = function()
-					if selectedExt == "None" or not extUrls[selectedExt] then
-						Library:Notify({Title = "Error", Content = "Pilih script terlebih dahulu.", Duration = 4, Image = "x-circle"})
-						return
-					end
-					Library:ExecuteRemoteScript(extUrls[selectedExt], selectedExt)
-				end,
-			})
+		if typeof(gethui) == "function" then
+			local ok, hui = pcall(gethui)
+			if ok and hui then
+				notifParent = hui
+			end
 		end
 
-		toolsTab:CreateSection("More Tools")
-
-		-- ===== Player Join/Leave Notification (holder di-parent ke gui window -> auto cleanup) =====
-		_G.JoinLeaveEnabled = false
-
-		local joinLeaveHolder = Instance.new("Frame")
-		joinLeaveHolder.Name = "JoinLeaveHolder"
-		joinLeaveHolder.Size = UDim2.new(1, 0, 1, 0)
-		joinLeaveHolder.BackgroundTransparency = 1
-		joinLeaveHolder.BorderSizePixel = 0
-		joinLeaveHolder.ZIndex = 9000
-		joinLeaveHolder.ClipsDescendants = false
-		joinLeaveHolder.Active = false
-		joinLeaveHolder.Parent = gui
+		NotificationGui.Parent = notifParent
 
 		local activeNotifications = {}
 		local notificationQueue = {}
 		local isProcessingQueue = false
+
 		local processNotificationQueue
 		local showPlayerNotification
 
@@ -5882,14 +6003,21 @@ function Library:CreateWindow(config)
 			if not userId or userId == 0 then
 				return "rbxasset://textures/ui/GuiImagePlaceholder.png"
 			end
-			return "https://www.roblox.com/headshot-thumbnail/image?userId=" .. userId .. "&width=150&height=150&format=png"
+
+			return "https://www.roblox.com/headshot-thumbnail/image?userId="
+				.. userId
+				.. "&width=150&height=150&format=png"
 		end
 
 		local function getCurrentTime()
-			local ok, t = pcall(function() return os.date("*t") end)
-			if ok and t then
-				return string.format("%02d:%02d:%02d", t.hour, t.min, t.sec)
+			local success, time = pcall(function()
+				return os.date("*t")
+			end)
+
+			if success and time then
+				return string.format("%02d:%02d:%02d", time.hour, time.min, time.sec)
 			end
+
 			return "00:00:00"
 		end
 
@@ -5898,9 +6026,13 @@ function Library:CreateWindow(config)
 				if frame.Parent then
 					local count = #activeNotifications
 					local yOffset = -(100 + (count - i) * 90)
-					TweenService:Create(frame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-						Position = UDim2.new(1, -340, 1, yOffset),
-					}):Play()
+					local targetPosition = UDim2.new(1, -340, 1, yOffset)
+
+					TweenService:Create(
+						frame,
+						TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+						{ Position = targetPosition }
+					):Play()
 				end
 			end
 		end
@@ -5915,10 +6047,16 @@ function Library:CreateWindow(config)
 			notifFrame.Position = UDim2.new(1, 20, 1, 20)
 			notifFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
 			notifFrame.BorderSizePixel = 0
-			notifFrame.ZIndex = 9001
-			notifFrame.Parent = joinLeaveHolder
-			Corner(notifFrame, 10)
-			local nStroke = Stroke(notifFrame, themeColor, 2)
+			notifFrame.Parent = NotificationGui
+
+			local corner = Instance.new("UICorner")
+			corner.CornerRadius = UDim.new(0, 10)
+			corner.Parent = notifFrame
+
+			local stroke = Instance.new("UIStroke")
+			stroke.Color = themeColor
+			stroke.Thickness = 2
+			stroke.Parent = notifFrame
 
 			local avatarImage = Instance.new("ImageLabel")
 			avatarImage.Size = UDim2.new(0, 50, 0, 50)
@@ -5926,9 +6064,11 @@ function Library:CreateWindow(config)
 			avatarImage.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
 			avatarImage.BorderSizePixel = 0
 			avatarImage.Image = getAvatarUrl(userId)
-			avatarImage.ZIndex = 9002
 			avatarImage.Parent = notifFrame
-			Corner(avatarImage, 99)
+
+			local avatarCorner = Instance.new("UICorner")
+			avatarCorner.CornerRadius = UDim.new(1, 0)
+			avatarCorner.Parent = avatarImage
 
 			local titleLabel = Instance.new("TextLabel")
 			titleLabel.Size = UDim2.new(1, -75, 0, 20)
@@ -5939,7 +6079,6 @@ function Library:CreateWindow(config)
 			titleLabel.TextSize = 14
 			titleLabel.Font = Enum.Font.GothamBold
 			titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-			titleLabel.ZIndex = 9002
 			titleLabel.Parent = notifFrame
 
 			local nameLabel = Instance.new("TextLabel")
@@ -5951,98 +6090,162 @@ function Library:CreateWindow(config)
 			nameLabel.TextSize = 15
 			nameLabel.Font = Enum.Font.GothamBold
 			nameLabel.TextXAlignment = Enum.TextXAlignment.Left
-			nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
-			nameLabel.ZIndex = 9002
 			nameLabel.Parent = notifFrame
 
 			local currentPlayers = #Players:GetPlayers()
-			if not isJoining then currentPlayers = math.max(0, currentPlayers - 1) end
+			if not isJoining then
+				currentPlayers = math.max(0, currentPlayers - 1)
+			end
+
 			local maxPlayers = 99
-			local okMax, resMax = pcall(function() return game.MaxPlayers end)
-			if okMax and type(resMax) == "number" and resMax > 0 then maxPlayers = resMax end
+			local success, result = pcall(function()
+				return game.MaxPlayers
+			end)
+
+			if success and type(result) == "number" and result > 0 then
+				maxPlayers = result
+			end
+
+			local infoText = string.format(
+				"Players: %d/%d | Time: %s",
+				currentPlayers,
+				maxPlayers,
+				getCurrentTime()
+			)
 
 			local infoLabel = Instance.new("TextLabel")
 			infoLabel.Size = UDim2.new(1, -75, 0, 18)
 			infoLabel.Position = UDim2.new(0, 72, 0, 50)
 			infoLabel.BackgroundTransparency = 1
-			infoLabel.Text = string.format("Players: %d/%d | Time: %s", currentPlayers, maxPlayers, getCurrentTime())
+			infoLabel.Text = infoText
 			infoLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
 			infoLabel.TextSize = 11
 			infoLabel.Font = Enum.Font.Gotham
 			infoLabel.TextXAlignment = Enum.TextXAlignment.Left
-			infoLabel.ZIndex = 9002
 			infoLabel.Parent = notifFrame
 
 			table.insert(activeNotifications, notifFrame)
 			updateNotificationPositions()
 
 			task.delay(4, function()
-				if not notifFrame.Parent then return end
-				TweenService:Create(notifFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-					Position = UDim2.new(1, 20, 1, 20),
-					BackgroundTransparency = 1,
-				}):Play()
-				TweenService:Create(avatarImage, TweenInfo.new(0.5), {ImageTransparency = 1}):Play()
-				TweenService:Create(titleLabel, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-				TweenService:Create(nameLabel, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-				TweenService:Create(infoLabel, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+				if not notifFrame.Parent then
+					return
+				end
+
+				TweenService:Create(
+					notifFrame,
+					TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+					{
+						Position = UDim2.new(1, 20, 1, 20),
+						BackgroundTransparency = 1,
+					}
+				):Play()
+
+				TweenService:Create(avatarImage, TweenInfo.new(0.5), { ImageTransparency = 1 }):Play()
+				TweenService:Create(titleLabel, TweenInfo.new(0.5), { TextTransparency = 1 }):Play()
+				TweenService:Create(nameLabel, TweenInfo.new(0.5), { TextTransparency = 1 }):Play()
+				TweenService:Create(infoLabel, TweenInfo.new(0.5), { TextTransparency = 1 }):Play()
+
 				task.wait(0.5)
-				if notifFrame.Parent then notifFrame:Destroy() end
+				notifFrame:Destroy()
+
 				for idx, frame in ipairs(activeNotifications) do
 					if frame == notifFrame then
 						table.remove(activeNotifications, idx)
 						break
 					end
 				end
+
 				updateNotificationPositions()
 			end)
 		end
 
 		processNotificationQueue = function()
-			if isProcessingQueue or #notificationQueue == 0 then return end
+			if isProcessingQueue or #notificationQueue == 0 then
+				return
+			end
+
 			isProcessingQueue = true
+
 			local data = table.remove(notificationQueue, 1)
+
 			if type(showPlayerNotification) == "function" then
 				showPlayerNotification(data.playerName, data.userId, data.isJoining)
 			end
+
 			task.delay(0.5, function()
 				isProcessingQueue = false
-				if type(processNotificationQueue) == "function" then processNotificationQueue() end
+
+				if type(processNotificationQueue) == "function" then
+					processNotificationQueue()
+				end
 			end)
 		end
 
-		Connect(Players.PlayerAdded, function(player)
-			if not _G.JoinLeaveEnabled then return end
-			table.insert(notificationQueue, {playerName = player.Name, userId = player.UserId, isJoining = true})
-			processNotificationQueue()
-		end, window)
+		Players.PlayerAdded:Connect(function(player)
+			if not _G.JoinLeaveEnabled then
+				return
+			end
 
-		Connect(Players.PlayerRemoving, function(player)
-			if not _G.JoinLeaveEnabled then return end
-			table.insert(notificationQueue, {playerName = player.Name, userId = player.UserId, isJoining = false})
-			processNotificationQueue()
-		end, window)
+			table.insert(notificationQueue, {
+				playerName = player.Name,
+				userId = player.UserId,
+				isJoining = true,
+			})
 
-		toolsTab:CreateToggle({
+			if type(processNotificationQueue) == "function" then
+				processNotificationQueue()
+			end
+		end)
+
+		Players.PlayerRemoving:Connect(function(player)
+			if not _G.JoinLeaveEnabled then
+				return
+			end
+
+			table.insert(notificationQueue, {
+				playerName = player.Name,
+				userId = player.UserId,
+				isJoining = false,
+			})
+
+			if type(processNotificationQueue) == "function" then
+				processNotificationQueue()
+			end
+		end)
+
+		ToolsTab:CreateToggle({
 			Name = "Player Notification",
 			Default = false,
-			Flag = "ZethHub_JoinLeaveNotif",
+			Flag = "JoinLeaveNotifToggle",
 			Icon = "users",
-			Tooltip = "Tampilkan notifikasi player join/leave",
+			Tooltip = "Show player join/leave notifications",
 			Callback = function(value)
 				_G.JoinLeaveEnabled = value
+
 				if value then
+					local pName = (LocalPlayer and LocalPlayer.Name) or "Unknown"
+					local pId = (LocalPlayer and LocalPlayer.UserId) or 0
+
 					table.insert(notificationQueue, {
-						playerName = (LocalPlayer and LocalPlayer.Name or "Unknown") .. " (You)",
-						userId = (LocalPlayer and LocalPlayer.UserId or 0),
+						playerName = pName .. " (You)",
+						userId = pId,
 						isJoining = true,
 					})
-					processNotificationQueue()
+
+					if type(processNotificationQueue) == "function" then
+						processNotificationQueue()
+					else
+						warn("[Zeutron Hub] processNotificationQueue is nil!")
+					end
 				end
 			end,
 		})
 
-		-- ===== ESP Player =====
+		-- =========================================================
+		-- TOOLS TAB - ESP PLAYER
+		-- =========================================================
+
 		local espEnabled = false
 		local espObjects = {}
 		local espCharacterConnections = {}
@@ -6050,68 +6253,125 @@ function Library:CreateWindow(config)
 
 		local function collectKeys(tbl)
 			local keys = {}
-			for key in pairs(tbl) do table.insert(keys, key) end
+			for key in pairs(tbl) do
+				table.insert(keys, key)
+			end
 			return keys
 		end
 
 		local function getTeamColor(player)
 			local team = nil
-			pcall(function() team = player.Team end)
+			pcall(function()
+				team = player.Team
+			end)
+
 			local teamName = (team and team.Name) or ""
-			local map = {
-				["Fugitive"] = Color3.fromRGB(255, 50, 50), ["Prison"] = Color3.fromRGB(255, 150, 0),
-				["Police"] = Color3.fromRGB(0, 100, 255), ["Civilian"] = Color3.fromRGB(50, 255, 50),
-				["Hostage"] = Color3.fromRGB(255, 0, 255), ["Choosing"] = Color3.fromRGB(0, 255, 255),
+
+			local teamColorMap = {
+				["Fugitive"] = Color3.fromRGB(255, 50, 50),
+				["Prison"] = Color3.fromRGB(255, 150, 0),
+				["Police"] = Color3.fromRGB(0, 100, 255),
+				["Civilian"] = Color3.fromRGB(50, 255, 50),
+
+				["Hostage"] = Color3.fromRGB(255, 0, 255),
+				["Choosing"] = Color3.fromRGB(0, 255, 255),
 				["ADMIN"] = Color3.fromRGB(255, 215, 0),
-				["Red"] = Color3.fromRGB(255, 50, 50), ["Blue"] = Color3.fromRGB(50, 100, 255),
-				["Green"] = Color3.fromRGB(50, 255, 50), ["Yellow"] = Color3.fromRGB(255, 255, 50),
-				["Purple"] = Color3.fromRGB(200, 50, 255), ["White"] = Color3.fromRGB(255, 255, 255),
+
+				["Red"] = Color3.fromRGB(255, 50, 50),
+				["Blue"] = Color3.fromRGB(50, 100, 255),
+				["Green"] = Color3.fromRGB(50, 255, 50),
+				["Yellow"] = Color3.fromRGB(255, 255, 50),
+				["Purple"] = Color3.fromRGB(200, 50, 255),
+				["White"] = Color3.fromRGB(255, 255, 255),
 				["Black"] = Color3.fromRGB(50, 50, 50),
 			}
-			for name, color in pairs(map) do
-				if string.lower(teamName) == string.lower(name) then return color end
+
+			for name, color in pairs(teamColorMap) do
+				if string.lower(teamName) == string.lower(name) then
+					return color
+				end
 			end
-			local tc = nil
-			pcall(function() tc = team and team.TeamColor and team.TeamColor.Color end)
-			return tc or Color3.fromRGB(255, 255, 255)
+
+			local teamColor = nil
+			pcall(function()
+				teamColor = team and team.TeamColor and team.TeamColor.Color
+			end)
+
+			return teamColor or Color3.fromRGB(255, 255, 255)
 		end
 
 		local function clearPlayerESP(player)
 			local data = espObjects[player]
 			if data then
-				pcall(function() if data.billboard then data.billboard:Destroy() end end)
-				pcall(function() if data.highlight then data.highlight:Destroy() end end)
+				pcall(function()
+					if data.billboard then
+						data.billboard:Destroy()
+					end
+				end)
+
+				pcall(function()
+					if data.highlight then
+						data.highlight:Destroy()
+					end
+				end)
+
 				espObjects[player] = nil
 			end
+
 			local conn = espCharacterConnections[player]
 			if conn then
-				pcall(function() conn:Disconnect() end)
+				pcall(function()
+					conn:Disconnect()
+				end)
+
 				espCharacterConnections[player] = nil
 			end
 		end
 
 		local function clearAllESP()
-			for _, player in ipairs(collectKeys(espObjects)) do clearPlayerESP(player) end
-			for _, player in ipairs(collectKeys(espCharacterConnections)) do clearPlayerESP(player) end
+			for _, player in ipairs(collectKeys(espObjects)) do
+				clearPlayerESP(player)
+			end
+
+			for _, player in ipairs(collectKeys(espCharacterConnections)) do
+				clearPlayerESP(player)
+			end
+
 			espObjects = {}
 		end
 
 		local function createESP(targetPlayer)
-			if targetPlayer == LocalPlayer then return end
+			if targetPlayer == LocalPlayer then
+				return
+			end
 
 			local function setupESP(char)
-				if not char or not char.Parent then return end
+				if not char then
+					return
+				end
+
 				local head = char:WaitForChild("Head", 5)
 				local hum = char:WaitForChild("Humanoid", 5)
 				local hrp = char:WaitForChild("HumanoidRootPart", 5)
-				if not head or not hum or not hrp then return end
+
+				if not head or not hum or not hrp then
+					return
+				end
 
 				local teamColor = getTeamColor(targetPlayer)
-				if head:FindFirstChild("PlayerESP_GUI") then head.PlayerESP_GUI:Destroy() end
-				if char:FindFirstChild("PlayerESP_HL") then char.PlayerESP_HL:Destroy() end
 
+				if head:FindFirstChild("PlayerESP_GUI") then
+					head.PlayerESP_GUI:Destroy()
+				end
+
+				if char:FindFirstChild("PlayerESP_HL") then
+					char.PlayerESP_HL:Destroy()
+				end
+
+				-- Highlight
 				local highlight = Instance.new("Highlight")
 				highlight.Name = "PlayerESP_HL"
+
 				pcall(function()
 					highlight.FillColor = teamColor
 					highlight.OutlineColor = Color3.fromRGB(0, 0, 0)
@@ -6119,20 +6379,26 @@ function Library:CreateWindow(config)
 					highlight.OutlineTransparency = 0
 					highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
 				end)
+
 				highlight.Adornee = char
 				highlight.Parent = char
 
-				-- BillboardGui: TIDAK ada ResetOnSpawn/ZIndexBehavior (dulu penyebab crash) -> dihilangkan
+				-- Billboard
 				local billboard = Instance.new("BillboardGui")
 				billboard.Name = "PlayerESP_GUI"
 				billboard.Adornee = head
 				billboard.Size = UDim2.new(0, 140, 0, 60)
 				billboard.StudsOffset = Vector3.new(0, 3, 0)
 				billboard.AlwaysOnTop = true
+				billboard.ResetOnSpawn = false
+				billboard.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 				billboard.Parent = head
 
+				-- Name
 				local nameLabel = Instance.new("TextLabel")
+				nameLabel.Name = "NameLabel"
 				nameLabel.Size = UDim2.new(1, 0, 0, 14)
+				nameLabel.Position = UDim2.new(0, 0, 0, 0)
 				nameLabel.BackgroundTransparency = 1
 				nameLabel.Text = targetPlayer.Name
 				nameLabel.TextColor3 = teamColor
@@ -6142,7 +6408,9 @@ function Library:CreateWindow(config)
 				nameLabel.TextSize = 12
 				nameLabel.Parent = billboard
 
+				-- Distance
 				local distanceLabel = Instance.new("TextLabel")
+				distanceLabel.Name = "DistanceLabel"
 				distanceLabel.Size = UDim2.new(1, 0, 0, 12)
 				distanceLabel.Position = UDim2.new(0, 0, 0, 13)
 				distanceLabel.BackgroundTransparency = 1
@@ -6154,22 +6422,34 @@ function Library:CreateWindow(config)
 				distanceLabel.TextSize = 11
 				distanceLabel.Parent = billboard
 
+				-- HP Background
 				local hpBg = Instance.new("Frame")
+				hpBg.Name = "HealthBg"
 				hpBg.Size = UDim2.new(0, 120, 0, 6)
 				hpBg.Position = UDim2.new(0.5, -60, 0, 26)
 				hpBg.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 				hpBg.BorderSizePixel = 0
 				hpBg.Parent = billboard
-				Corner(hpBg, 3)
 
+				local hpCornerBg = Instance.new("UICorner")
+				hpCornerBg.CornerRadius = UDim.new(0, 3)
+				hpCornerBg.Parent = hpBg
+
+				-- HP Fill
 				local hpFill = Instance.new("Frame")
+				hpFill.Name = "HealthFill"
 				hpFill.Size = UDim2.new(1, 0, 1, 0)
 				hpFill.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
 				hpFill.BorderSizePixel = 0
 				hpFill.Parent = hpBg
-				Corner(hpFill, 3)
 
+				local hpCornerFill = Instance.new("UICorner")
+				hpCornerFill.CornerRadius = UDim.new(0, 3)
+				hpCornerFill.Parent = hpFill
+
+				-- HP Label
 				local hpLabel = Instance.new("TextLabel")
+				hpLabel.Name = "HPLabel"
 				hpLabel.Size = UDim2.new(1, 0, 0, 12)
 				hpLabel.Position = UDim2.new(0, 0, 0, 34)
 				hpLabel.BackgroundTransparency = 1
@@ -6181,7 +6461,9 @@ function Library:CreateWindow(config)
 				hpLabel.TextSize = 11
 				hpLabel.Parent = billboard
 
+				-- Team Label
 				local teamLabel = Instance.new("TextLabel")
+				teamLabel.Name = "TeamLabel"
 				teamLabel.Size = UDim2.new(1, 0, 0, 10)
 				teamLabel.Position = UDim2.new(0, 0, 0, 46)
 				teamLabel.BackgroundTransparency = 1
@@ -6194,91 +6476,141 @@ function Library:CreateWindow(config)
 				teamLabel.Parent = billboard
 
 				espObjects[targetPlayer] = {
-					billboard = billboard, highlight = highlight, hpFill = hpFill, hpLabel = hpLabel,
-					distanceLabel = distanceLabel, nameLabel = nameLabel, teamLabel = teamLabel,
-					humanoid = hum, hrp = hrp, character = char,
+					billboard = billboard,
+					highlight = highlight,
+					hpFill = hpFill,
+					hpLabel = hpLabel,
+					distanceLabel = distanceLabel,
+					nameLabel = nameLabel,
+					teamLabel = teamLabel,
+					humanoid = hum,
+					hrp = hrp,
+					character = char,
 				}
 			end
 
-			if targetPlayer.Character then setupESP(targetPlayer.Character) end
+			if targetPlayer.Character then
+				setupESP(targetPlayer.Character)
+			end
+
 			if not espCharacterConnections[targetPlayer] then
 				espCharacterConnections[targetPlayer] = targetPlayer.CharacterAdded:Connect(function(char)
-					if espEnabled then task.wait(0.5); setupESP(char) end
+					if espEnabled then
+						task.wait(0.5)
+						setupESP(char)
+					end
 				end)
 			end
 		end
 
 		local function startUpdateLoop()
 			if updateConnection then
-				pcall(function() updateConnection:Disconnect() end)
+				updateConnection:Disconnect()
 				updateConnection = nil
 			end
+
 			updateConnection = RunService.RenderStepped:Connect(function()
 				local myChar = LocalPlayer.Character
 				local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
-				for _, data in pairs(espObjects) do
+
+				for player, data in pairs(espObjects) do
 					pcall(function()
-						local hum, hrp, fill, hpLabel, distLabel = data.humanoid, data.hrp, data.hpFill, data.hpLabel, data.distanceLabel
+						local hum = data.humanoid
+						local hrp = data.hrp
+						local fill = data.hpFill
+						local hpLabel = data.hpLabel
+						local distLabel = data.distanceLabel
+
+						-- HP
 						if hum and fill and hpLabel and hum.Parent then
-							local curHP = math.floor(hum.Health)
+							local currentHP = math.floor(hum.Health)
 							local maxHP = math.floor(hum.MaxHealth)
 							local percent = math.clamp(hum.Health / hum.MaxHealth, 0, 1)
+
 							fill.Size = UDim2.new(percent, 0, 1, 0)
-							hpLabel.Text = string.format("HP: %d/%d", curHP, maxHP)
+							hpLabel.Text = string.format("HP: %d/%d", currentHP, maxHP)
+
 							if percent > 0.6 then
-								fill.BackgroundColor3 = Color3.fromRGB(0, 255, 0); hpLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+								fill.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+								hpLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
 							elseif percent > 0.3 then
-								fill.BackgroundColor3 = Color3.fromRGB(255, 200, 0); hpLabel.TextColor3 = Color3.fromRGB(255, 200, 0)
+								fill.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
+								hpLabel.TextColor3 = Color3.fromRGB(255, 200, 0)
 							else
-								fill.BackgroundColor3 = Color3.fromRGB(255, 0, 0); hpLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+								fill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+								hpLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
 							end
 						end
+
+						-- Distance
 						if myHRP and hrp and hrp.Parent and distLabel then
 							local distance = (myHRP.Position - hrp.Position).Magnitude
 							distLabel.Text = string.format("[%dm]", math.floor(distance))
-							if distance < 15 then distLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
-							elseif distance < 40 then distLabel.TextColor3 = Color3.fromRGB(255, 200, 0)
-							else distLabel.TextColor3 = Color3.fromRGB(255, 255, 255) end
+
+							if distance < 15 then
+								distLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
+							elseif distance < 40 then
+								distLabel.TextColor3 = Color3.fromRGB(255, 200, 0)
+							else
+								distLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+							end
 						end
 					end)
 				end
 			end)
-			-- daftarkan ke window agar ikut ter-disconnect saat window destroy (anti-leak)
-			table.insert(window._connections, updateConnection)
 		end
 
 		local function toggleESP(state)
 			espEnabled = state
+
 			if state then
 				for _, player in ipairs(Players:GetPlayers()) do
-					if player ~= LocalPlayer then createESP(player) end
+					if player ~= LocalPlayer then
+						createESP(player)
+					end
 				end
+
 				startUpdateLoop()
 			else
 				if updateConnection then
-					pcall(function() updateConnection:Disconnect() end)
+					updateConnection:Disconnect()
 					updateConnection = nil
 				end
+
 				clearAllESP()
 			end
 		end
 
-		Connect(Players.PlayerAdded, function(player)
-			if espEnabled and player ~= LocalPlayer then createESP(player) end
-		end, window)
+		Players.PlayerAdded:Connect(function(player)
+			if espEnabled and player ~= LocalPlayer then
+				createESP(player)
+			end
+		end)
 
-		Connect(Players.PlayerRemoving, function(player)
+		Players.PlayerRemoving:Connect(function(player)
 			clearPlayerESP(player)
-		end, window)
+		end)
 
-		toolsTab:CreateToggle({
+		ToolsTab:CreateToggle({
 			Name = "ESP Player",
 			Default = false,
-			Flag = "ZethHub_ESPPlayer",
+			Flag = "ESPPlayerToggle",
 			Icon = "eye",
-			Tooltip = "ESP pemain: nama, HP, jarak, tim",
+			Tooltip = "Activate ESP players with HP, distance, and team",
 			Callback = function(value)
 				toggleESP(value)
+			end,
+		})
+
+		ToolsTab:CreateButton({
+			Name = "Korblox & Headless",
+			Icon = "gem",
+			Tooltip = "This script is client only And Not real",
+			Callback = function()
+				executeRemoteScript(
+					"https://raw.githubusercontent.com/Uo2iQnNhD/Maintenance/refs/heads/main/SYtg4g76-Korblox%20%26%20Headless.lua",
+					"Korblox & Headless"
+				)
 			end,
 		})
 	end
