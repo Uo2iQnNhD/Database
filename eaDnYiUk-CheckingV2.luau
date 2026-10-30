@@ -1,24 +1,35 @@
+--[[
+    Clean Loader v3 + Notification
+    - Fast checker: uses indexed tables instead of scanning loops
+    - More accurate: separates GameId and PlaceId
+    - Numeric ID validation
+    - Prevents reloading the same URL
+    - Separates download, compile, and runtime errors
+    - Easy to add new games
+    - Notification system with fallbacks and queue
+]]
+
 --------------------------------------------------
 -- SETTINGS
 --------------------------------------------------
 local LoaderSettings = {
-    -- Mode pencocokan:
-    -- "GameIdThenPlaceId" => utamakan GameId, fallback ke PlaceId
-    -- "PlaceIdThenGameId" => utamakan PlaceId, fallback ke GameId
-    -- "GameIdOnly"        => hanya terima GameId
-    -- "PlaceIdOnly"       => hanya terima PlaceId
+    -- Matching mode:
+    -- "GameIdThenPlaceId" => prioritize GameId, fallback to PlaceId
+    -- "PlaceIdThenGameId" => prioritize PlaceId, fallback to GameId
+    -- "GameIdOnly"        => accept GameId only
+    -- "PlaceIdOnly"       => accept PlaceId only
     MatchMode = "GameIdThenPlaceId",
 
-    -- Tolak URL selain http/https
+    -- Reject URLs other than http/https
     AllowNonHttps = false,
 
-    -- Tampilkan log detail
+    -- Show detailed logs
     PrintDetailedLog = true,
 
-    -- Jika game terdaftar tapi tidak punya URL, load universal
+    -- If a registered game has no URLs, load universal
     FallbackToUniversalIfNoUrls = true,
 
-    -- Jika semua script game gagal dimuat, load universal
+    -- If all game scripts fail to load, load universal
     FallbackToUniversalIfSupportedFails = false,
 }
 
@@ -26,46 +37,46 @@ local LoaderSettings = {
 -- NOTIFICATION SETTINGS
 --------------------------------------------------
 local NotificationSettings = {
-    -- Master switch notification
+    -- Notification master switch
     Enabled = true,
 
-    -- Prefix judul notification
+    -- Notification title prefix
     TitlePrefix = "Loader",
 
-    -- Durasi default notification dalam detik
+    -- Default notification duration in seconds
     Duration = 5,
 
-    -- Jeda antar notification supaya tidak spam
+    -- Delay between notifications to prevent spam
     QueueDelay = 0.12,
 
-    -- Batas panjang judul/text
+    -- Maximum title/text length
     MaxTitleLength = 42,
     MaxTextLength = 180,
 
-    -- Notification saat loader mulai
+    -- Notify when loader starts
     NotifyOnStart = true,
 
-    -- Notification saat hasil load: sukses/gagal/sebagian gagal
+    -- Notify on load result: success/failure/partial failure
     NotifyOnResult = true,
 
-    -- Notification untuk setiap script/part
-    -- Matikan jika tidak ingin spam
+    -- Notify for each script/part
+    -- Disable if you don't want spam
     NotifyOnEachScript = false,
 
-    -- Notification untuk setiap warning/error kecil
-    -- Matikan secara default agar tidak terlalu spam
+    -- Notify for every minor warning/error
+    -- Disabled by default to avoid excessive spam
     NotifyOnErrors = false,
 }
 
 --------------------------------------------------
--- CONFIG GAME
+-- GAME CONFIG
 --------------------------------------------------
--- Saya isi GameIds dan PlaceIds dengan ID yang sama
--- agar kompatibel dengan script lamamu.
+-- I filled GameIds and PlaceIds with the same IDs
+-- to remain compatible with your old script.
 --
--- Jika kamu ingin lebih ketat:
--- - Kalau ID berasal dari URL game Roblox, pindahkan ke GameIds saja.
--- - Kalau ID khusus place tertentu, pindahkan ke PlaceIds saja.
+-- If you want stricter matching:
+-- - If the ID comes from a Roblox game URL, move it to GameIds only.
+-- - If the ID is specific to a certain place, move it to PlaceIds only.
 --------------------------------------------------
 local LoaderConfig = {
     Universal = {
@@ -151,7 +162,7 @@ local LoaderConfig = {
 }
 
 --------------------------------------------------
--- UTILITAS
+-- UTILITIES
 --------------------------------------------------
 local function countKeys(tbl)
     local count = 0
@@ -176,7 +187,7 @@ local function isFinitePositiveInteger(value)
         return false
     end
 
-    -- Harus positif dan bulat
+    -- Must be positive and an integer
     if value <= 0 then
         return false
     end
@@ -189,10 +200,10 @@ local function normalizeUrl(url)
         return ""
     end
 
-    -- Hapus spasi di awal/akhir
+    -- Remove leading/trailing spaces
     url = url:gsub("^%s+", ""):gsub("%s+$", "")
 
-    -- Hapus BOM jika tidak sengaja menempel di string URL
+    -- Remove BOM if accidentally attached to URL string
     url = url:gsub("^\239\187\191", "")
 
     return url
@@ -219,7 +230,7 @@ local function getUtf8Length(str)
         end
     end
 
-    -- Fallback hitung byte
+    -- Fallback byte count
     return #str
 end
 
@@ -235,7 +246,7 @@ local function truncateNotificationString(value, maxLength)
 
     local keepChars = math.max(1, maxLength - 3)
 
-    -- Coba potong aman berdasarkan UTF-8 character
+    -- Try safe truncation based on UTF-8 character
     if utf8 and utf8.offset then
         local ok, offset = pcall(utf8.offset, value, keepChars + 1)
         if ok and type(offset) == "number" and offset > 1 then
@@ -243,21 +254,21 @@ local function truncateNotificationString(value, maxLength)
         end
     end
 
-    -- Fallback potong byte
+    -- Fallback byte truncation
     return value:sub(1, keepChars) .. "..."
 end
 
 local function cleanNotificationString(value, maxLength)
     value = tostring(value or "")
 
-    -- Ganti control character/newline jadi spasi
+    -- Replace control characters/newlines with spaces
     value = value:gsub("[%c]", " ")
 
-    -- Rapikan spasi berlebih
+    -- Clean up excess spaces
     value = value:gsub("%s+", " ")
     value = value:gsub("^%s+", ""):gsub("%s+$", "")
 
-    -- Potong jika terlalu panjang
+    -- Truncate if too long
     value = truncateNotificationString(value, maxLength)
 
     return value
@@ -287,7 +298,7 @@ local function sendNotificationImmediate(title, text, duration)
     end
 
     if text == "" then
-        text = "Selesai."
+        text = "Done."
     end
 
     local payload = {
@@ -298,7 +309,7 @@ local function sendNotificationImmediate(title, text, duration)
 
     local sent = false
 
-    -- Metode 1: StarterGui:SetCore("SendNotification", ...)
+    -- Method 1: StarterGui:SetCore("SendNotification", ...)
     sent = pcall(function()
         local starterGui = game:GetService("StarterGui")
         starterGui:SetCore("SendNotification", payload)
@@ -308,7 +319,7 @@ local function sendNotificationImmediate(title, text, duration)
         return true
     end
 
-    -- Metode 2: NotificationService:Notify(...)
+    -- Method 2: NotificationService:Notify(...)
     sent = pcall(function()
         local service = game:GetService("NotificationService")
         service:Notify(payload)
@@ -318,7 +329,7 @@ local function sendNotificationImmediate(title, text, duration)
         return true
     end
 
-    -- Metode 3: CoreGui.NotificationService
+    -- Method 3: CoreGui.NotificationService
     sent = pcall(function()
         local coreGui = game:GetService("CoreGui")
         local service = coreGui:FindFirstChild("NotificationService")
@@ -336,7 +347,7 @@ local function processNotificationQueue()
         return
     end
 
-    -- Jika spawn/task tidak tersedia, kirim langsung dengan jeda manual jika possible
+    -- If spawn/task is unavailable, send directly with manual delay if possible
     if not spawnFn then
         while #notificationQueue > 0 do
             local item = table.remove(notificationQueue, 1)
@@ -373,7 +384,7 @@ local function processNotificationQueue()
 
     if not spawnOk then
         notificationProcessing = false
-        warn("Failed to start notification queue thread.")
+        warn("Failed to start notification queue thread")
     end
 end
 
@@ -396,18 +407,18 @@ end
 --------------------------------------------------
 local function logInfo(message)
     if LoaderSettings.PrintDetailedLog then
-        print("  [INFO] " .. message)
+        print("ℹ️ | " .. message)
     end
 end
 
 local function logSuccess(message)
     if LoaderSettings.PrintDetailedLog then
-        print("  [✅] " .. message)
+        print("✅ | " .. message)
     end
 end
 
 local function logWarn(message)
-    warn("  [❌] " .. message)
+    warn("❌ | " .. message)
 
     if NotificationSettings.NotifyOnErrors then
         notify("Warning", message, NotificationSettings.Duration)
@@ -423,7 +434,7 @@ local placeIndex = {}
 local function registerIndex(index, id, entry, idKind)
     if not isFinitePositiveInteger(id) then
         logWarn(string.format(
-            "ID tidak valid untuk %s (%s): %s",
+            "Invalid ID for %s (%s): %s",
             tostring(entry.Name),
             idKind,
             tostring(id)
@@ -433,7 +444,7 @@ local function registerIndex(index, id, entry, idKind)
 
     if index[id] ~= nil then
         logWarn(string.format(
-            "Duplicate %s %d untuk %s. Entri terakhir akan dipakai.",
+            "Duplicate %s %d for %s. The last entry will be used.",
             idKind,
             id,
             tostring(entry.Name)
@@ -444,7 +455,7 @@ local function registerIndex(index, id, entry, idKind)
     return true
 end
 
--- Validasi dan bangun index sekali saja saat script dimulai
+-- Validate and build indexes once when the script starts
 for i, entry in ipairs(LoaderConfig.Games) do
     if type(entry) == "table" then
         entry.Name = entry.Name or ("Game #" .. i)
@@ -460,12 +471,12 @@ for i, entry in ipairs(LoaderConfig.Games) do
             registerIndex(placeIndex, id, entry, "PlaceId")
         end
     else
-        logWarn("Entri game ke-" .. i .. " bukan table dan dilewati.")
+        logWarn("Game entry #" .. i .. " is not a table and was skipped.")
     end
 end
 
 --------------------------------------------------
--- LOADER AMAN
+-- SAFE LOADER
 --------------------------------------------------
 local loadedUrls = {}
 local loadFunction = loadstring or load
@@ -474,22 +485,22 @@ local function loadRemoteScript(url, label)
     url = normalizeUrl(url)
 
     if url == "" then
-        logWarn(label .. ": URL kosong.")
+        logWarn(label .. ": Empty URL")
         return false
     end
 
     if not LoaderSettings.AllowNonHttps and not isHttpUrl(url) then
-        logWarn(label .. ": URL bukan http/https: " .. url)
+        logWarn(label .. ": URL is not http/https: " .. url)
         return false
     end
 
-    -- Hindari load ulang URL yang sama
+    -- Avoid reloading the same URL
     local previousStatus = loadedUrls[url]
     if previousStatus ~= nil then
         if previousStatus then
-            logSuccess(label .. ": URL sudah pernah sukses dimuat, dilewati.")
+            logSuccess(label .. ": URL has already been successfully loaded, skipped.")
         else
-            logWarn(label .. ": URL sudah pernah gagal, tidak diulang.")
+            logWarn(label .. ": URL previously failed, not retrying.")
         end
 
         return previousStatus
@@ -503,7 +514,7 @@ local function loadRemoteScript(url, label)
     if not fetchOk then
         loadedUrls[url] = false
         logWarn(string.format(
-            "%s: gagal download. Error: %s",
+            "%s: download failed. Error: %s",
             label,
             tostring(body)
         ))
@@ -512,22 +523,22 @@ local function loadRemoteScript(url, label)
 
     if type(body) ~= "string" then
         loadedUrls[url] = false
-        logWarn(label .. ": hasil download bukan string.")
+        logWarn(label .. ": downloaded content is not a string.")
         return false
     end
 
-    -- Hapus UTF-8 BOM dari awal konten script
+    -- Remove UTF-8 BOM from the beginning of script content
     body = body:gsub("^\239\187\191", "")
 
     if body == "" then
         loadedUrls[url] = false
-        logWarn(label .. ": konten script kosong.")
+        logWarn(label .. ": script content is empty.")
         return false
     end
 
     if type(loadFunction) ~= "function" then
         loadedUrls[url] = false
-        logWarn(label .. ": loadstring/load tidak tersedia.")
+        logWarn(label .. ": loadstring/load is unavailable.")
         return false
     end
 
@@ -547,7 +558,7 @@ local function loadRemoteScript(url, label)
     if compiled == nil then
         loadedUrls[url] = false
         logWarn(string.format(
-            "%s: script gagal dikompilasi. Detail: %s",
+            "%s: script failed to compile. Detail: %s",
             label,
             tostring(compileError)
         ))
@@ -559,7 +570,7 @@ local function loadRemoteScript(url, label)
     loadedUrls[url] = runOk
 
     if runOk then
-        logSuccess(label .. ": berhasil dimuat dan dijalankan.")
+        logSuccess(label .. ": loaded and executed successfully.")
     else
         logWarn(string.format(
             "%s: runtime error. Detail: %s",
@@ -583,7 +594,7 @@ local function loadUrlList(urls, baseName)
         local label = string.format("%s [%d/%d]", baseName, i, total)
 
         if NotificationSettings.NotifyOnEachScript then
-            notify("Memuat", label, 2)
+            notify("Loading", label, 2)
         end
 
         local ok = loadRemoteScript(urls[i], label)
@@ -593,7 +604,7 @@ local function loadUrlList(urls, baseName)
         end
 
         if NotificationSettings.NotifyOnEachScript then
-            notify(ok and "Sukses" or "Gagal", label, 2)
+            notify(ok and "Success" or "Failed", label, 2)
         end
     end
 
@@ -601,7 +612,7 @@ local function loadUrlList(urls, baseName)
 end
 
 --------------------------------------------------
--- CHECKER CEPAT
+-- FAST CHECKER
 --------------------------------------------------
 local function getIndexValue(index, id)
     if isFinitePositiveInteger(id) then
@@ -665,13 +676,13 @@ local function notifyLoadResult(kind, name, loaded, total)
     name = tostring(name or kind)
 
     if total == 0 then
-        notify(kind .. " Kosong", string.format("%s tidak memiliki URL.", name), 5)
+        notify(kind .. " Empty", string.format("%s has no URLs.", name), 5)
     elseif loaded == total then
-        notify(kind .. " Sukses", string.format("%s: %d/%d script dimuat.", name, loaded, total), 5)
+        notify(kind .. " Success", string.format("%s: %d/%d scripts loaded.", name, loaded, total), 5)
     elseif loaded > 0 then
-        notify(kind .. " Sebagian Gagal", string.format("%s: %d/%d script dimuat.", name, loaded, total), 5)
+        notify(kind .. " Partial Failure", string.format("%s: %d/%d scripts loaded.", name, loaded, total), 5)
     else
-        notify(kind .. " Gagal", string.format("%s: 0/%d script dimuat.", name, total), 5)
+        notify(kind .. " Failed", string.format("%s: 0/%d scripts loaded.", name, total), 5)
     end
 end
 
@@ -683,13 +694,13 @@ local function loadUniversal(reason)
         warn(reason)
     end
 
-    print("⏳ Memuat Universal...")
+    print("⏳ Loading Universal...")
 
     if type(LoaderConfig.Universal) ~= "table" then
-        warn("💀 LoaderConfig.Universal tidak ada.")
+        warn("💀 LoaderConfig.Universal is missing.")
 
         if NotificationSettings.NotifyOnResult then
-            notify("Universal Error", "Konfigurasi Universal tidak ada.", 5)
+            notify("Universal Error", "Universal configuration is missing.", 5)
         end
 
         return 0, 0
@@ -698,7 +709,7 @@ local function loadUniversal(reason)
     local universalName = LoaderConfig.Universal.Name or "Universal"
 
     if NotificationSettings.NotifyOnResult then
-        notify("Universal", reason or string.format("Memuat %s...", universalName), 4)
+        notify("Universal", reason or string.format("Loading %s...", universalName), 4)
     end
 
     local loaded, total = loadUrlList(
@@ -726,7 +737,7 @@ print(string.format(
     LoaderSettings.MatchMode
 ))
 print(string.format(
-    "📚 Registered: GameId=%d, PlaceId=%d",
+    "📚 Registered: GameId: %d, PlaceId: %d",
     countKeys(gameIndex),
     countKeys(placeIndex)
 ))
@@ -749,7 +760,7 @@ local matched, matchedBy = getMatchedGame()
 
 if matched then
     print(string.format(
-        "[SUPPORTED] Game Detected: %s (matched by %s)",
+        "SUPPORTED | Game Detected: %s (matched by %s)",
         matched.Name,
         tostring(matchedBy)
     ))
@@ -758,7 +769,7 @@ if matched then
         notify(
             "Supported",
             string.format(
-                "%s terdeteksi via %s. Memuat script...",
+                "%s detected via %s, Loading scripts...",
                 matched.Name,
                 tostring(matchedBy)
             ),
@@ -772,12 +783,12 @@ if matched then
 
     if total == 0 then
         warn(string.format(
-            "[!] %s terdaftar tetapi tidak memiliki URL.",
+            "[!] %s is registered but has no URLs.",
             matched.Name
         ))
 
         if LoaderSettings.FallbackToUniversalIfNoUrls then
-            loadUniversal("⏳ Fallback ke Universal karena game didukung tidak punya URL.")
+            loadUniversal("⏳ Falling back to Universal because supported game has no URLs")
         end
     else
         print(string.format(
@@ -788,12 +799,12 @@ if matched then
         ))
 
         if loaded == 0 and LoaderSettings.FallbackToUniversalIfSupportedFails then
-            loadUniversal("⏳ Fallback ke Universal karena semua script game gagal.")
+            loadUniversal("⏳ Falling back to Universal because all game scripts failed")
         end
     end
 else
     warn(string.format(
-        "[⚠️ UNIVERSAL] Game tidak terdaftar. GameId=%s, PlaceId=%s",
+        "⚠️ UNIVERSAL | Game is not registered. GameId=%s, PlaceId=%s",
         tostring(game.GameId),
         tostring(game.PlaceId)
     ))
@@ -802,7 +813,7 @@ else
         notify(
             "Unsupported",
             string.format(
-                "GameId %s | PlaceId %s tidak terdaftar. Menggunakan Universal.",
+                "GameId %s | PlaceId %s is not registered. Using Universal.",
                 tostring(game.GameId),
                 tostring(game.PlaceId)
             ),
