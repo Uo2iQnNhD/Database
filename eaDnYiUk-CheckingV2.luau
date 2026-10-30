@@ -23,41 +23,6 @@ local LoaderSettings = {
 }
 
 --------------------------------------------------
--- NOTIFICATION SETTINGS
---------------------------------------------------
-local NotificationSettings = {
-    -- Notification master switch
-    Enabled = true,
-
-    -- Notification title prefix
-    TitlePrefix = "",
-
-    -- Default notification duration in seconds
-    Duration = 5,
-
-    -- Delay between notifications to prevent spam
-    QueueDelay = 0.12,
-
-    -- Maximum title/text length
-    MaxTitleLength = 42,
-    MaxTextLength = 180,
-
-    -- Notify when loader starts
-    NotifyOnStart = true,
-
-    -- Notify on load result: success/failure/partial failure
-    NotifyOnResult = true,
-
-    -- Notify for each script/part
-    -- Disable if you don't want spam
-    NotifyOnEachScript = false,
-
-    -- Notify for every minor warning/error
-    -- Disabled by default to avoid excessive spam
-    NotifyOnErrors = false,
-}
-
---------------------------------------------------
 -- GAME CONFIG
 --------------------------------------------------
 -- I filled GameIds and PlaceIds with the same IDs
@@ -203,195 +168,6 @@ local function isHttpUrl(url)
 end
 
 --------------------------------------------------
--- NOTIFICATION SYSTEM
---------------------------------------------------
-local notificationQueue = {}
-local notificationProcessing = false
-
-local spawnFn = (task and task.spawn) or spawn
-local waitFn = (task and task.wait) or wait
-
-local function getUtf8Length(str)
-    if utf8 and utf8.len then
-        local ok, len = pcall(utf8.len, str)
-        if ok and type(len) == "number" then
-            return len
-        end
-    end
-
-    -- Fallback byte count
-    return #str
-end
-
-local function truncateNotificationString(value, maxLength)
-    if not maxLength or maxLength <= 0 then
-        return value
-    end
-
-    local length = getUtf8Length(value)
-    if length <= maxLength then
-        return value
-    end
-
-    local keepChars = math.max(1, maxLength - 3)
-
-    -- Try safe truncation based on UTF-8 character
-    if utf8 and utf8.offset then
-        local ok, offset = pcall(utf8.offset, value, keepChars + 1)
-        if ok and type(offset) == "number" and offset > 1 then
-            return value:sub(1, offset - 1) .. "..."
-        end
-    end
-
-    -- Fallback byte truncation
-    return value:sub(1, keepChars) .. "..."
-end
-
-local function cleanNotificationString(value, maxLength)
-    value = tostring(value or "")
-
-    -- Replace control characters/newlines with spaces
-    value = value:gsub("[%c]", " ")
-
-    -- Clean up excess spaces
-    value = value:gsub("%s+", " ")
-    value = value:gsub("^%s+", ""):gsub("%s+$", "")
-
-    -- Truncate if too long
-    value = truncateNotificationString(value, maxLength)
-
-    return value
-end
-
-local function buildNotificationTitle(title)
-    title = tostring(title or "Notification")
-
-    if NotificationSettings.TitlePrefix and NotificationSettings.TitlePrefix ~= "" then
-        title = NotificationSettings.TitlePrefix .. "" .. title
-    end
-
-    return cleanNotificationString(title, NotificationSettings.MaxTitleLength)
-end
-
-local function sendNotificationImmediate(title, text, duration)
-    if not NotificationSettings.Enabled then
-        return false
-    end
-
-    title = buildNotificationTitle(title)
-    text = cleanNotificationString(text, NotificationSettings.MaxTextLength)
-    duration = tonumber(duration) or NotificationSettings.Duration
-
-    if duration < 1 then
-        duration = 1
-    end
-
-    if text == "" then
-        text = "Done."
-    end
-
-    local payload = {
-        Title = title,
-        Text = text,
-        Duration = duration,
-    }
-
-    local sent = false
-
-    -- Method 1: StarterGui:SetCore("SendNotification", ...)
-    sent = pcall(function()
-        local starterGui = game:GetService("StarterGui")
-        starterGui:SetCore("SendNotification", payload)
-    end)
-
-    if sent then
-        return true
-    end
-
-    -- Method 2: NotificationService:Notify(...)
-    sent = pcall(function()
-        local service = game:GetService("NotificationService")
-        service:Notify(payload)
-    end)
-
-    if sent then
-        return true
-    end
-
-    -- Method 3: CoreGui.NotificationService
-    sent = pcall(function()
-        local coreGui = game:GetService("CoreGui")
-        local service = coreGui:FindFirstChild("NotificationService")
-
-        if service then
-            service:Notify(payload)
-        end
-    end)
-
-    return sent
-end
-
-local function processNotificationQueue()
-    if notificationProcessing then
-        return
-    end
-
-    -- If spawn/task is unavailable, send directly with manual delay if possible
-    if not spawnFn then
-        while #notificationQueue > 0 do
-            local item = table.remove(notificationQueue, 1)
-            sendNotificationImmediate(item.title, item.text, item.duration)
-
-            if waitFn then
-                waitFn(NotificationSettings.QueueDelay or 0.12)
-            end
-        end
-
-        return
-    end
-
-    notificationProcessing = true
-
-    local spawnOk = pcall(spawnFn, function()
-        local queueOk, queueErr = pcall(function()
-            while #notificationQueue > 0 do
-                local item = table.remove(notificationQueue, 1)
-                sendNotificationImmediate(item.title, item.text, item.duration)
-
-                if waitFn then
-                    waitFn(NotificationSettings.QueueDelay or 0.12)
-                end
-            end
-        end)
-
-        notificationProcessing = false
-
-        if not queueOk then
-            warn("Notification queue error: " .. tostring(queueErr))
-        end
-    end)
-
-    if not spawnOk then
-        notificationProcessing = false
-        warn("Failed to start notification queue thread")
-    end
-end
-
-local function notify(title, text, duration)
-    if not NotificationSettings.Enabled then
-        return
-    end
-
-    table.insert(notificationQueue, {
-        title = title,
-        text = text,
-        duration = duration,
-    })
-
-    processNotificationQueue()
-end
-
---------------------------------------------------
 -- LOGGING
 --------------------------------------------------
 local function logInfo(message)
@@ -408,10 +184,6 @@ end
 
 local function logWarn(message)
     warn("❌ | " .. message)
-
-    if NotificationSettings.NotifyOnErrors then
-        notify("Warning", message, NotificationSettings.Duration)
-    end
 end
 
 --------------------------------------------------
@@ -582,18 +354,10 @@ local function loadUrlList(urls, baseName)
     for i = 1, total do
         local label = string.format("%s [%d/%d]", baseName, i, total)
 
-        if NotificationSettings.NotifyOnEachScript then
-            notify("Loading", label, 2)
-        end
-
         local ok = loadRemoteScript(urls[i], label)
 
         if ok then
             successCount = successCount + 1
-        end
-
-        if NotificationSettings.NotifyOnEachScript then
-            notify(ok and "Success" or "Failed", label, 2)
         end
     end
 
@@ -655,27 +419,6 @@ local function getMatchedGame()
 end
 
 --------------------------------------------------
--- NOTIFICATION RESULT HELPER
---------------------------------------------------
-local function notifyLoadResult(kind, name, loaded, total)
-    if not NotificationSettings.NotifyOnResult then
-        return
-    end
-
-    name = tostring(name or kind)
-
-    if total == 0 then
-        notify(kind .. " Empty", string.format("%s has no URLs.", name), 5)
-    elseif loaded == total then
-        notify(kind .. " Success", string.format("%s: %d/%d scripts loaded.", name, loaded, total), 5)
-    elseif loaded > 0 then
-        notify(kind .. " Partial Failure", string.format("%s: %d/%d scripts loaded.", name, loaded, total), 5)
-    else
-        notify(kind .. " Failed", string.format("%s: 0/%d scripts loaded.", name, total), 5)
-    end
-end
-
---------------------------------------------------
 -- UNIVERSAL FALLBACK
 --------------------------------------------------
 local function loadUniversal(reason)
@@ -687,26 +430,15 @@ local function loadUniversal(reason)
 
     if type(LoaderConfig.Universal) ~= "table" then
         warn("💀 LoaderConfig.Universal is missing.")
-
-        if NotificationSettings.NotifyOnResult then
-            notify("Universal Error", "Universal configuration is missing.", 5)
-        end
-
         return 0, 0
     end
 
     local universalName = LoaderConfig.Universal.Name or "Universal"
 
-    if NotificationSettings.NotifyOnResult then
-        notify("Universal", reason or string.format("Loading %s...", universalName), 4)
-    end
-
     local loaded, total = loadUrlList(
         LoaderConfig.Universal.Urls,
         universalName
     )
-
-    notifyLoadResult("Universal", universalName, loaded, total)
 
     return loaded, total
 end
@@ -732,19 +464,6 @@ print(string.format(
 ))
 print("==================================================")
 
-if NotificationSettings.NotifyOnStart then
-    notify(
-        "Start",
-        string.format(
-            "GameId %s | PlaceId %s | Mode %s",
-            tostring(game.GameId),
-            tostring(game.PlaceId),
-            LoaderSettings.MatchMode
-        ),
-        4
-    )
-end
-
 local matched, matchedBy = getMatchedGame()
 
 if matched then
@@ -754,21 +473,7 @@ if matched then
         tostring(matchedBy)
     ))
 
-    if NotificationSettings.NotifyOnResult then
-        notify(
-            "Supported",
-            string.format(
-                "%s detected via %s, Loading scripts...",
-                matched.Name,
-                tostring(matchedBy)
-            ),
-            4
-        )
-    end
-
     local loaded, total = loadUrlList(matched.Urls, matched.Name)
-
-    notifyLoadResult("Game", matched.Name, loaded, total)
 
     if total == 0 then
         warn(string.format(
@@ -797,18 +502,6 @@ else
         tostring(game.GameId),
         tostring(game.PlaceId)
     ))
-
-    if NotificationSettings.NotifyOnResult then
-        notify(
-            "Unsupported",
-            string.format(
-                "GameId %s | PlaceId %s is not registered, Using Universal.",
-                tostring(game.GameId),
-                tostring(game.PlaceId)
-            ),
-            4
-        )
-    end
 
     loadUniversal()
 end
