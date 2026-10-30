@@ -5907,7 +5907,7 @@ ToolsTab:CreateMultiDropdown({
 	Default = {},
 	Placeholder = "None selected",
 	Flag = "ToolsScriptMulti",
-	Tooltip = "Pilih satu atau lebih script eksternal",
+	Tooltip = "Select one or more external scripts",
 	Callback = function(list)
 		if type(list) == "string" then
 			selectedToolScripts = { list }
@@ -5922,7 +5922,7 @@ ToolsTab:CreateMultiDropdown({
 ToolsTab:CreateButton({
 	Name = "Execute Selected Scripts",
 	Icon = "play",
-	Tooltip = "Jalankan semua script eksternal yang dipilih",
+	Tooltip = "Run all selected external scripts",
 	Callback = function()
 		if type(selectedToolScripts) ~= "table" or #selectedToolScripts == 0 then
 			Library:Notify("Please select at least one script!", 5, "Error", "x-circle")
