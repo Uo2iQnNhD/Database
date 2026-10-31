@@ -1901,6 +1901,7 @@ end
 
 -- PART 1 END
 -- JANGAN JALANKAN SENDIRI. LANJUTKAN DENGAN PART 2
+
 --// Window
 function Library:CreateWindow(config)
 	if Library._destroyed or (type(Env) == "table" and Env.ZethHubGeneration ~= Library.Generation) then
@@ -1909,7 +1910,7 @@ function Library:CreateWindow(config)
 
 	config = config or {}
 	local title = config.Title or "ZETHUB"
-	local subtitle = config.Subtitle or "V5.3 • RGB / Particle / Multi-Select"
+	local subtitle = config.Subtitle or "V5.4 • Scroll Tabs / Multi-Select"
 	local OPEN_SIZE = UDim2.new(0, 560, 0, 420)
 
 	local gui = Instance.new("ScreenGui")
@@ -1925,7 +1926,6 @@ function Library:CreateWindow(config)
 	end
 
 	--// Theme live-refresh references
-	-- Tiap entri: {obj = Instance, prop = "BackgroundColor3"/"BorderColor3"/..., key = "Background"/"Sidebar"/...}
 	local themeRefs = {}
 
 	local function registerThemeRef(obj, prop, key)
@@ -2272,7 +2272,6 @@ function Library:CreateWindow(config)
 		ThemeManager.Dirty = true
 	end
 
-	--// Apply theme ke semua referensi elemen window
 	function window:ApplyTheme()
 		if self._destroyed then return end
 
@@ -2287,7 +2286,6 @@ function Library:CreateWindow(config)
 			end
 		end
 
-		-- Refresh RGB gradients/strokes agar ikut mode terbaru
 		refreshRGBColors()
 	end
 
@@ -2421,8 +2419,8 @@ function Library:CreateWindow(config)
 	local tagsConfig = config.Tags
 	if tagsConfig == nil then
 		tagsConfig = {
-			{Text = "V5.3", Color = Color3.fromRGB(255, 204, 0), TextColor = Color3.fromRGB(0, 0, 0)},
-			{Text = "Multi-Select", Color = Color3.fromRGB(46, 230, 110), TextColor = Color3.fromRGB(0, 0, 0)},
+			{Text = "V5.4", Color = Color3.fromRGB(255, 204, 0), TextColor = Color3.fromRGB(0, 0, 0)},
+			{Text = "Scroll Tabs", Color = Color3.fromRGB(46, 230, 110), TextColor = Color3.fromRGB(0, 0, 0)},
 		}
 	end
 
@@ -2543,13 +2541,18 @@ function Library:CreateWindow(config)
 		end
 	end, window)
 
-	-- Sidebar
+	-- ==========================================================
+	-- [V5.4 FIX #1] SIDEBAR: Search sticky di atas + Tab SCROLLABLE
+	-- ==========================================================
+	local SIDE_PAD = 8
+	local SEARCH_H = 34
+
 	local sidebar = Instance.new("Frame")
 	sidebar.Size = UDim2.new(0, 150, 1, -TOPBAR_H)
 	sidebar.Position = UDim2.new(0, 0, 0, TOPBAR_H)
 	sidebar.BackgroundColor3 = Theme.Sidebar
 	sidebar.BorderSizePixel = 0
-	sidebar.ClipsDescendants = false
+	sidebar.ClipsDescendants = true
 	sidebar.ZIndex = 41
 	sidebar.Parent = main
 	Corner(sidebar, 10)
@@ -2559,56 +2562,14 @@ function Library:CreateWindow(config)
 	sideStroke.Transparency = 0.35
 	registerThemeRef(sideStroke, "Color", "Border")
 
-	local sideList = Instance.new("UIListLayout")
-	sideList.SortOrder = Enum.SortOrder.LayoutOrder
-	sideList.Padding = UDim.new(0, 5)
-	sideList.Parent = sidebar
-	Pad(sidebar, 14, 8, 12, 8)
-
-	-- Content
-	local content = Instance.new("ScrollingFrame")
-	content.Size = UDim2.new(1, -150, 1, -TOPBAR_H)
-	content.Position = UDim2.new(0, 150, 0, TOPBAR_H)
-	content.BackgroundTransparency = 1
-	content.BorderSizePixel = 0
-	content.ScrollBarThickness = 3
-	content.ScrollBarImageColor3 = window.accent
-	content.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	content.CanvasSize = UDim2.new(0, 0, 0, 0)
-	content.ZIndex = 41
-	content.Parent = main
-
-	window:onAccent(function(c)
-		content.ScrollBarImageColor3 = c
-	end)
-
-	local container = Instance.new("Frame")
-	container.Size = UDim2.new(1, -24, 0, 0)
-	container.Position = UDim2.new(0, 12, 0, 10)
-	container.BackgroundTransparency = 1
-	container.AutomaticSize = Enum.AutomaticSize.Y
-	container.Parent = content
-
-	local containerList = Instance.new("UIListLayout")
-	containerList.SortOrder = Enum.SortOrder.LayoutOrder
-	containerList.Padding = UDim.new(0, 8)
-	containerList.Parent = container
-
-	local spacer = Instance.new("Frame")
-	spacer.Size = UDim2.new(1, 0, 0, 2)
-	spacer.BackgroundTransparency = 1
-	spacer.Parent = container
-
-	local info = nil
-
-	-- Search UI
+	-- Search bar: TETAP di atas (tidak ikut scroll tab)
 	local searchBar = Instance.new("Frame")
 	searchBar.Name = "SearchBar"
-	searchBar.Size = UDim2.new(1, 0, 0, 34)
+	searchBar.Size = UDim2.new(1, -(SIDE_PAD * 2), 0, SEARCH_H)
+	searchBar.Position = UDim2.new(0, SIDE_PAD, 0, SIDE_PAD)
 	searchBar.BackgroundColor3 = Theme.Element
 	searchBar.BackgroundTransparency = 0.08
 	searchBar.BorderSizePixel = 0
-	searchBar.LayoutOrder = -9999
 	searchBar.ZIndex = 43
 	searchBar.Parent = sidebar
 	Corner(searchBar, 8)
@@ -2641,6 +2602,84 @@ function Library:CreateWindow(config)
 	registerThemeRef(searchInput, "TextColor3", "Text")
 	registerThemeRef(searchInput, "PlaceholderColor3", "SubText")
 
+	-- Tab scroll area: mengisi sisa tinggi di bawah search bar
+	local tabScroll = Instance.new("ScrollingFrame")
+	tabScroll.Name = "TabScroll"
+	tabScroll.Size = UDim2.new(1, -(SIDE_PAD * 2), 1, -(SEARCH_H + SIDE_PAD * 2 + 6))
+	tabScroll.Position = UDim2.new(0, SIDE_PAD, 0, SEARCH_H + SIDE_PAD + 6)
+	tabScroll.BackgroundTransparency = 1
+	tabScroll.BorderSizePixel = 0
+	tabScroll.ScrollBarThickness = 3
+	tabScroll.ScrollBarImageColor3 = window.accent
+	tabScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	tabScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+	tabScroll.ScrollingDirection = Enum.ScrollingDirection.Y
+	tabScroll.ElasticBehavior = Enum.ElasticBehavior.Always
+	tabScroll.ZIndex = 42
+	tabScroll.Parent = sidebar
+
+	window:onAccent(function(c)
+		tabScroll.ScrollBarImageColor3 = c
+	end)
+
+	local sideList = Instance.new("UIListLayout")
+	sideList.SortOrder = Enum.SortOrder.LayoutOrder
+	sideList.Padding = UDim.new(0, 5)
+	sideList.Parent = tabScroll
+
+	-- [V5.4 FIX #2a] margin bawah tab agar tab terakhir tidak terpotong sudut
+	local sidePad = Instance.new("UIPadding")
+	sidePad.PaddingTop = UDim.new(0, 2)
+	sidePad.PaddingBottom = UDim.new(0, 14)
+	sidePad.PaddingLeft = UDim.new(0, 0)
+	sidePad.PaddingRight = UDim.new(0, 4)
+	sidePad.Parent = tabScroll
+
+	-- Content
+	local content = Instance.new("ScrollingFrame")
+	content.Size = UDim2.new(1, -150, 1, -TOPBAR_H)
+	content.Position = UDim2.new(0, 150, 0, TOPBAR_H)
+	content.BackgroundTransparency = 1
+	content.BorderSizePixel = 0
+	content.ScrollBarThickness = 3
+	content.ScrollBarImageColor3 = window.accent
+	content.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	content.CanvasSize = UDim2.new(0, 0, 0, 0)
+	content.ZIndex = 41
+	content.Parent = main
+
+	window:onAccent(function(c)
+		content.ScrollBarImageColor3 = c
+	end)
+
+	local container = Instance.new("Frame")
+	container.Size = UDim2.new(1, -24, 0, 0)
+	container.Position = UDim2.new(0, 12, 0, 10)
+	container.BackgroundTransparency = 1
+	container.AutomaticSize = Enum.AutomaticSize.Y
+	container.Parent = content
+
+	local containerList = Instance.new("UIListLayout")
+	containerList.SortOrder = Enum.SortOrder.LayoutOrder
+	containerList.Padding = UDim.new(0, 8)
+	containerList.Parent = container
+
+	-- [V5.4 FIX #2b] margin bawah konten agar button/element terakhir tidak terpotong
+	local containerPad = Instance.new("UIPadding")
+	containerPad.PaddingTop = UDim.new(0, 0)
+	containerPad.PaddingBottom = UDim.new(0, 16)
+	containerPad.PaddingLeft = UDim.new(0, 0)
+	containerPad.PaddingRight = UDim.new(0, 0)
+	containerPad.Parent = container
+
+	local spacer = Instance.new("Frame")
+	spacer.Size = UDim2.new(1, 0, 0, 2)
+	spacer.BackgroundTransparency = 1
+	spacer.Parent = container
+
+	local info = nil
+
+	-- Search Results (popup, parent = gui agar tidak ter-clip sidebar)
 	local searchResults = Instance.new("ScrollingFrame")
 	searchResults.Name = "SearchResults"
 	searchResults.Size = UDim2.new(0, 220, 0, 0)
@@ -2961,7 +3000,7 @@ function Library:CreateWindow(config)
 		btn.Text = ""
 		btn.AutoButtonColor = false
 		btn.ZIndex = 42
-		btn.Parent = sidebar
+		btn.Parent = tabScroll   -- [V5.4] tab masuk ke area scroll, bukan sidebar langsung
 		Corner(btn, 7)
 
 		local ind = Instance.new("Frame")
@@ -3176,8 +3215,7 @@ function Library:CreateWindow(config)
 			return obj
 		end
 
-		--// Paragraph dengan DIVIDER/PEMBATAS antara title tebal dan subtext
-		--// [V5.3.1 FIX] jarak title<->divider diperbesar, divider solid & lebih tebal, tetap ikut theme
+		--// Paragraph dengan DIVIDER/PEMBATAS (V5.3.1 fix dipertahankan)
 		function tab:CreateParagraph(cfg)
 			cfg = cfg or {}
 
@@ -3223,7 +3261,6 @@ function Library:CreateWindow(config)
 			sizeConstraint.MaxSize = Vector2.new(999999, 999999)
 			sizeConstraint.Parent = f
 
-			-- Row judul + icon
 			local titleRow = Instance.new("Frame")
 			titleRow.Size = UDim2.new(1, 0, 0, 0)
 			titleRow.AutomaticSize = Enum.AutomaticSize.Y
@@ -3284,7 +3321,6 @@ function Library:CreateWindow(config)
 
 			titleRow.Visible = (iconOffset > 0) or hasTitle
 
-			-- Spacer di ATAS divider supaya title tebal tidak menempel ke garis
 			local titleSpacer = Instance.new("Frame")
 			titleSpacer.Name = "TitleSpacer"
 			titleSpacer.Size = UDim2.new(1, 0, 0, 10)
@@ -3294,7 +3330,6 @@ function Library:CreateWindow(config)
 			titleSpacer.Visible = hasTitle and hasContent
 			titleSpacer.Parent = f
 
-			-- DIVIDER / GARIS PEMBATAS: solid, lebih tebal (2px), tanpa fade, tetap ikut theme/accent
 			local divider = Instance.new("Frame")
 			divider.Name = "Divider"
 			divider.Size = UDim2.new(1, 0, 0, 2)
@@ -3313,7 +3348,6 @@ function Library:CreateWindow(config)
 				end
 			end)
 
-			-- Spacer kecil antara divider dan content
 			local dividerSpacer = Instance.new("Frame")
 			dividerSpacer.Name = "DividerSpacer"
 			dividerSpacer.Size = UDim2.new(1, 0, 0, 10)
